@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #030304;
+  color: #f3f4f6;
+  overflow-x: hidden;
+  background-image: url('/background1.jpg');
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  background-attachment: scroll;
+  background-position: center top;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030304;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #202227;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+/* Senior Production Design Utilities */
+@layer components {
+  /* Primary Action Button (Pure Color, No Gradient) */
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 font-medium text-sm text-neutral-950 bg-amber-500 hover:bg-amber-400 rounded-xl transition-all duration-200 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Secondary Outline Button */
+  .btn-outline-gold {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 font-medium text-sm text-neutral-200 border border-neutral-800 bg-neutral-900/60 hover:bg-neutral-800/80 hover:text-white hover:border-neutral-700 rounded-xl transition-all duration-200;
+  }
+
+  /* Clean Surface Card */
+  .card-obsidian {
+    @apply bg-[#0a0a0d]/90 border border-white/[0.07] rounded-2xl p-6 transition-all duration-200 hover:border-neutral-700/80;
+  }
+
+  /* Input fields */
+  .input-luxury {
+    @apply w-full bg-[#0d0e12] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/40 transition-all duration-150;
+  }
+}
+
+/* Mobile Scrollbar Hide */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

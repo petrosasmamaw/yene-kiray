@@ -1,0 +1,495 @@
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  PlusCircle, 
+  Upload, 
+  X, 
+  CheckCircle2, 
+  AlertCircle, 
+  ArrowRight, 
+  ArrowLeft,
+  Building, 
+  DollarSign, 
+  MapPin, 
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  Info
+} from 'lucide-react';
+import { createNewListing, fetchCategories } from '../store/slices/listingSlice';
+import api from '../services/api';
+import PaymentModal from '../components/PaymentModal';
+
+const PRESET_FEATURES = [
+  'Furnished / Ready to Use',
+  'Backup Generator',
+  'Water Reservoir Tank',
+  'Dedicated Parking Space',
+  'High-speed Wi-Fi',
+  '24/7 Security Guard',
+  'Air Conditioning',
+  'Driver Included',
+  'Commercial Kitchen / Utilities',
+  'Insurance Included'
+];
+
+export default function PostListingPage({ onListingSuccess, onGoHome }) {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.listings);
+  const { user } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category_id: '',
+    rental_price: '',
+    price_period: 'month',
+    city: 'Addis Ababa',
+    subcity: '',
+    specific_location: '',
+    contact_phone: user?.phone || ''
+  });
+
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [images, setImages] = useState([]); // Array of { image_url, public_id }
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  // Payment Modal State
+  const [paymentModalData, setPaymentModalData] = useState(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const toggleFeature = (feature) => {
+    if (selectedFeatures.includes(feature)) {
+      setSelectedFeatures(selectedFeatures.filter((f) => f !== feature));
+    } else {
+      setSelectedFeatures([...selectedFeatures, feature]);
+    }
+  };
+
+  // Upload image to Cloudinary via backend endpoint
+  const handleImageFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploadingImage(true);
+    setErrorMsg('');
+
+    try {
+      for (const file of files) {
+        const data = new FormData();
+        data.append('image', file);
+        data.append('folder', 'yene_kiray/listings');
+
+        const res = await api.post('/upload', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        setImages((prev) => [...prev, { image_url: res.data.image_url, public_id: res.data.public_id }]);
+      }
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setErrorMsg('Failed to upload image to Cloudinary. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!formData.title || !formData.description || !formData.rental_price || !formData.contact_phone) {
+      setErrorMsg('Please complete all required fields.');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const payload = {
+        ...formData,
+        category_id: formData.category_id || (categories[0]?.id || 1),
+        rental_price: parseFloat(formData.rental_price),
+        features: selectedFeatures,
+        images
+      };
+
+      const result = await dispatch(createNewListing(payload)).unwrap();
+
+      // Check if Admin requires payment
+      if (result.requires_payment) {
+        setPaymentModalData({
+          listing: result.listing,
+          fee: result.posting_fee || 200
+        });
+      } else {
+        setPaymentSuccess(true);
+      }
+    } catch (err) {
+      console.error('Failed to post listing:', err);
+      setErrorMsg(typeof err === 'string' ? err : 'Error publishing listing');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (paymentSuccess) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-[#0D0D0D] border border-amber-500/40 rounded-3xl p-8 text-center space-y-4 shadow-gold-lg">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-black text-white font-sans">
+            Listing Live & Published!
+          </h2>
+          <p className="text-xs text-neutral-400 leading-relaxed">
+            Free posting mode is currently active. Your rental listing has been approved immediately and is visible across the marketplace.
+          </p>
+          <div className="pt-4">
+            <button
+              onClick={() => onListingSuccess && onListingSuccess()}
+              className="w-full btn-gold text-sm py-3 font-bold"
+            >
+              View in My Listings
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-[#FAFAFA] py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+        
+        {/* Header */}
+        <div className="border-b border-neutral-800 pb-5 sm:pb-6">
+          {onGoHome && (
+            <button
+              onClick={onGoHome}
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2.5 group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Home</span>
+            </button>
+          )}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>Create New Rental Post</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white font-sans leading-tight">
+            Post Your House, Car or Equipment
+          </h1>
+          <p className="text-xs text-neutral-400 mt-1">
+            Fill in the details below. If admin pay-to-post is turned on, you can submit payment proof for fast review.
+          </p>
+        </div>
+
+        {errorMsg && (
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {/* Post Form */}
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-8">
+          
+          {/* Card 1: Basic Info */}
+          <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
+            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <Building className="w-4 h-4 text-amber-500" />
+              <span>Rental Information</span>
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              {/* Title */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Listing Title *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="e.g. Modern 3-Bedroom Villa with Garden or Toyota Land Cruiser V8"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Category *
+                </label>
+                <select
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  className="input-luxury text-sm cursor-pointer"
+                >
+                  <option value="" className="bg-[#111111]">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-[#111111]">
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price & Period */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                    Rate (ETB) *
+                  </label>
+                  <input
+                    type="number"
+                    name="rental_price"
+                    required
+                    min="1"
+                    placeholder="25000"
+                    value={formData.rental_price}
+                    onChange={handleChange}
+                    className="input-luxury text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                    Billing Period
+                  </label>
+                  <select
+                    name="price_period"
+                    value={formData.price_period}
+                    onChange={handleChange}
+                    className="input-luxury text-sm cursor-pointer"
+                  >
+                    <option value="month" className="bg-[#111111]">Per Month</option>
+                    <option value="day" className="bg-[#111111]">Per Day</option>
+                    <option value="year" className="bg-[#111111]">Per Year</option>
+                    <option value="hour" className="bg-[#111111]">Per Hour</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Full Description & Conditions *
+                </label>
+                <textarea
+                  name="description"
+                  required
+                  rows={4}
+                  placeholder="Detail the specifications, condition, rental terms, and inclusions..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Card 2: Location & Contact */}
+          <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
+            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <MapPin className="w-4 h-4 text-amber-500" />
+              <span>Location & Direct Contact</span>
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  required
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Subcity / District
+                </label>
+                <input
+                  type="text"
+                  name="subcity"
+                  placeholder="e.g. Bole, Kirkos, Yeka"
+                  value={formData.subcity}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Specific Landmark
+                </label>
+                <input
+                  type="text"
+                  name="specific_location"
+                  placeholder="e.g. Near Edna Mall"
+                  value={formData.specific_location}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  Direct Phone Number for Calls *
+                </label>
+                <input
+                  type="tel"
+                  name="contact_phone"
+                  required
+                  placeholder="+251 911 234567"
+                  value={formData.contact_phone}
+                  onChange={handleChange}
+                  className="input-luxury text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Cloudinary Image Uploads */}
+          <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
+            <h3 className="text-base font-bold text-white flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Upload className="w-4 h-4 text-amber-500" />
+                <span>Photos & Media (Cloudinary)</span>
+              </div>
+              <span className="text-xs text-neutral-400 font-normal">
+                {images.length} uploaded
+              </span>
+            </h3>
+
+            {/* Image Preview Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+              {images.map((img, i) => (
+                <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900 group">
+                  <img src={img.image_url} alt="upload" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/80 text-rose-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  {i === 0 && (
+                    <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black">
+                      Cover
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {/* Upload Trigger Button */}
+              <label className="cursor-pointer aspect-[4/3] rounded-xl border-2 border-dashed border-neutral-800 hover:border-amber-500/60 bg-neutral-950 flex flex-col items-center justify-center text-center p-3 sm:p-4 transition-all">
+                <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mb-1.5 sm:mb-2" />
+                <span className="text-xs font-semibold text-neutral-300">
+                  {uploadingImage ? 'Uploading...' : 'Add Images'}
+                </span>
+                <span className="text-[10px] text-neutral-500 mt-0.5 sm:mt-1">PNG, JPG up to 10MB</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageFileChange}
+                  disabled={uploadingImage}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Card 4: Features & Amenities */}
+          <div className="card-obsidian space-y-3.5 sm:space-y-4 p-4 sm:p-6">
+            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Features & Amenities</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+              {PRESET_FEATURES.map((feat) => {
+                const checked = selectedFeatures.includes(feat);
+                return (
+                  <button
+                    type="button"
+                    key={feat}
+                    onClick={() => toggleFeature(feat)}
+                    className={`p-2.5 sm:p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center gap-2.5 ${
+                      checked
+                        ? 'bg-amber-500/10 border-amber-500 text-amber-300'
+                        : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    <CheckCircle2 className={`w-4 h-4 shrink-0 ${checked ? 'text-amber-400' : 'text-neutral-600'}`} />
+                    <span>{feat}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Submit Actions */}
+          <div className="pt-2 sm:pt-4 flex items-center justify-end">
+            <button
+              type="submit"
+              disabled={submitting || uploadingImage}
+              className="w-full sm:w-auto btn-gold text-sm sm:text-base py-3.5 sm:py-4 px-8 sm:px-10 font-bold justify-center"
+            >
+              {submitting ? (
+                <span>Publishing Listing...</span>
+              ) : (
+                <>
+                  <span>Publish Rental Post</span>
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+
+      {/* Payment Modal if Pay-to-Post is ON */}
+      {paymentModalData && (
+        <PaymentModal
+          listing={paymentModalData.listing}
+          feeAmount={paymentModalData.fee}
+          onClose={() => setPaymentModalData(null)}
+          onSuccess={() => {
+            setPaymentModalData(null);
+            if (onListingSuccess) onListingSuccess();
+          }}
+        />
+      )}
+    </div>
+  );
+}
