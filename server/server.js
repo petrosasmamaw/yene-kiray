@@ -24,12 +24,30 @@ const app = express();
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-// Setup Socket.io
+// Parse allowed client origins from comma-separated CLIENT_URL in .env
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+console.log('🔒 [CORS] Allowed Origins:', allowedOrigins);
+
+// Shared CORS origin validator
+const corsOriginValidator = (origin, callback) => {
+  // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or matching allowedOrigins
+  if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    callback(null, true);
+  } else {
+    console.warn(`⚠️ [CORS] Blocked request from unauthorized origin: ${origin}`);
+    callback(new Error(`CORS policy: Origin ${origin} not allowed`));
+  }
+};
+
+// Setup Socket.io with strict allowed origins
 const io = new Server(server, {
   cors: {
-    origin: [CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'],
+    origin: corsOriginValidator,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }
@@ -40,8 +58,9 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: [CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin: corsOriginValidator,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -145,7 +164,7 @@ app.use((err, req, res, next) => {
 server.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 የኔ ኪራይ (Yene Kiray) API Server Running on port ${PORT}`);
-  console.log(`🌐 Client Origin: ${CLIENT_URL}`);
+  console.log(`🌐 Allowed Client Origins: ${allowedOrigins.join(', ')}`);
   console.log(`⚡ Socket.io enabled & listening for realtime chat`);
   console.log(`====================================================`);
 });
