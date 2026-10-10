@@ -21,7 +21,7 @@ import api from '../services/api';
 
 export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
-  const { myListings, postSuccessData } = useSelector((state) => state.listings);
+  const { myListings, myListingsLoading, postSuccessData } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [paymentTarget, setPaymentTarget] = useState(null);
@@ -137,7 +137,29 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
         )}
 
         {/* Listings Content */}
-        {myListings.length === 0 ? (
+        {myListingsLoading ? (
+          <div className="space-y-3 sm:space-y-4">
+            {[1, 2, 3].map((n) => (
+              <div 
+                key={n} 
+                className="bg-[#0D0D0D] border border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 animate-pulse"
+              >
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-white/[0.05] skeleton-shimmer shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-20 rounded bg-white/[0.08] skeleton-shimmer" />
+                    <div className="h-4 w-48 sm:w-64 rounded bg-white/[0.07] skeleton-shimmer" />
+                    <div className="h-3 w-32 rounded bg-white/[0.05] skeleton-shimmer" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  <div className="h-8 w-24 rounded-xl bg-white/[0.05] skeleton-shimmer" />
+                  <div className="h-8 w-20 rounded-xl bg-white/[0.05] skeleton-shimmer" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : myListings.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-[#0D0D0D] border border-neutral-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
             <Layers className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-1">No Listings Yet</h3>

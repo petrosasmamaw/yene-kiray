@@ -68,6 +68,8 @@ const listingSlice = createSlice({
     selectedListing: null,
     loading: false,
     categoriesLoading: false,
+    savedLoading: false,
+    myListingsLoading: false,
     error: null,
     selectedCategory: '',
     searchQuery: '',
@@ -118,8 +120,15 @@ const listingSlice = createSlice({
     });
 
     // Saved Listings
+    builder.addCase(fetchSavedListings.pending, (state) => {
+      state.savedLoading = true;
+    });
     builder.addCase(fetchSavedListings.fulfilled, (state, action) => {
       state.savedItems = action.payload;
+      state.savedLoading = false;
+    });
+    builder.addCase(fetchSavedListings.rejected, (state) => {
+      state.savedLoading = false;
     });
     builder.addCase(toggleSave.fulfilled, (state, action) => {
       const { listingId, saved } = action.payload;
@@ -129,8 +138,15 @@ const listingSlice = createSlice({
     });
 
     // My Listings
+    builder.addCase(fetchMyListings.pending, (state) => {
+      state.myListingsLoading = true;
+    });
     builder.addCase(fetchMyListings.fulfilled, (state, action) => {
       state.myListings = action.payload;
+      state.myListingsLoading = false;
+    });
+    builder.addCase(fetchMyListings.rejected, (state) => {
+      state.myListingsLoading = false;
     });
 
     // Create Listing

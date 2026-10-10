@@ -671,7 +671,39 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-850">
-                    {adminListings
+                    {loadingListings ? (
+                      [1, 2, 3, 4, 5].map((n) => (
+                        <tr key={n} className="animate-pulse">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg bg-white/[0.05] skeleton-shimmer shrink-0" />
+                              <div className="space-y-1.5">
+                                <div className="h-3.5 w-36 rounded bg-white/[0.08] skeleton-shimmer" />
+                                <div className="h-2.5 w-20 rounded bg-white/[0.04] skeleton-shimmer" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-3 w-16 rounded bg-amber-500/20 skeleton-shimmer" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-3.5 w-20 rounded bg-white/[0.08] skeleton-shimmer" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-3.5 w-24 rounded bg-white/[0.08] skeleton-shimmer" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-3 w-20 rounded bg-white/[0.06] skeleton-shimmer" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-5 w-16 rounded-full bg-white/[0.05] skeleton-shimmer" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="h-7 w-24 rounded-lg bg-white/[0.06] skeleton-shimmer" />
+                          </td>
+                        </tr>
+                      ))
+                    ) : adminListings
                       .filter((l) => {
                         const matchSearch =
                           !listingSearch ||

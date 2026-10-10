@@ -49,11 +49,11 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
       className="group relative bg-[#090a0d]/90 border border-white/[0.07] rounded-2xl overflow-hidden hover:border-white/[0.18] transition-all duration-200 flex flex-col cursor-pointer"
     >
       {/* Image Container with Badge Overlays */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900 skeleton-shimmer">
         <img 
           src={primaryImage} 
           alt={listing.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-0"
           loading="lazy"
         />
 

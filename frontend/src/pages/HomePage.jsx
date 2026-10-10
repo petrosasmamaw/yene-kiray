@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { fetchListings, fetchCategories, setSelectedCategory } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
+import ListingCardSkeleton from '../components/ListingCardSkeleton';
+import { CategoryPillSkeleton, CategoryCardSkeleton } from '../components/CategorySkeleton';
 
 // Map icon string names to Lucide components
 const iconMap = {
@@ -33,7 +35,7 @@ const iconMap = {
 
 export default function HomePage({ onSelectListing, onOpenAuth }) {
   const dispatch = useDispatch();
-  const { items, categories, selectedCategory, loading } = useSelector((state) => state.listings);
+  const { items, categories, selectedCategory, loading, categoriesLoading } = useSelector((state) => state.listings);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -202,50 +204,54 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
       {/* Category Navigation Bar */}
       <section className="py-3 sm:py-6 border-b border-white/[0.06] bg-[#050608]/90 backdrop-blur-md sticky top-[72px] z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            
-            {/* "All" Filter Pill */}
-            <button
-              onClick={() => dispatch(setSelectedCategory(''))}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
-                selectedCategory === ''
-                  ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
-                  : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>All Categories</span>
-            </button>
+          {categoriesLoading || (!categories.length && loading) ? (
+            <CategoryPillSkeleton />
+          ) : (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+              
+              {/* "All" Filter Pill */}
+              <button
+                onClick={() => dispatch(setSelectedCategory(''))}
+                className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
+                  selectedCategory === ''
+                    ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
+                    : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>All Categories</span>
+              </button>
 
-            {/* Dynamic Categories */}
-            {categories.map((cat) => {
-              const IconComp = iconMap[cat.icon_name] || Layers;
-              const isActive = selectedCategory === cat.slug;
+              {/* Dynamic Categories */}
+              {categories.map((cat) => {
+                const IconComp = iconMap[cat.icon_name] || Layers;
+                const isActive = selectedCategory === cat.slug;
 
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => dispatch(setSelectedCategory(cat.slug))}
-                  className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
-                    isActive
-                      ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
-                      : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
-                  }`}
-                >
-                  <IconComp className="w-3.5 h-3.5" />
-                  <span>{cat.name}</span>
-                  {cat.listings_count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                      isActive ? 'bg-black text-amber-400' : 'bg-white/[0.08] text-neutral-400'
-                    }`}>
-                      {cat.listings_count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => dispatch(setSelectedCategory(cat.slug))}
+                    className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
+                      isActive
+                        ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
+                        : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
+                    }`}
+                  >
+                    <IconComp className="w-3.5 h-3.5" />
+                    <span>{cat.name}</span>
+                    {cat.listings_count > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                        isActive ? 'bg-black text-amber-400' : 'bg-white/[0.08] text-neutral-400'
+                      }`}>
+                        {cat.listings_count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
 
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -271,39 +277,43 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         </div>
 
         {/* Mobile Swipeable Carousel & Desktop Grid */}
-        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat.slug;
-            return (
-              <div
-                key={cat.id}
-                onClick={() => dispatch(setSelectedCategory(isSelected ? '' : cat.slug))}
-                className={`group relative rounded-2xl overflow-hidden cursor-pointer border transition-all duration-300 shrink-0 w-36 sm:w-auto snap-start ${
-                  isSelected
-                    ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-gold-sm scale-[1.02]'
-                    : 'border-white/[0.08] hover:border-amber-500/50 hover:scale-[1.02]'
-                }`}
-              >
-                <div className="h-28 w-full relative">
-                  <img
-                    src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
-                    alt={cat.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                  <div className="absolute inset-x-2 bottom-2">
-                    <h3 className="text-xs font-bold text-white leading-tight truncate drop-shadow-sm">
-                      {cat.name}
-                    </h3>
-                    <p className="text-[10px] text-amber-400/90 font-medium">
-                      {cat.listings_count || 0} rentals
-                    </p>
+        {categoriesLoading || (!categories.length && loading) ? (
+          <CategoryCardSkeleton />
+        ) : (
+          <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat.slug;
+              return (
+                <div
+                  key={cat.id}
+                  onClick={() => dispatch(setSelectedCategory(isSelected ? '' : cat.slug))}
+                  className={`group relative rounded-2xl overflow-hidden cursor-pointer border transition-all duration-300 shrink-0 w-36 sm:w-auto snap-start ${
+                    isSelected
+                      ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-gold-sm scale-[1.02]'
+                      : 'border-white/[0.08] hover:border-amber-500/50 hover:scale-[1.02]'
+                  }`}
+                >
+                  <div className="h-28 w-full relative">
+                    <img
+                      src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
+                      alt={cat.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                    <div className="absolute inset-x-2 bottom-2">
+                      <h3 className="text-xs font-bold text-white leading-tight truncate drop-shadow-sm">
+                        {cat.name}
+                      </h3>
+                      <p className="text-[10px] text-amber-400/90 font-medium">
+                        {cat.listings_count || 0} rentals
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Main Listings Grid */}
@@ -329,7 +339,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="animate-pulse bg-white/[0.02] rounded-2xl h-80 border border-white/[0.05]" />
+              <ListingCardSkeleton key={n} />
             ))}
           </div>
         ) : items.length === 0 ? (

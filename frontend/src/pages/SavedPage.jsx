@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Bookmark, Layers, ArrowLeft } from 'lucide-react';
 import { fetchSavedListings } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
+import ListingCardSkeleton from '../components/ListingCardSkeleton';
 
 export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
-  const { savedItems } = useSelector((state) => state.listings);
+  const { savedItems, savedLoading } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -51,7 +52,13 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
         </div>
 
         {/* Listings Grid */}
-        {savedItems.length === 0 ? (
+        {savedLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            {[1, 2, 3].map((n) => (
+              <ListingCardSkeleton key={n} />
+            ))}
+          </div>
+        ) : savedItems.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-[#0D0D0D] border border-neutral-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
             <Bookmark className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-1">No Saved Listings</h3>

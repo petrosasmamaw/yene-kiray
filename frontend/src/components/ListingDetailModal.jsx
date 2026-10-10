@@ -81,11 +81,11 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
         </div>
 
         {/* Image Gallery Hero */}
-        <div className="relative aspect-[16/9] w-full bg-neutral-950 overflow-hidden">
+        <div className="relative aspect-[16/9] w-full bg-neutral-950 overflow-hidden skeleton-shimmer">
           <img 
             src={images[activeImageIndex]?.image_url} 
             alt={listing.title}
-            className="w-full h-full object-cover transition-all duration-300"
+            className="w-full h-full object-cover transition-all duration-300 relative z-0"
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-transparent to-black/30 pointer-events-none" />
