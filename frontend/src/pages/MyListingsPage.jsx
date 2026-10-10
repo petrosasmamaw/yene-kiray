@@ -15,13 +15,13 @@ import {
   Trash2,
   X
 } from 'lucide-react';
-import { fetchMyListings } from '../store/slices/listingSlice';
+import { fetchMyListings, clearPostSuccessData } from '../store/slices/listingSlice';
 import PaymentModal from '../components/PaymentModal';
 import api from '../services/api';
 
-export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoHome }) {
+export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
-  const { myListings } = useSelector((state) => state.listings);
+  const { myListings, postSuccessData } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [paymentTarget, setPaymentTarget] = useState(null);
@@ -80,11 +80,16 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoHo
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5 sm:pb-6">
           <div>
             <button
-              onClick={onGoHome}
-              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2"
+              type="button"
+              onClick={() => {
+                if (onGoBack) onGoBack();
+                else if (onGoHome) onGoHome();
+                else window.history.back();
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Marketplace</span>
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
@@ -109,6 +114,26 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoHo
             <span>Post Another Rental</span>
           </button>
         </div>
+
+        {/* Newly Added Listing Success Notification */}
+        {postSuccessData && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs flex items-center justify-between gap-3 shadow-gold-sm animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0" />
+              <span>
+                <strong>Listing Added!</strong> Your rental post <strong className="text-white">"{postSuccessData.listing?.title}"</strong> has been successfully added to your listings!
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => dispatch(clearPostSuccessData())}
+              className="text-neutral-400 hover:text-white p-1"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Listings Content */}
         {myListings.length === 0 ? (

@@ -34,7 +34,7 @@ import {
 } from '../store/slices/adminSlice';
 import api from '../services/api';
 
-export default function AdminDashboardPage({ onGoHome, onSelectListing }) {
+export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing }) {
   const dispatch = useDispatch();
   const { dashboardData, payments, users, loading } = useSelector((state) => state.admin);
 
@@ -234,11 +234,16 @@ export default function AdminDashboardPage({ onGoHome, onSelectListing }) {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-neutral-800 pb-5 sm:pb-6">
           <div>
             <button
-              onClick={onGoHome}
-              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2"
+              type="button"
+              onClick={() => {
+                if (onGoBack) onGoBack();
+                else if (onGoHome) onGoHome();
+                else window.history.back();
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Marketplace</span>
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500 text-black shadow-sm shrink-0">

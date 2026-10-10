@@ -27,7 +27,27 @@ export default function App() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { activeConversation, isOpen, conversations } = useSelector((state) => state.chat);
 
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'post', 'saved', 'my-listings', 'admin'
+  const [viewHistory, setViewHistory] = useState(['home']);
+  const currentView = viewHistory[viewHistory.length - 1] || 'home';
+
+  const navigateTo = (view) => {
+    setSelectedListing(null);
+    setAuthModalConfig(null);
+    setViewHistory((prev) => {
+      if (prev[prev.length - 1] === view) return prev;
+      return [...prev, view];
+    });
+  };
+
+  const goBack = () => {
+    setViewHistory((prev) => {
+      if (prev.length > 1) {
+        return prev.slice(0, -1);
+      }
+      return ['home'];
+    });
+  };
+
   const [selectedListing, setSelectedListing] = useState(null);
   const [authModalConfig, setAuthModalConfig] = useState(null); // { mode: 'login' | 'register' }
 
@@ -94,7 +114,7 @@ export default function App() {
   // Handle protected page redirection if logged out
   useEffect(() => {
     if (!isAuthenticated && ['post', 'saved', 'my-listings', 'admin'].includes(currentView)) {
-      setCurrentView('home');
+      setViewHistory(['home']);
     }
   }, [isAuthenticated, currentView]);
 
@@ -105,9 +125,7 @@ export default function App() {
       <Navbar
         currentView={currentView}
         setCurrentView={(view) => {
-          setSelectedListing(null);
-          setAuthModalConfig(null);
-          setCurrentView(view);
+          navigateTo(view);
         }}
         onOpenAuth={(mode) => {
           setSelectedListing(null);
@@ -126,8 +144,9 @@ export default function App() {
 
         {currentView === 'post' && (
           <PostListingPage
-            onListingSuccess={() => setCurrentView('my-listings')}
-            onGoHome={() => setCurrentView('home')}
+            onListingSuccess={() => navigateTo('my-listings')}
+            onGoBack={goBack}
+            onGoHome={() => navigateTo('home')}
           />
         )}
 
@@ -135,21 +154,24 @@ export default function App() {
           <SavedPage
             onSelectListing={(listing) => setSelectedListing(listing)}
             onOpenAuth={(mode) => setAuthModalConfig({ mode })}
-            onGoHome={() => setCurrentView('home')}
+            onGoBack={goBack}
+            onGoHome={() => navigateTo('home')}
           />
         )}
 
         {currentView === 'my-listings' && (
           <MyListingsPage
-            onNavigatePost={() => setCurrentView('post')}
+            onNavigatePost={() => navigateTo('post')}
             onSelectListing={(listing) => setSelectedListing(listing)}
-            onGoHome={() => setCurrentView('home')}
+            onGoBack={goBack}
+            onGoHome={() => navigateTo('home')}
           />
         )}
 
         {currentView === 'admin' && user?.role === 'admin' && (
           <AdminDashboardPage
-            onGoHome={() => setCurrentView('home')}
+            onGoBack={goBack}
+            onGoHome={() => navigateTo('home')}
             onSelectListing={(listing) => setSelectedListing(listing)}
           />
         )}
@@ -159,9 +181,7 @@ export default function App() {
       <BottomNav
         currentView={currentView}
         setCurrentView={(view) => {
-          setSelectedListing(null);
-          setAuthModalConfig(null);
-          setCurrentView(view);
+          navigateTo(view);
         }}
         onOpenAuth={(mode) => {
           setSelectedListing(null);
@@ -171,7 +191,7 @@ export default function App() {
 
       {/* Persistent Footer */}
       <Footer 
-        onCategorySelect={() => setCurrentView('home')}
+        onCategorySelect={() => navigateTo('home')}
       />
 
       {/* Modals & Slide-overs */}
@@ -180,7 +200,6 @@ export default function App() {
           listing={selectedListing}
           onClose={() => {
             setSelectedListing(null);
-            setCurrentView('home');
           }}
           onOpenAuth={(mode) => setAuthModalConfig({ mode })}
         />
@@ -191,7 +210,6 @@ export default function App() {
           initialMode={authModalConfig.mode}
           onClose={() => {
             setAuthModalConfig(null);
-            setCurrentView('home');
           }}
         />
       )}

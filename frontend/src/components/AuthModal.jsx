@@ -55,7 +55,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Home</span>
+            <span>Back</span>
           </button>
           <button
             type="button"

@@ -12,6 +12,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import api from '../services/api';
+import { compressImage, fileToDataUri } from '../utils/imageCompressor';
 
 export default function PaymentModal({ listing, feeAmount = 200, onClose, onSuccess }) {
   const [paymentMethod, setPaymentMethod] = useState('Telebirr');
@@ -23,7 +24,7 @@ export default function PaymentModal({ listing, feeAmount = 200, onClose, onSucc
 
   if (!listing) return null;
 
-  // Handle receipt image upload via backend Cloudinary endpoint
+  // Handle receipt image upload via backend endpoint with client compression & fallback
   const handleReceiptFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -32,18 +33,29 @@ export default function PaymentModal({ listing, feeAmount = 200, onClose, onSucc
     setErrorMessage('');
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('folder', 'yene_kiray/receipts');
+      // Compress receipt image
+      const optimizedFile = await compressImage(file, 1280, 0.82);
 
-      const res = await api.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      try {
+        const formData = new FormData();
+        formData.append('image', optimizedFile);
+        formData.append('folder', 'yene_kiray/receipts');
 
-      setReceiptUrl(res.data.image_url);
+        const res = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (res.data?.image_url) {
+          setReceiptUrl(res.data.image_url);
+        }
+      } catch (uploadErr) {
+        console.warn('Backend receipt upload failed, using local fallback:', uploadErr);
+        const dataUri = await fileToDataUri(optimizedFile);
+        setReceiptUrl(dataUri);
+      }
     } catch (err) {
       console.error('Receipt upload error:', err);
-      setErrorMessage(err.response?.data?.message || 'Failed to upload receipt image. You can still submit with transaction reference.');
+      setErrorMessage('Failed to process receipt image. You can still submit with transaction reference.');
     } finally {
       setIsUploading(false);
     }
@@ -94,7 +106,7 @@ export default function PaymentModal({ listing, feeAmount = 200, onClose, onSucc
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Home</span>
+            <span>Back</span>
           </button>
           <button
             type="button"

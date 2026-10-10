@@ -63,7 +63,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group shadow-sm"
           >
             <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Home</span>
+            <span>Back</span>
           </button>
 
           <div className="flex items-center gap-3">
@@ -226,10 +226,10 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors group"
               >
-                <ArrowLeft className="w-4 h-4 text-amber-400" />
-                <span>Back to Home</span>
+                <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back</span>
               </button>
 
               <button

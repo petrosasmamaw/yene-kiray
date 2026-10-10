@@ -16,7 +16,9 @@ class SocketService {
     if (!this.socket) {
       this.socket = io(SOCKET_URL, {
         withCredentials: true,
-        transports: ['websocket', 'polling']
+        transports: ['polling', 'websocket'],
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000
       });
 
       this.socket.on('connect', () => {
