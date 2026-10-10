@@ -29,6 +29,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (isAuthenticated) {
       dispatch(fetchMyListings());
       api.get('/categories').then(res => setCategories(res.data.categories || [])).catch(() => {});

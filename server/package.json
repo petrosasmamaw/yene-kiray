@@ -9,6 +9,7 @@
     "dev": "nodemon server.js",
     "seed:admin": "node scripts/seedAdmin.js",
     "seed:realistic": "node scripts/seedRealisticData.js",
+    "seed:ethiopia": "node scripts/resetAndSeedRealisticEthiopia.js",
     "db:init": "node scripts/initDb.js"
   },
   "dependencies": {

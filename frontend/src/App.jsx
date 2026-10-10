@@ -33,6 +33,7 @@ export default function App() {
   const navigateTo = (view) => {
     setSelectedListing(null);
     setAuthModalConfig(null);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     setViewHistory((prev) => {
       if (prev[prev.length - 1] === view) return prev;
       return [...prev, view];
@@ -40,6 +41,7 @@ export default function App() {
   };
 
   const goBack = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     setViewHistory((prev) => {
       if (prev.length > 1) {
         return prev.slice(0, -1);
@@ -47,6 +49,15 @@ export default function App() {
       return ['home'];
     });
   };
+
+  // Scroll to the very top whenever the active page/view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [currentView]);
 
   const [selectedListing, setSelectedListing] = useState(null);
   const [authModalConfig, setAuthModalConfig] = useState(null); // { mode: 'login' | 'register' }

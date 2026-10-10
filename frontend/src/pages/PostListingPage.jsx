@@ -152,7 +152,8 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           fee: result.posting_fee || 200
         });
       } else {
-        // Free posting / approved: navigate directly to listings list!
+        // Free posting / approved: scroll to top and navigate directly to listings list!
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         if (onListingSuccess) {
           onListingSuccess(result.listing);
         } else {
@@ -182,7 +183,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           </p>
           <div className="pt-4">
             <button
-              onClick={() => onListingSuccess && onListingSuccess()}
+              onClick={() => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                if (onListingSuccess) onListingSuccess();
+              }}
               className="w-full btn-gold text-sm py-3 font-bold"
             >
               View in My Listings
