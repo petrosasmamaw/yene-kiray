@@ -51,6 +51,26 @@ export function LanguageProvider({ children }) {
     return category.description || '';
   };
 
+  const CITY_MAP_AM = {
+    'Addis Ababa': 'አዲስ አበባ',
+    'Hawassa': 'ሐዋሳ',
+    'Adama': 'አዳማ',
+    'Bahir Dar': 'ባሕር ዳር',
+    'Bishoftu': 'ቢሾፍቱ',
+    'Mekelle': 'መቀሌ',
+    'Dire Dawa': 'ድሬዳዋ',
+    'Gondar': 'ጎንደር',
+    'Jimma': 'ጅማ'
+  };
+
+  const getCityTitle = (city) => {
+    if (!city) return '';
+    if (language === 'am' && CITY_MAP_AM[city]) {
+      return CITY_MAP_AM[city];
+    }
+    return city;
+  };
+
   return (
     <LanguageContext.Provider
       value={{
@@ -60,6 +80,7 @@ export function LanguageProvider({ children }) {
         t,
         getCategoryTitle,
         getCategoryDesc,
+        getCityTitle,
         isAmharic: language === 'am'
       }}
     >

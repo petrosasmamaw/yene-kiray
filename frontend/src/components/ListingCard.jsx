@@ -16,7 +16,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function ListingCard({ listing, onSelect, onOpenAuth }) {
   const dispatch = useDispatch();
-  const { t, isAmharic } = useLanguage();
+  const { t, isAmharic, getCityTitle } = useLanguage();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { savedItems } = useSelector((state) => state.listings);
 
@@ -130,7 +130,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
           <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-normal mb-1">
             <MapPin className="w-3.5 h-3.5 text-amber-400/80 shrink-0" />
             <span className="truncate">
-              {listing.city} {listing.subcity ? `• ${listing.subcity}` : ''}
+              {getCityTitle(listing.city)} {listing.subcity ? `• ${listing.subcity}` : ''}
             </span>
           </div>
 

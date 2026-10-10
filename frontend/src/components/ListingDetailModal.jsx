@@ -20,7 +20,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
   const dispatch = useDispatch();
-  const { t, isAmharic } = useLanguage();
+  const { t, isAmharic, getCityTitle } = useLanguage();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { savedItems } = useSelector((state) => state.listings);
   
@@ -152,7 +152,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
               <div className="flex items-center gap-2 text-sm text-neutral-400 font-medium">
                 <MapPin className="w-4 h-4 text-amber-500" />
                 <span>
-                  {listing.city} {listing.subcity ? `• ${listing.subcity}` : ''} {listing.specific_location ? `(${listing.specific_location})` : ''}
+                  {getCityTitle(listing.city)} {listing.subcity ? `• ${listing.subcity}` : ''} {listing.specific_location ? `(${listing.specific_location})` : ''}
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-sans">
