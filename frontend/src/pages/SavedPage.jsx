@@ -4,9 +4,11 @@ import { Bookmark, Layers, ArrowLeft } from 'lucide-react';
 import { fetchSavedListings } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
 import ListingCardSkeleton from '../components/ListingCardSkeleton';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
+  const { t, isAmharic } = useLanguage();
   const { savedItems, savedLoading } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -33,7 +35,7 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
               className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              <span>Back</span>
+              <span>{t('back')}</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
@@ -41,10 +43,10 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white font-sans leading-tight">
-                  Saved Favorites
+                  {t('savedPageTitle')}
                 </h1>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  {savedItems.length} rental listings saved to your account
+                  {savedItems.length} {isAmharic ? 'የተቀመጡ የኪራይ ዕቃዎች በመለያዎ ውስጥ ይገኛሉ' : 'rental listings saved to your account'}
                 </p>
               </div>
             </div>
@@ -61,15 +63,15 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
         ) : savedItems.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-[#0D0D0D] border border-neutral-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
             <Bookmark className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-white mb-1">No Saved Listings</h3>
+            <h3 className="text-lg font-bold text-white mb-1">{t('savedNoneTitle')}</h3>
             <p className="text-xs text-neutral-400 mb-6">
-              You haven't bookmarked any rentals yet. Click the bookmark icon on any card to save it for later.
+              {t('savedNoneDesc')}
             </p>
             <button
               onClick={onGoHome}
               className="btn-gold text-xs py-2.5 px-6 font-bold"
             >
-              Browse Rentals
+              {t('savedBrowseRentals')}
             </button>
           </div>
         ) : (

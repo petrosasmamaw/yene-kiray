@@ -1,0 +1,438 @@
+/**
+ * Yene Kiray (የኔ ኪራይ) - Central Translation Dictionary
+ * 
+ * To modify any wording, button label, or placeholder in Amharic or English,
+ * simply edit the respective string in this file.
+ */
+
+export const translations = {
+  // ==========================================
+  // AMHARIC (አማርኛ) - DEFAULT ETHIOPIAN LOCALE
+  // ==========================================
+  am: {
+    // Brand & General
+    brandName: 'የኔ ኪራይ',
+    back: 'ተመለስ',
+    close: 'ዝጋ',
+    cancel: 'ይቅር',
+    save: 'አስቀምጥ',
+    delete: 'አጥፋ',
+    edit: 'አስተካክል',
+    loading: 'በመጫን ላይ...',
+    etb: 'ብር',
+    items: 'ዕቃዎች',
+    rentals: 'ኪራዮች',
+    verified: 'የተረጋገጠ',
+    or: 'ወይም',
+
+    // Time Periods
+    periodHour: 'በሰዓት',
+    periodDay: 'በቀን',
+    periodMonth: 'በወር',
+    periodYear: 'በዓመት',
+
+    // Navigation (Navbar & BottomNav)
+    navExplore: 'ያስሱ',
+    navBrowse: 'ያስሱ',
+    navHome: 'መነሻ',
+    navSaved: 'የተወደዱ',
+    navMyListings: 'የእኔ ኪራዮች',
+    navPostRent: 'አከራይ / ፖስት',
+    navMessages: 'መልዕክቶች',
+    navAdmin: 'አስተዳዳሪ ማዕከል',
+    navLogin: 'ይግቡ / ይመዝገቡ',
+    navSignIn: 'ይግቡ',
+    navRegister: 'ይመዝገቡ',
+    navCreateAccount: 'መለያ ፍጠር',
+    navLogout: 'ውጣ',
+    navVerifiedUser: 'የተረጋገጠ ተጠቃሚ',
+    signedInAs: 'የገቡበት መለያ',
+
+    // Hero Section
+    heroTitleLine1: 'ቤት፣ መኪና እና ልዩ ልዩ',
+    heroTitleHighlight: 'ዕቃዎችን',
+    heroTitleLine2: 'በቀላሉ ይከራዩ።',
+    heroSubtitle: 'በኢትዮጵያ ውስጥ ተከራዮችን ከተረጋገጡ የቤት፣ የተሽከርካሪ እና የመሣሪያ አከራዮች ጋር በቀጥታ የሚያገናኝ ዘመናዊ የኪራይ የገበያ መድረክ።',
+
+    // Search & Filters
+    searchPlaceholder: 'ምን መከራየት ይፈልጋሉ? (ለምሳሌ፦ ቪላ፣ አፓርታማ፣ V8 መኪና፣ ኤክስካቫተር...)',
+    searchButton: 'ፈልግ',
+    filterAllCities: 'ሁሉንም ከተሞች',
+    filterSelectCity: 'ከተማ ይምረጡ',
+    filterPriceRate: 'የዋጋ መጠን',
+    filterAnyPrice: 'ማንኛውም ዋጋ',
+    priceUnder10k: 'ከ 10,000 ብር በታች',
+    price10kTo50k: 'ከ 10,000 - 50,000 ብር',
+    price50kTo150k: 'ከ 50,000 - 150,000 ብር',
+    priceAbove150k: 'ከ 150,000 ብር በላይ',
+    filterPeriod: 'የኪራይ ጊዜ',
+    filterAllPeriods: 'በቀን / በወር',
+
+    // Ethiopian Major Cities
+    cityAddisAbaba: 'አዲስ አበባ',
+    cityHawassa: 'ሐዋሳ',
+    cityAdama: 'አዳማ',
+    cityBahirDar: 'ባሕር ዳር',
+    cityBishoftu: 'ቢሾፍቱ',
+    cityMekelle: 'መቀሌ',
+    cityDireDawa: 'ድሬዳዋ',
+    cityGondar: 'ጎንደር',
+    cityJimma: 'ጅማ',
+
+    // Categories Section
+    allCategories: 'ሁሉም ዘርፎች',
+    exploreCategories: 'የኪራይ ዘርፎችን ያስሱ',
+    exploreCategoriesSubtitle: 'የሚፈልጉትን የቤት፣ የተሽከርካሪ ወይም የዕቃ ዓይነት ይምረጡ',
+    clearFilter: 'ማጣሪያውን አጥፋ',
+
+    // Listings Grid Section
+    availableListings: 'የሚከራዩ ዝርዝሮች',
+    availableListingsSubtitle: 'የተረጋገጡ ቤቶች፣ መኪኖች እና የሙያ መሣሪያዎችን ይመልከቱ',
+    detailsButton: 'ዝርዝር እይ',
+    verifiedOwner: 'የተረጋገጠ አከራይ',
+    messageOwner: 'መልዕክት ጻፍ',
+    saveFavorite: 'አስቀምጥ',
+    savedToFavorites: 'ተቀምጧል',
+    noListingsFound: 'ምንም የተገኘ ኪራይ የለም',
+    noListingsFoundDesc: 'በመረጡት መስፈርት የተገኘ የኪራይ ዕቃ የለም። እባክዎ ፍለጋዎን ወይም የተመረጠውን ከተማ ይቀይሩ።',
+    clearAllFilters: 'ሁሉንም ማጣሪያዎች አጽዳ',
+
+    // Post Listing Page
+    postPageBadge: 'አዲስ የኪራይ ማስታወቂያ ይለጥፉ',
+    postPageTitle: 'ቤት፣ መኪና ወይም መሣሪያ ያከራዩ',
+    postPageSubtitle: 'የሚከራየውን ንብረት ዝርዝር መረጃ ከታች ባለው ቅጽ ይሙሉ፤ በፍጥነት ለተከራዮች ይደርሳል።',
+    postCardRentalInfo: 'የኪራይ ንብረት መረጃ',
+    postLabelTitle: 'የኪራይ ርዕስ *',
+    postPlaceholderTitle: 'ለምሳሌ፦ ዘመናዊ ባለ 3 መኝታ ቪላ ወይም ቶዮታ ላንድ ክሩዘር V8',
+    postLabelCategory: 'የኪራይ ዘርፍ *',
+    postLabelPrice: 'የኪራይ ዋጋ (በብር) *',
+    postLabelPeriod: 'የኪራይ ክፍያ ጊዜ *',
+    postCardLocation: 'አድራሻ እና ስልክ ቁጥር',
+    postLabelCity: 'ከተማ *',
+    postLabelSubcity: 'ክፍለ ከተማ / አካባቢ',
+    postPlaceholderSubcity: 'ለምሳሌ፦ ቦሌ፣ ካዛንቺስ፣ ሲኤምሲ...',
+    postLabelLocation: 'ዝርዝር አድራሻ',
+    postPlaceholderLocation: 'ለምሳሌ፦ ቦሌ መድኃኔዓለም፣ ኤድና ሞል ጀርባ',
+    postLabelPhone: 'የአከራይ ስልክ ቁጥር *',
+    postPlaceholderPhone: '+251 911 ... ወይም 0911...',
+    postCardDesc: 'ዝርዝር ማብራሪያ እና አገልግሎቶች',
+    postLabelDesc: 'የንብረቱ ሙሉ ማብራሪያ *',
+    postPlaceholderDesc: 'ስለ ንብረቱ ሁኔታ፣ ስለሚሰጣቸው አገልግሎቶች እና ስለ ኪራይ ሁኔታዎች በዝርዝር ይግለጹ...',
+    postLabelFeatures: 'ዋና ዋና አገልግሎቶች / መለያዎች',
+    postPlaceholderFeatureInput: 'አዲስ አገልግሎት ጻፍ (ለምሳሌ፦ ጀነሬተር፣ ዋይፋይ፣ 24/7 ጥበቃ...)',
+    postBtnAddFeature: 'አክል',
+    postCardImages: 'የንብረቱ ፎቶዎች *',
+    postUploadButton: 'ፎቶዎችን ከስልክ/ኮምፒውተር ይስቀሉ',
+    postUploadHint: 'ወይም የቀጥታ ፎቶ ሊንክ (URL) ከታች ያስገቡ',
+    postPublishing: 'በማስገባት ላይ...',
+    postPublishButton: 'የኪራይ ማስታወቂያውን ለጥፍ',
+    postSuccessTitle: 'ማስታወቂያዎ በቀጥታ ተለጥፏል!',
+    postSuccessDesc: 'የኪራይ ማስታወቂያዎ በተሳካ ሁኔታ ጸድቆ በመድረኩ ላይ ለሁሉም ተከራዮች ክፍት ሆኗል።',
+    postViewInMyListings: 'በእኔ ኪራዮች ውስጥ እይ',
+
+    // My Listings Page
+    myListingsTitle: 'የእኔ የኪራይ ማስታወቂያዎች',
+    myListingsSubtitle: 'የለጠፏቸውን ንብረቶች ያስተዳድሩ እና የክፍያ/የዕይታ ሁኔታቸውን ይከታተሉ',
+    myListingsPostAnother: 'ሌላ ኪራይ ፖስት አድርግ',
+    myListingsNewAdded: 'አዲስ ኪራይ ተጨምሯል!',
+    myListingsNewAddedDesc: 'የለጠፉት ኪራይ በተሳካ ሁኔታ ወደ ማስታወቂያዎችዎ ገብቷል።',
+    myListingsNoneTitle: 'እስካሁን ምንም ኪራይ አልለጠፉም',
+    myListingsNoneDesc: 'ቤትዎን፣ መኪናዎን ወይም መሣሪያዎችዎን በማከራየት በሺዎች የሚቆጠሩ ደንበኞችን ያግኙ።',
+    myListingsPostFirst: 'አሁን የመጀመሪያዎን ኪራይ ይለጥፉ',
+    statusApproved: 'ጸድቋል',
+    statusPending: 'በመጠባበቅ ላይ',
+    statusRejected: 'ውድቅ ተደርጓል',
+    statusRented: 'ተከራይቷል',
+    viewsCount: 'እይታዎች',
+    deleteConfirm: 'ይህን የኪራይ ማስታወቂያ በእርግጥ መሰረዝ ይፈልጋሉ?',
+
+    // Saved Page
+    savedPageTitle: 'የተቀመጡ ኪራዮች',
+    savedPageSubtitle: 'በመለያዎ ውስጥ ያስቀመጧቸው የኪራይ ዕቃዎች',
+    savedNoneTitle: 'ምንም የተቀመጠ ኪራይ የለም',
+    savedNoneDesc: 'እስካሁን ምንም ኪራይ አላስቀመጡም። በማንኛውም ካርድ ላይ ያለውን የዕልባት ምልክት በመጫን ማስቀመጥ ይችላሉ።',
+    savedBrowseRentals: 'ኪራዮችን ያስሱ',
+
+    // Listing Details Modal
+    modalOwner: 'የንብረቱ አከራይ',
+    modalLocation: 'አድራሻ',
+    modalCategory: 'ዘርፍ',
+    modalViews: 'የታየበት ጊዜ',
+    modalFeatures: 'የንብረቱ ዋና ዋና አገልግሎቶች',
+    modalDescription: 'ሙሉ ማብራሪያ',
+    modalCall: 'በስልክ ደውል',
+    modalMessage: 'በመልዕክት አነጋግር',
+    modalEditListing: 'ይህን ኪራይ አስተካክል',
+
+    // Chat & Messaging
+    chatTitle: 'የቀጥታ የመልዕክት ልውውጥ',
+    chatSubtitle: 'ከአከራዮች እና ከተከራዮች ጋር የቀጥታ ቻት',
+    chatNoMessages: 'ምንም የተላከ መልዕክት የለም። ሰላምታ በመላክ ንግግር ይጀምሩ!',
+    chatInputPlaceholder: 'መልዕክትዎን እዚህ ይጻፉ...',
+    chatNoConversations: 'ምንም ንግግሮች የሉም',
+    chatNoConversationsDesc: 'የኪራይ ማስታወቂያዎችን በመመልከት "መልዕክት ጻፍ" የሚለውን በመጫን ከአከራዩ ጋር በቀጥታ ይገናኙ።',
+    chatRentalHost: 'አከራይ',
+
+    // Auth Modal
+    authLoginTitle: 'ወደ መለያዎ ይግቡ',
+    authRegisterTitle: 'አዲስ መለያ ይክፈቱ',
+    authEmail: 'ኢሜይል አድራሻ',
+    authPassword: 'የይለፍ ቃል',
+    authFullName: 'ሙሉ ስም',
+    authPhone: 'ስልክ ቁጥር',
+    authSubmitLogin: 'ግባ',
+    authSubmitRegister: 'መለያ ፍጠር',
+    authSwitchToRegister: 'መለያ የለዎትም? ይመዝገቡ',
+    authSwitchToLogin: 'ቀደም ሲል መለያ አለዎት? ይግቡ',
+
+    // Admin Dashboard
+    adminTitle: 'የአስተዳዳሪ ማዕከል',
+    adminFinancials: 'የገንዘብ እና ገቢ መረጃ',
+    adminPayments: 'ክፍያዎች',
+    adminMonetization: 'የክፍያ ቅንብር',
+    adminUsers: 'ተጠቃሚዎች',
+    adminCategories: 'የኪራይ ዘርፎች',
+    adminListings: 'ሁሉም ኪራዮች',
+    adminAddCategoryNameAm: 'የዘርፉ የአማርኛ ስም (አማራጭ)',
+    adminAddCategoryNameEn: 'የዘርፉ የእንግሊዝኛ ስም *',
+
+    // Trust Features
+    trustDirectContact: 'ቀጥተኛ ግንኙነት ከአከራዮች ጋር',
+    trustDirectContactDesc: 'ከቤት፣ ከመኪና ወይም ከመሣሪያ አከራዮች ጋር በቀጥታ በመደወል መረጃ ያግኙና ስምምነት ያድርጉ።',
+    trustMessaging: 'የቀጥታ የመልዕክት ልውውጥ',
+    trustMessagingDesc: 'በመተግበሪያው ውስጥ ባለ የቀጥታ ቻት አማካኝነት ዋጋ ይደራደሩ፤ ተጨማሪ ጥያቄዎችን ይጠይቁ።',
+    trustModerated: 'የተረጋገጡ የኪራይ ማስታወቂያዎች',
+    trustModeratedDesc: 'ለተከራዮች ደህንነት እና ጥራት ሲባል ሁሉም ማስታወቂያዎች ከመለጠፋቸው በፊት በቡድናችን ይገመገማሉ።',
+
+    // Footer
+    footerTagline: 'በኢትዮጵያ ውስጥ የተረጋገጡ ቤቶችን፣ መኪኖችን እና መሣሪያዎችን በቀጥታ የሚያከራዩበት አስተማማኝ የገበያ መድረክ።',
+    footerModerated: 'የተረጋገጡ ማስታወቂያዎች እና ቀጥተኛ ግንኙነት',
+    footerExplore: 'የኪራይ ዘርፎች',
+    footerFeatures: 'የመድረኩ ገጽታዎች',
+    footerFeature1: 'ግልጽ የኪራይ ዋጋ እና ውሎች',
+    footerFeature2: 'ከአከራዮች ጋር ቀጥተኛ ቻት',
+    footerFeature3: 'ቴሌብር እና የባንክ ድጋፍ',
+    footerFeature4: 'ጥራታቸው የተረጋገጠ ማስታወቂያዎች',
+    footerContact: 'ቀጥተኛ ግንኙነት',
+    footerAddress: 'ቦሌ መድኃኔዓለም፣ አዲስ አበባ፣ ኢትዮጵያ',
+    footerRights: 'መብቱ በህግ የተጠበቀ ነው።',
+    footerTerms: 'የአጠቃቀም ውሎች',
+    footerPrivacy: 'የግላዊነት ፖሊሲ',
+    footerSecurity: 'የክፍያ ደህንነት'
+  },
+
+  // ==========================================
+  // ENGLISH - SECONDARY LOCALE
+  // ==========================================
+  en: {
+    // Brand & General
+    brandName: 'Yene Kiray',
+    back: 'Back',
+    close: 'Close',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    loading: 'Loading...',
+    etb: 'ETB',
+    items: 'items',
+    rentals: 'rentals',
+    verified: 'Verified',
+    or: 'or',
+
+    // Time Periods
+    periodHour: 'hour',
+    periodDay: 'day',
+    periodMonth: 'month',
+    periodYear: 'year',
+
+    // Navigation (Navbar & BottomNav)
+    navExplore: 'Explore',
+    navBrowse: 'Browse',
+    navHome: 'Home',
+    navSaved: 'Saved',
+    navMyListings: 'My Listings',
+    navPostRent: 'Post Listing',
+    navMessages: 'Messages',
+    navAdmin: 'Admin Console',
+    navLogin: 'Sign In / Register',
+    navSignIn: 'Sign In',
+    navRegister: 'Register',
+    navCreateAccount: 'Create Account',
+    navLogout: 'Sign Out',
+    navVerifiedUser: 'Verified User',
+    signedInAs: 'Signed in as',
+
+    // Hero Section
+    heroTitleLine1: 'Find and rent',
+    heroTitleHighlight: 'homes, vehicles',
+    heroTitleLine2: '& equipment.',
+    heroSubtitle: 'Direct marketplace connecting renters with verified property and equipment owners across Ethiopia.',
+
+    // Search & Filters
+    searchPlaceholder: 'What would you like to rent? (e.g. Villa, Apartment, V8, Excavator...)',
+    searchButton: 'Search',
+    filterAllCities: 'All Cities',
+    filterSelectCity: 'Select City',
+    filterPriceRate: 'Price Rate',
+    filterAnyPrice: 'Any Price',
+    priceUnder10k: 'Under 10,000 ETB',
+    price10kTo50k: '10,000 - 50,000 ETB',
+    price50kTo150k: '50,000 - 150,000 ETB',
+    priceAbove150k: 'Above 150,000 ETB',
+    filterPeriod: 'Rental Period',
+    filterAllPeriods: 'Per Day / Month',
+
+    // Ethiopian Major Cities
+    cityAddisAbaba: 'Addis Ababa',
+    cityHawassa: 'Hawassa',
+    cityAdama: 'Adama',
+    cityBahirDar: 'Bahir Dar',
+    cityBishoftu: 'Bishoftu',
+    cityMekelle: 'Mekelle',
+    cityDireDawa: 'Dire Dawa',
+    cityGondar: 'Gondar',
+    cityJimma: 'Jimma',
+
+    // Categories Section
+    allCategories: 'All Categories',
+    exploreCategories: 'Explore Categories',
+    exploreCategoriesSubtitle: 'Select a rental category to explore available properties, vehicles, and equipment',
+    clearFilter: 'Clear filter',
+
+    // Listings Grid Section
+    availableListings: 'Available Listings',
+    availableListingsSubtitle: 'Browse approved properties, vehicles, and equipment',
+    detailsButton: 'Details',
+    verifiedOwner: 'Verified Owner',
+    messageOwner: 'Message',
+    saveFavorite: 'Save',
+    savedToFavorites: 'Saved',
+    noListingsFound: 'No Listings Found',
+    noListingsFoundDesc: 'No active listings match your current filters. Try changing your search query or city selection.',
+    clearAllFilters: 'Clear All Filters',
+
+    // Post Listing Page
+    postPageBadge: 'Create New Rental Post',
+    postPageTitle: 'Post Your House, Car or Equipment',
+    postPageSubtitle: 'Fill in the details below. Reach thousands of active renters looking for your rental item.',
+    postCardRentalInfo: 'Rental Information',
+    postLabelTitle: 'Listing Title *',
+    postPlaceholderTitle: 'e.g. Modern 3-Bedroom Villa with Garden or Toyota Land Cruiser V8',
+    postLabelCategory: 'Rental Category *',
+    postLabelPrice: 'Rental Price (ETB) *',
+    postLabelPeriod: 'Price Period *',
+    postCardLocation: 'Location & Phone Number',
+    postLabelCity: 'City *',
+    postLabelSubcity: 'Subcity / Area',
+    postPlaceholderSubcity: 'e.g. Bole, Kazanchis, CMC...',
+    postLabelLocation: 'Specific Location',
+    postPlaceholderLocation: 'e.g. Behind Medhanialem Cathedral, Atlas Area',
+    postLabelPhone: 'Contact Phone Number *',
+    postPlaceholderPhone: '+251 911 ... or 0911...',
+    postCardDesc: 'Detailed Description & Amenities',
+    postLabelDesc: 'Full Description *',
+    postPlaceholderDesc: 'Describe the property condition, included amenities, rules, and rental terms in detail...',
+    postLabelFeatures: 'Key Features & Amenities',
+    postPlaceholderFeatureInput: 'Type feature (e.g. Backup Generator, WiFi, 24/7 Security...)',
+    postBtnAddFeature: 'Add',
+    postCardImages: 'Listing Photos *',
+    postUploadButton: 'Upload Photos from Device',
+    postUploadHint: 'Or paste direct image URLs below',
+    postPublishing: 'Publishing...',
+    postPublishButton: 'Publish Rental Post',
+    postSuccessTitle: 'Listing Live & Published!',
+    postSuccessDesc: 'Your rental post has been approved and is now active across the marketplace.',
+    postViewInMyListings: 'View in My Listings',
+
+    // My Listings Page
+    myListingsTitle: 'My Posted Rentals',
+    myListingsSubtitle: 'Manage your posted properties, vehicles, and track admin approval & views',
+    myListingsPostAnother: 'Post Another Rental',
+    myListingsNewAdded: 'Listing Added!',
+    myListingsNewAddedDesc: 'Your rental post has been successfully added to your listings.',
+    myListingsNoneTitle: 'No Listings Yet',
+    myListingsNoneDesc: 'You haven\'t posted any rental items yet. Share your house, car, or tools to reach thousands of renters.',
+    myListingsPostFirst: 'Post Your First Rental Now',
+    statusApproved: 'Approved',
+    statusPending: 'Pending',
+    statusRejected: 'Rejected',
+    statusRented: 'Rented',
+    viewsCount: 'Views',
+    deleteConfirm: 'Are you sure you want to delete this listing?',
+
+    // Saved Page
+    savedPageTitle: 'Saved Favorites',
+    savedPageSubtitle: 'Rental listings saved to your account',
+    savedNoneTitle: 'No Saved Listings',
+    savedNoneDesc: 'You haven\'t bookmarked any rentals yet. Click the bookmark icon on any card to save it for later.',
+    savedBrowseRentals: 'Browse Rentals',
+
+    // Listing Details Modal
+    modalOwner: 'Rental Owner',
+    modalLocation: 'Location',
+    modalCategory: 'Category',
+    modalViews: 'Views',
+    modalFeatures: 'Features & Amenities',
+    modalDescription: 'Full Description',
+    modalCall: 'Call Phone',
+    modalMessage: 'Send Message',
+    modalEditListing: 'Edit Listing',
+
+    // Chat & Messaging
+    chatTitle: 'Real-time Rental Messages',
+    chatSubtitle: 'Live chat with owners & renters',
+    chatNoMessages: 'No messages yet. Send a greeting to start negotiating!',
+    chatInputPlaceholder: 'Type your message...',
+    chatNoConversations: 'No Conversations Yet',
+    chatNoConversationsDesc: 'Browse rental listings and click "Message Owner" on any property or vehicle to message directly.',
+    chatRentalHost: 'Rental Host',
+
+    // Auth Modal
+    authLoginTitle: 'Sign In to Your Account',
+    authRegisterTitle: 'Create New Account',
+    authEmail: 'Email Address',
+    authPassword: 'Password',
+    authFullName: 'Full Name',
+    authPhone: 'Phone Number',
+    authSubmitLogin: 'Sign In',
+    authSubmitRegister: 'Create Account',
+    authSwitchToRegister: 'Don\'t have an account? Sign Up',
+    authSwitchToLogin: 'Already have an account? Sign In',
+
+    // Admin Dashboard
+    adminTitle: 'Admin Portal',
+    adminFinancials: 'Financial Overview',
+    adminPayments: 'Payments',
+    adminMonetization: 'Monetization Settings',
+    adminUsers: 'Users',
+    adminCategories: 'Categories',
+    adminListings: 'All Rental Posts',
+    adminAddCategoryNameAm: 'Category Amharic Name (Optional)',
+    adminAddCategoryNameEn: 'Category English Name *',
+
+    // Trust Features
+    trustDirectContact: 'Direct Owner Contact',
+    trustDirectContactDesc: 'Connect directly with verified property or equipment owners to arrange viewings and confirm availability.',
+    trustMessaging: 'Direct Messaging',
+    trustMessagingDesc: 'Coordinate terms, ask questions, and negotiate rates directly within the platform.',
+    trustModerated: 'Moderated Listings',
+    trustModeratedDesc: 'Submissions are reviewed before publication to maintain quality standards across all rental categories.',
+
+    // Footer
+    footerTagline: 'Direct marketplace for renting verified properties, vehicles, and equipment across Ethiopia.',
+    footerModerated: 'Moderated Listings & Direct Communication',
+    footerExplore: 'Explore Categories',
+    footerFeatures: 'Platform Features',
+    footerFeature1: 'Transparent Rates & Terms',
+    footerFeature2: 'Direct Owner Messaging',
+    footerFeature3: 'Telebirr & Local Banking Support',
+    footerFeature4: 'Quality Moderated Listings',
+    footerContact: 'Direct Contact',
+    footerAddress: 'Bole Medhanialem, Addis Ababa, Ethiopia',
+    footerRights: 'All rights reserved.',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerSecurity: 'Payment Security'
+  }
+};

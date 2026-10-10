@@ -33,9 +33,11 @@ import {
   updateSettings 
 } from '../store/slices/adminSlice';
 import api from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing }) {
   const dispatch = useDispatch();
+  const { t, getCategoryTitle, isAmharic } = useLanguage();
   const { dashboardData, payments, users, loading } = useSelector((state) => state.admin);
 
   const [activeTab, setActiveTab] = useState('financials'); // 'financials', 'payments', 'pricing', 'users', 'categories', 'listings'
@@ -49,6 +51,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
   // Category Management State
   const [categories, setCategories] = useState([]);
   const [newCatName, setNewCatName] = useState('');
+  const [newCatNameAm, setNewCatNameAm] = useState('');
   const [newCatSlug, setNewCatSlug] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('Layers');
   const [newCatImage, setNewCatImage] = useState('');
@@ -156,11 +159,13 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
     try {
       await api.post('/categories', {
         name: newCatName,
+        name_am: newCatNameAm.trim() || null,
         slug: newCatSlug,
         icon_name: newCatIcon,
         image_url: newCatImage.trim() || null
       });
       setNewCatName('');
+      setNewCatNameAm('');
       setNewCatSlug('');
       setNewCatImage('');
       loadCategories();
@@ -175,6 +180,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
     try {
       await api.put(`/categories/${editingCategory.id}`, {
         name: editingCategory.name,
+        name_am: editingCategory.name_am ? editingCategory.name_am.trim() : null,
         slug: editingCategory.slug,
         description: editingCategory.description,
         icon_name: editingCategory.icon_name,
@@ -243,7 +249,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              <span>Back</span>
+              <span>{t('back')}</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500 text-black shadow-sm shrink-0">
@@ -252,14 +258,16 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl sm:text-3xl font-black text-white font-sans">
-                    Admin Executive Console
+                    {t('adminTitle')}
                   </h1>
                   <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
                     Terminal Guard
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  Financials, payment approval pipeline, rental posts moderation, categories, and user administration
+                  {isAmharic 
+                    ? 'የገንዘብ፣ የክፍያ ማረጋገጫዎች፣ የኪራይ ማስታወቂያዎች፣ የዘርፎች እና የተጠቃሚዎች አስተዳደር ማዕከል' 
+                    : 'Financials, payment approval pipeline, rental posts moderation, categories, and user administration'}
                 </p>
               </div>
             </div>
@@ -269,12 +277,12 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         {/* Tab Navigation (Horizontal swipeable on mobile) */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-neutral-800 no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
           {[
-            { id: 'financials', label: 'Financial Dashboard', icon: DollarSign },
-            { id: 'listings', label: 'All Rental Posts', icon: Building2, badge: adminListings.length },
-            { id: 'categories', label: 'Rental Categories', icon: Layers, badge: categories.length },
-            { id: 'users', label: 'User Directory & Status', icon: Users, badge: users.length },
-            { id: 'payments', label: 'Payment Approvals Queue', icon: CreditCard, badge: dashboardData?.financials?.pendingCount },
-            { id: 'pricing', label: 'Monetization & Pricing', icon: Sliders }
+            { id: 'financials', label: t('adminFinancials'), icon: DollarSign },
+            { id: 'listings', label: t('adminListings'), icon: Building2, badge: adminListings.length },
+            { id: 'categories', label: t('adminCategories'), icon: Layers, badge: categories.length },
+            { id: 'users', label: t('adminUsers'), icon: Users, badge: users.length },
+            { id: 'payments', label: t('adminPayments'), icon: CreditCard, badge: dashboardData?.financials?.pendingCount },
+            { id: 'pricing', label: t('adminMonetization'), icon: Sliders }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -937,8 +945,9 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
               <form onSubmit={handleCreateCategory} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                    Category Name
+                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Category Name (English)</span>
+                    <span className="text-[10px] text-amber-400 font-mono">Required</span>
                   </label>
                   <input
                     type="text"
@@ -949,6 +958,20 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       setNewCatName(e.target.value);
                       setNewCatSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
                     }}
+                    className="input-luxury text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>የዘርፉ የአማርኛ ስም (Amharic Name)</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">አማራጭ (Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ምሳሌ፦ የቅንጦት ጀልባዎች"
+                    value={newCatNameAm}
+                    onChange={(e) => setNewCatNameAm(e.target.value)}
                     className="input-luxury text-xs"
                   />
                 </div>
@@ -1038,8 +1061,13 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                         </div>
                       )}
                       <div className="space-y-0.5 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-sm text-white truncate">{c.name}</span>
+                          {c.name_am && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-medium border border-amber-500/20">
+                              {c.name_am}
+                            </span>
+                          )}
                           <span className="text-[10px] font-mono text-neutral-500">({c.slug})</span>
                         </div>
                         <p className="text-xs text-neutral-400">
@@ -1105,12 +1133,26 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             <form onSubmit={handleSaveCategoryEdit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Category Name</label>
+                <label className="block text-neutral-400 font-semibold mb-1">Category Name (English)</label>
                 <input
                   type="text"
                   required
                   value={editingCategory.name}
                   onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                  className="input-luxury text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-neutral-400 font-semibold mb-1 flex items-center justify-between">
+                  <span>የምድቡ የአማርኛ ስም (Amharic Name)</span>
+                  <span className="text-[10px] text-amber-400">አማራጭ (Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="ምሳሌ፦ የመኖሪያ ቤቶች እና ቪላዎች"
+                  value={editingCategory.name_am || ''}
+                  onChange={(e) => setEditingCategory({ ...editingCategory, name_am: e.target.value })}
                   className="input-luxury text-xs"
                 />
               </div>

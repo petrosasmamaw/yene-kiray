@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { compressImage, fileToDataUri } from '../utils/imageCompressor';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function PaymentModal({ listing, feeAmount = 200, onClose, onSuccess }) {
+  const { t, isAmharic } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState('Telebirr');
   const [transactionRef, setTransactionRef] = useState('');
   const [receiptUrl, setReceiptUrl] = useState('');
@@ -106,13 +108,13 @@ export default function PaymentModal({ listing, feeAmount = 200, onClose, onSucc
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back</span>
+            <span>{t('back')}</span>
           </button>
           <button
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 transition-colors"
-            title="Close"
+            title={t('close')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -125,10 +127,10 @@ export default function PaymentModal({ listing, feeAmount = 200, onClose, onSucc
           </div>
           <div>
             <h2 className="text-xl font-bold text-white font-sans">
-              Complete Listing Payment
+              {isAmharic ? 'የማስታወቂያ ክፍያ ያረጋግጡ' : 'Complete Listing Payment'}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
-              Pay-to-Post is enabled by platform administrators
+              {isAmharic ? 'በአስተዳዳሪው የተወሰነ የፖስቲንግ ክፍያ' : 'Pay-to-Post is enabled by platform administrators'}
             </p>
           </div>
         </div>

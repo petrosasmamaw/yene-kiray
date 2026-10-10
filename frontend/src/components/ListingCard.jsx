@@ -12,9 +12,11 @@ import {
 } from 'lucide-react';
 import { toggleSave } from '../store/slices/listingSlice';
 import { startConversation } from '../store/slices/chatSlice';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ListingCard({ listing, onSelect, onOpenAuth }) {
   const dispatch = useDispatch();
+  const { t, isAmharic } = useLanguage();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { savedItems } = useSelector((state) => state.listings);
 
@@ -43,6 +45,18 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
     ? listing.images[0].image_url 
     : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
 
+  const categoryTitle = isAmharic && listing.category_name_am 
+    ? listing.category_name_am 
+    : (listing.category_name || (isAmharic ? 'ኪራይ' : 'Rental'));
+
+  const periodLabel = listing.price_period === 'day' 
+    ? t('periodDay') 
+    : listing.price_period === 'hour' 
+    ? t('periodHour') 
+    : listing.price_period === 'year' 
+    ? t('periodYear') 
+    : t('periodMonth');
+
   return (
     <div 
       onClick={() => onSelect(listing)}
@@ -65,13 +79,13 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
           {/* Category Chip */}
           <span className="px-2.5 py-1 text-[11px] font-medium tracking-wide rounded-md bg-black/80 backdrop-blur-md text-amber-300 border border-white/[0.1] flex items-center gap-1.5 shadow-sm">
             <Tag className="w-3 h-3 text-amber-400" />
-            <span>{listing.category_name || 'Rental'}</span>
+            <span>{categoryTitle}</span>
           </span>
 
           {/* Bookmark Button */}
           <button
             onClick={handleSaveClick}
-            title={isSaved ? 'Remove from Saved' : 'Save to Favorites'}
+            title={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
             className={`p-2 rounded-xl backdrop-blur-md transition-all duration-200 border ${
               isSaved 
                 ? 'bg-amber-500 text-black border-amber-400 font-semibold' 
@@ -89,7 +103,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
               {Number(listing.rental_price).toLocaleString()}
             </span>
             <span className="text-[11px] text-neutral-300 font-normal">
-              ETB / {listing.price_period || 'month'}
+              {t('etb')} / {periodLabel}
             </span>
           </div>
         </div>
@@ -103,7 +117,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
                 : 'bg-rose-500/20 text-rose-300 border border-rose-500/40 backdrop-blur-md'
             }`}>
               {listing.status === 'pending' ? <Clock className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-              <span>{listing.status}</span>
+              <span>{listing.status === 'pending' ? t('statusPending') : listing.status === 'rejected' ? t('statusRejected') : listing.status}</span>
             </span>
           </div>
         )}
@@ -138,7 +152,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
               {listing.owner_name ? listing.owner_name.charAt(0).toUpperCase() : 'O'}
             </div>
             <span className="text-xs text-neutral-300 font-normal truncate max-w-[110px]">
-              {listing.owner_name || 'Verified Owner'}
+              {listing.owner_name || t('verifiedOwner')}
             </span>
           </div>
 
@@ -146,7 +160,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
             {!isOwner && (
               <button
                 onClick={handleChatClick}
-                title="Message owner"
+                title={t('messageOwner')}
                 className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-amber-500 hover:text-black border border-white/[0.08] text-neutral-300 transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
@@ -157,7 +171,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
               onClick={() => onSelect(listing)}
               className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-white border border-white/[0.08] transition-colors"
             >
-              Details
+              {t('detailsButton')}
             </button>
           </div>
         </div>

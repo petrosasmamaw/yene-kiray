@@ -16,9 +16,11 @@ import {
 } from 'lucide-react';
 import { toggleSave } from '../store/slices/listingSlice';
 import { startConversation } from '../store/slices/chatSlice';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
   const dispatch = useDispatch();
+  const { t, isAmharic } = useLanguage();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { savedItems } = useSelector((state) => state.listings);
   
@@ -32,6 +34,18 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
   const images = listing.images && listing.images.length > 0 
     ? listing.images 
     : [{ image_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80' }];
+
+  const categoryTitle = isAmharic && listing.category_name_am 
+    ? listing.category_name_am 
+    : (listing.category_name || (isAmharic ? 'የኪራይ ዕቃ' : 'Rental Item'));
+
+  const periodLabel = listing.price_period === 'day' 
+    ? t('periodDay') 
+    : listing.price_period === 'hour' 
+    ? t('periodHour') 
+    : listing.price_period === 'year' 
+    ? t('periodYear') 
+    : t('periodMonth');
 
   const handleStartChat = () => {
     if (!isAuthenticated) {
@@ -63,17 +77,17 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group shadow-sm"
           >
             <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back</span>
+            <span>{t('back')}</span>
           </button>
 
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg bg-black text-amber-400 border border-amber-500/30">
-              {listing.category_name || 'Rental Item'}
+              {categoryTitle}
             </span>
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 transition-colors"
-              title="Close"
+              title={t('close')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -124,7 +138,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
           {/* Floating Category Badge */}
           <div className="absolute top-4 left-4 z-10">
             <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-black/80 text-amber-400 border border-amber-500/30 backdrop-blur-md">
-              {listing.category_name || 'Rental Item'}
+              {categoryTitle}
             </span>
           </div>
         </div>
@@ -147,11 +161,11 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
               <div className="flex items-center gap-4 text-xs text-neutral-400 pt-1">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Posted {new Date(listing.created_at || Date.now()).toLocaleDateString()}</span>
+                  <span>{isAmharic ? 'የተለጠፈበት ቀን፦ ' : 'Posted '}{new Date(listing.created_at || Date.now()).toLocaleDateString()}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <Eye className="w-3.5 h-3.5 text-amber-500" />
-                  <span>{listing.views_count || 1} Views</span>
+                  <span>{listing.views_count || 1} {t('viewsCount')}</span>
                 </span>
               </div>
             </div>
@@ -159,18 +173,18 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             {/* Price Card */}
             <div className="bg-[#121212] border border-amber-500/30 rounded-2xl p-4 sm:p-5 flex flex-col items-start md:items-end justify-center shrink-0">
               <span className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
-                Rental Rate
+                {isAmharic ? 'የኪራይ ክፍያ' : 'Rental Rate'}
               </span>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-3xl font-black text-amber-400">
                   {Number(listing.rental_price).toLocaleString()}
                 </span>
                 <span className="text-sm font-bold text-white uppercase">
-                  ETB
+                  {t('etb')}
                 </span>
               </div>
               <span className="text-xs text-neutral-400 font-semibold mt-0.5">
-                Per {listing.price_period || 'month'}
+                {isAmharic ? 'በ' : 'Per '}{periodLabel}
               </span>
             </div>
           </div>
@@ -178,7 +192,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
           {/* Description */}
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-wider text-amber-400">
-              Overview & Specifications
+              {t('modalDescription')}
             </h3>
             <p className="text-sm sm:text-base text-neutral-300 leading-relaxed whitespace-pre-line">
               {listing.description}
@@ -189,7 +203,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
           {listing.features && listing.features.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-bold uppercase tracking-wider text-amber-400">
-                Key Features & Amenities
+                {t('modalFeatures')}
               </h3>
               <div className="flex flex-wrap gap-2.5">
                 {listing.features.map((feature, idx) => (
@@ -215,10 +229,10 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-white">{listing.owner_name || 'Rental Owner'}</span>
+                  <span className="text-sm font-bold text-white">{listing.owner_name || t('verifiedOwner')}</span>
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 </div>
-                <span className="text-xs text-neutral-400">Verified Platform Host</span>
+                <span className="text-xs text-neutral-400">{t('verifiedOwner')}</span>
               </div>
             </div>
 
@@ -229,7 +243,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                 className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors group"
               >
                 <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-                <span>Back</span>
+                <span>{t('back')}</span>
               </button>
 
               <button
@@ -239,7 +253,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                     ? 'bg-amber-500 text-black border-amber-400' 
                     : 'bg-neutral-900 text-neutral-300 border-neutral-800 hover:text-amber-400 hover:border-amber-400'
                 }`}
-                title={isSaved ? 'Saved' : 'Save'}
+                title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
               >
                 <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-black' : ''}`} />
               </button>
@@ -249,7 +263,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                 className="btn-outline-gold text-sm py-3 px-5 flex items-center gap-2"
               >
                 <Phone className="w-4 h-4" />
-                <span>Call ({listing.contact_phone})</span>
+                <span>{t('modalCall')} ({listing.contact_phone})</span>
               </a>
 
               {!isOwner && (
@@ -258,7 +272,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                   className="btn-gold text-sm py-3 px-6 flex items-center gap-2"
                 >
                   <MessageSquare className="w-4 h-4 stroke-[2.5]" />
-                  <span>Start Live Chat</span>
+                  <span>{t('modalMessage')}</span>
                 </button>
               )}
             </div>
@@ -276,7 +290,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                 ? 'bg-amber-500 text-black border-amber-400 font-semibold' 
                 : 'bg-neutral-900 text-neutral-300 border-neutral-800'
             }`}
-            title={isSaved ? 'Saved' : 'Save'}
+            title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
           >
             <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-black' : ''}`} />
           </button>
@@ -286,7 +300,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             className="flex-1 btn-outline-gold text-xs py-2.5 px-3 flex items-center justify-center gap-1.5"
           >
             <Phone className="w-3.5 h-3.5 text-amber-400" />
-            <span>Call Host</span>
+            <span>{t('modalCall')}</span>
           </a>
 
           {!isOwner && (
@@ -295,7 +309,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
               className="flex-1 btn-gold text-xs py-2.5 px-3 flex items-center justify-center gap-1.5 font-bold"
             >
               <MessageSquare className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Live Chat</span>
+              <span>{t('modalMessage')}</span>
             </button>
           )}
         </div>

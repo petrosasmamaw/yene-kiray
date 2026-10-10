@@ -15,6 +15,7 @@ export const getListings = async (req, res) => {
       SELECT 
         l.*,
         c.name AS category_name,
+        c.name_am AS category_name_am,
         c.slug AS category_slug,
         u.name AS owner_name,
         u.phone AS owner_phone,
@@ -71,7 +72,7 @@ export const getListings = async (req, res) => {
       paramIndex++;
     }
 
-    queryText += ` GROUP BY l.id, c.name, c.slug, u.name, u.phone, u.avatar_url`;
+    queryText += ` GROUP BY l.id, c.name, c.name_am, c.slug, u.name, u.phone, u.avatar_url`;
 
     // Sorting
     if (sort === 'price_asc') {
@@ -119,6 +120,7 @@ export const getListingById = async (req, res) => {
       `SELECT 
         l.*,
         c.name AS category_name,
+        c.name_am AS category_name_am,
         c.slug AS category_slug,
         u.id AS owner_id,
         u.name AS owner_name,
@@ -139,7 +141,7 @@ export const getListingById = async (req, res) => {
       LEFT JOIN users u ON l.user_id = u.id
       LEFT JOIN listing_images li ON li.listing_id = l.id
       WHERE l.id = $1
-      GROUP BY l.id, c.name, c.slug, u.id, u.name, u.phone, u.avatar_url`,
+      GROUP BY l.id, c.name, c.name_am, c.slug, u.id, u.name, u.phone, u.avatar_url`,
       [id]
     );
 
@@ -278,6 +280,7 @@ export const getMyListings = async (req, res) => {
       `SELECT 
         l.*,
         c.name AS category_name,
+        c.name_am AS category_name_am,
         p.id AS payment_id,
         p.status AS payment_status,
         p.amount AS payment_amount,
@@ -291,7 +294,7 @@ export const getMyListings = async (req, res) => {
       LEFT JOIN listing_images li ON li.listing_id = l.id
       LEFT JOIN payments p ON p.listing_id = l.id
       WHERE l.user_id = $1
-      GROUP BY l.id, c.name, p.id, p.status, p.amount
+      GROUP BY l.id, c.name, c.name_am, p.id, p.status, p.amount
       ORDER BY l.created_at DESC`,
       [req.user.id]
     );
@@ -341,6 +344,7 @@ export const getSavedListings = async (req, res) => {
       `SELECT 
         l.*,
         c.name AS category_name,
+        c.name_am AS category_name_am,
         u.name AS owner_name,
         COALESCE(
           json_agg(
@@ -353,7 +357,7 @@ export const getSavedListings = async (req, res) => {
       LEFT JOIN users u ON l.user_id = u.id
       LEFT JOIN listing_images li ON li.listing_id = l.id
       WHERE sl.user_id = $1
-      GROUP BY l.id, c.name, u.name, sl.created_at
+      GROUP BY l.id, c.name, c.name_am, u.name, sl.created_at
       ORDER BY sl.created_at DESC`,
       [req.user.id]
     );
@@ -501,6 +505,7 @@ export const getAllListingsAdmin = async (req, res) => {
       SELECT 
         l.*,
         c.name AS category_name,
+        c.name_am AS category_name_am,
         u.name AS owner_name,
         u.email AS owner_email,
         u.phone AS owner_phone,
@@ -537,7 +542,7 @@ export const getAllListingsAdmin = async (req, res) => {
       paramIndex++;
     }
 
-    queryText += ` GROUP BY l.id, c.name, u.name, u.email, u.phone ORDER BY l.created_at DESC`;
+    queryText += ` GROUP BY l.id, c.name, c.name_am, u.name, u.email, u.phone ORDER BY l.created_at DESC`;
 
     const result = await pool.query(queryText, params);
     return res.json({ success: true, count: result.rows.length, listings: result.rows });

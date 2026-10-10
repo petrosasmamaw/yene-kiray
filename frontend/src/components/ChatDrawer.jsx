@@ -24,9 +24,11 @@ import {
 } from '../store/slices/chatSlice';
 import socketService from '../services/socket';
 import api from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ChatDrawer() {
   const dispatch = useDispatch();
+  const { t } = useLanguage();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { 
     isOpen, 
@@ -132,10 +134,10 @@ export default function ChatDrawer() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white font-sans">
-                  Real-time Rental Messages
+                  {t('chatTitle')}
                 </h3>
                 <p className="text-[11px] text-neutral-400">
-                  Live chat with owners & renters
+                  {t('chatSubtitle')}
                 </p>
               </div>
             </div>
@@ -191,7 +193,7 @@ export default function ChatDrawer() {
                   return (
                     <div className="h-full flex flex-col items-center justify-center text-center p-6 text-neutral-500">
                       <MessageSquare className="w-10 h-10 text-neutral-700 mb-2" />
-                      <p className="text-xs">No messages yet. Send a greeting to start negotiating!</p>
+                      <p className="text-xs">{t('chatNoMessages')}</p>
                     </div>
                   );
                 }
@@ -247,7 +249,7 @@ export default function ChatDrawer() {
                 type="text"
                 value={inputText}
                 onChange={handleInputChange}
-                placeholder="Type your message..."
+                placeholder={t('chatInputPlaceholder')}
                 className="flex-1 bg-black border border-neutral-800 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500"
               />
               <button
@@ -265,9 +267,9 @@ export default function ChatDrawer() {
             {conversations.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-neutral-500">
                 <MessageSquare className="w-12 h-12 text-neutral-700 mb-3" />
-                <h4 className="text-sm font-bold text-neutral-300">No Conversations Yet</h4>
+                <h4 className="text-sm font-bold text-neutral-300">{t('chatNoConversations')}</h4>
                 <p className="text-xs text-neutral-500 mt-1 max-w-xs">
-                  Browse rental listings and click "Start Live Chat" on any property or vehicle to message the owner directly.
+                  {t('chatNoConversationsDesc')}
                 </p>
               </div>
             ) : (
@@ -286,7 +288,7 @@ export default function ChatDrawer() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
                         <h4 className="text-xs font-bold text-white truncate">
-                          {partnerName || 'Rental Host'}
+                          {partnerName || t('chatRentalHost')}
                         </h4>
                         <span className="text-[10px] text-neutral-500">
                           {conv.last_message_at ? new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}

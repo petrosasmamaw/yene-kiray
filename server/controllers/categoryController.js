@@ -46,7 +46,7 @@ export const getAdminCategories = async (req, res) => {
 // @access  Private / Admin
 export const createCategory = async (req, res) => {
   try {
-    const { name, slug, description, icon_name, image_url } = req.body;
+    const { name, name_am, slug, description, description_am, icon_name, image_url } = req.body;
 
     if (!name || !slug) {
       return res.status(400).json({ success: false, message: 'Category name and slug are required' });
@@ -55,10 +55,10 @@ export const createCategory = async (req, res) => {
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
     const result = await pool.query(
-      `INSERT INTO categories (name, slug, description, icon_name, image_url, is_active)
-       VALUES ($1, $2, $3, $4, $5, true)
+      `INSERT INTO categories (name, name_am, slug, description, description_am, icon_name, image_url, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
        RETURNING *`,
-      [name.trim(), cleanSlug, description || '', icon_name || 'Layers', image_url || null]
+      [name.trim(), name_am ? name_am.trim() : null, cleanSlug, description || '', description_am || '', icon_name || 'Layers', image_url || null]
     );
 
     return res.status(201).json({
@@ -80,19 +80,21 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, description, icon_name, image_url, is_active } = req.body;
+    const { name, name_am, slug, description, description_am, icon_name, image_url, is_active } = req.body;
 
     const result = await pool.query(
       `UPDATE categories 
        SET name = COALESCE($1, name),
-           slug = COALESCE($2, slug),
-           description = COALESCE($3, description),
-           icon_name = COALESCE($4, icon_name),
-           image_url = COALESCE($5, image_url),
-           is_active = COALESCE($6, is_active)
-       WHERE id = $7
+           name_am = COALESCE($2, name_am),
+           slug = COALESCE($3, slug),
+           description = COALESCE($4, description),
+           description_am = COALESCE($5, description_am),
+           icon_name = COALESCE($6, icon_name),
+           image_url = COALESCE($7, image_url),
+           is_active = COALESCE($8, is_active)
+       WHERE id = $9
        RETURNING *`,
-      [name, slug, description, icon_name, image_url, is_active, id]
+      [name, name_am, slug, description, description_am, icon_name, image_url, is_active, id]
     );
 
     if (result.rows.length === 0) {

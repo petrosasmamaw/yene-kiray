@@ -12,9 +12,11 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { loginUser, registerUser, clearAuthError } from '../store/slices/authSlice';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AuthModal({ initialMode = 'login', onClose }) {
   const dispatch = useDispatch();
+  const { t, isAmharic } = useLanguage();
   const { loading, error } = useSelector((state) => state.auth);
 
   const [mode, setMode] = useState(initialMode); // 'login' or 'register'
@@ -55,13 +57,13 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back</span>
+            <span>{t('back')}</span>
           </button>
           <button
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 transition-colors"
-            title="Close"
+            title={t('close')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -73,12 +75,12 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             <img src="/logo-key.svg" alt="የኔ ኪራይ" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-2xl font-extrabold text-white font-sans">
-            {mode === 'login' ? 'Welcome Back' : 'Join የኔ ኪራይ'}
+            {mode === 'login' ? (isAmharic ? 'እንኳን ደህና መጡ' : 'Welcome Back') : (isAmharic ? 'የኔ ኪራይ ይቀላቀሉ' : 'Join የኔ ኪራይ')}
           </h2>
           <p className="text-xs text-neutral-400 mt-1 max-w-xs">
             {mode === 'login' 
-              ? 'Access your rental listings, favorites, and live chats' 
-              : 'Create an account to post rentals and contact owners'}
+              ? (isAmharic ? 'የኪራይ ማስታወቂያዎችዎን፣ የተወደዱትን እና መልዕክቶችዎን ያግኙ' : 'Access your rental listings, favorites, and live chats') 
+              : (isAmharic ? 'ኪራይ ለመለጠፍ እና ከአከራዮች ጋር ለመገናኘት መለያ ይክፈቱ' : 'Create an account to post rentals and contact owners')}
           </p>
         </div>
 
@@ -96,7 +98,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            Sign In
+            {t('navSignIn')}
           </button>
           <button
             type="button"
@@ -110,7 +112,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            Create Account
+            {t('navCreateAccount')}
           </button>
         </div>
 
@@ -119,7 +121,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           <div className="mb-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2.5 text-[11px] text-amber-300">
             <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <p>
-              Public registrations are assigned <strong>Client (User)</strong> privileges. Administrative roles are provisioned exclusively through internal terminal CLI seeds.
+              {isAmharic ? 'አዲስ የተመዘገቡ ተጠቃሚዎች መደበኛ የተጠቃሚ ፍቃድ ያገኛሉ። የአስተዳዳሪ ሚናዎች በውስጣዊ ቁጥጥር ብቻ ይሰጣሉ።' : 'Public registrations are assigned Client (User) privileges. Administrative roles are provisioned exclusively through internal terminal CLI seeds.'}
             </p>
           </div>
         )}
@@ -130,7 +132,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           {mode === 'register' && (
             <div>
               <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                Full Name
+                {t('authFullName')}
               </label>
               <div className="relative">
                 <UserIcon className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -149,7 +151,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
           <div>
             <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-              Email Address
+              {t('authEmail')}
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -168,7 +170,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           {mode === 'register' && (
             <div>
               <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                Phone Number
+                {t('authPhone')}
               </label>
               <div className="relative">
                 <Phone className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -186,7 +188,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
           <div>
             <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-              Password
+              {t('authPassword')}
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -216,10 +218,10 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
               className="w-full btn-gold text-sm py-3.5"
             >
               {loading ? (
-                <span>Authenticating...</span>
+                <span>{t('loading')}</span>
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In to Account' : 'Register Account'}</span>
+                  <span>{mode === 'login' ? t('authSubmitLogin') : t('authSubmitRegister')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

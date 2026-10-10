@@ -20,8 +20,20 @@ import { createNewListing, fetchCategories } from '../store/slices/listingSlice'
 import api from '../services/api';
 import PaymentModal from '../components/PaymentModal';
 import { compressImage, fileToDataUri } from '../utils/imageCompressor';
+import { useLanguage } from '../context/LanguageContext';
 
-const PRESET_FEATURES = [
+const getPresetFeatures = (isAmharic) => isAmharic ? [
+  'ዕቃ የተሟላለት (Furnished)',
+  'የተጠባባቂ ጀነሬተር (Generator)',
+  'የውሃ ማጠራቀሚያ ታንከር (Water Tank)',
+  'የግል የመኪና ማቆሚያ (Parking)',
+  'ፈጣን ዋይፋይ ኢንተርኔት (Wi-Fi)',
+  'የ 24/7 የጥበቃ አገልግሎት (Security)',
+  'የአየር ማቀዝቀዣ (A/C)',
+  'ሹፌር ያለው / የተካተተ',
+  'የንግድ ማእድ ቤት / አገልግሎቶች',
+  'ኢንሹራንስ ያለው'
+] : [
   'Furnished / Ready to Use',
   'Backup Generator',
   'Water Reservoir Tank',
@@ -36,6 +48,7 @@ const PRESET_FEATURES = [
 
 export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
+  const { t, getCategoryTitle, isAmharic } = useLanguage();
   const { categories } = useSelector((state) => state.listings);
   const { user } = useSelector((state) => state.auth);
 
@@ -176,10 +189,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-black text-white font-sans">
-            Listing Live & Published!
+            {t('postSuccessTitle')}
           </h2>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            Free posting mode is currently active. Your rental listing has been approved immediately and is visible across the marketplace.
+            {t('postSuccessDesc')}
           </p>
           <div className="pt-4">
             <button
@@ -189,7 +202,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               }}
               className="w-full btn-gold text-sm py-3 font-bold"
             >
-              View in My Listings
+              {t('postViewInMyListings')}
             </button>
           </div>
         </div>
@@ -213,17 +226,17 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
             className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2.5 group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back</span>
+            <span>{t('back')}</span>
           </button>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
             <PlusCircle className="w-3.5 h-3.5" />
-            <span>Create New Rental Post</span>
+            <span>{t('postPageBadge')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white font-sans leading-tight">
-            Post Your House, Car or Equipment
+            {t('postPageTitle')}
           </h1>
           <p className="text-xs text-neutral-400 mt-1">
-            Fill in the details below. If admin pay-to-post is turned on, you can submit payment proof for fast review.
+            {t('postPageSubtitle')}
           </p>
         </div>
 
@@ -241,7 +254,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
             <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
               <Building className="w-4 h-4 text-amber-500" />
-              <span>Rental Information</span>
+              <span>{t('postCardRentalInfo')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -249,13 +262,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               {/* Title */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Listing Title *
+                  {t('postLabelTitle')}
                 </label>
                 <input
                   type="text"
                   name="title"
                   required
-                  placeholder="e.g. Modern 3-Bedroom Villa with Garden or Toyota Land Cruiser V8"
+                  placeholder={t('postPlaceholderTitle')}
                   value={formData.title}
                   onChange={handleChange}
                   className="input-luxury text-sm"
@@ -265,7 +278,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               {/* Category */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Category *
+                  {t('postLabelCategory')}
                 </label>
                 <select
                   name="category_id"
@@ -273,10 +286,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                   onChange={handleChange}
                   className="input-luxury text-sm cursor-pointer"
                 >
-                  <option value="" className="bg-[#111111]">Select Category</option>
+                  <option value="" className="bg-[#111111]">{isAmharic ? 'የኪራይ ዘርፍ ይምረጡ' : 'Select Category'}</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-[#111111]">
-                      {cat.name}
+                      {getCategoryTitle(cat)}
                     </option>
                   ))}
                 </select>
@@ -286,7 +299,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                    Rate (ETB) *
+                    {t('postLabelPrice')}
                   </label>
                   <input
                     type="number"
@@ -301,7 +314,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                    Billing Period
+                    {t('postLabelPeriod')}
                   </label>
                   <select
                     name="price_period"
@@ -309,10 +322,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                     onChange={handleChange}
                     className="input-luxury text-sm cursor-pointer"
                   >
-                    <option value="month" className="bg-[#111111]">Per Month</option>
-                    <option value="day" className="bg-[#111111]">Per Day</option>
-                    <option value="year" className="bg-[#111111]">Per Year</option>
-                    <option value="hour" className="bg-[#111111]">Per Hour</option>
+                    <option value="month" className="bg-[#111111]">{t('periodMonth')}</option>
+                    <option value="day" className="bg-[#111111]">{t('periodDay')}</option>
+                    <option value="year" className="bg-[#111111]">{t('periodYear')}</option>
+                    <option value="hour" className="bg-[#111111]">{t('periodHour')}</option>
                   </select>
                 </div>
               </div>
@@ -320,13 +333,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               {/* Description */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Full Description & Conditions *
+                  {t('postLabelDesc')}
                 </label>
                 <textarea
                   name="description"
                   required
                   rows={4}
-                  placeholder="Detail the specifications, condition, rental terms, and inclusions..."
+                  placeholder={t('postPlaceholderDesc')}
                   value={formData.description}
                   onChange={handleChange}
                   className="input-luxury text-sm"
@@ -340,13 +353,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
             <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
               <MapPin className="w-4 h-4 text-amber-500" />
-              <span>Location & Direct Contact</span>
+              <span>{t('postCardLocation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  City *
+                  {t('postLabelCity')}
                 </label>
                 <input
                   type="text"
@@ -360,12 +373,12 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Subcity / District
+                  {t('postLabelSubcity')}
                 </label>
                 <input
                   type="text"
                   name="subcity"
-                  placeholder="e.g. Bole, Kirkos, Yeka"
+                  placeholder={t('postPlaceholderSubcity')}
                   value={formData.subcity}
                   onChange={handleChange}
                   className="input-luxury text-sm"
@@ -374,12 +387,12 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Specific Landmark
+                  {t('postLabelLocation')}
                 </label>
                 <input
                   type="text"
                   name="specific_location"
-                  placeholder="e.g. Near Edna Mall"
+                  placeholder={t('postPlaceholderLocation')}
                   value={formData.specific_location}
                   onChange={handleChange}
                   className="input-luxury text-sm"
@@ -388,13 +401,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
               <div className="md:col-span-3">
                 <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                  Direct Phone Number for Calls *
+                  {t('postLabelPhone')}
                 </label>
                 <input
                   type="tel"
                   name="contact_phone"
                   required
-                  placeholder="+251 911 234567"
+                  placeholder={t('postPlaceholderPhone')}
                   value={formData.contact_phone}
                   onChange={handleChange}
                   className="input-luxury text-sm"
@@ -408,10 +421,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
             <h3 className="text-base font-bold text-white flex items-center justify-between border-b border-neutral-800 pb-3">
               <div className="flex items-center gap-2">
                 <Upload className="w-4 h-4 text-amber-500" />
-                <span>Photos & Media (Cloudinary)</span>
+                <span>{t('postCardImages')}</span>
               </div>
               <span className="text-xs text-neutral-400 font-normal">
-                {images.length} uploaded
+                {images.length} {isAmharic ? 'ፎቶዎች ተካተዋል' : 'uploaded'}
               </span>
             </h3>
 
@@ -429,7 +442,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                   </button>
                   {i === 0 && (
                     <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black">
-                      Cover
+                      {isAmharic ? 'ዋና ፎቶ' : 'Cover'}
                     </span>
                   )}
                 </div>
@@ -439,9 +452,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               <label className="cursor-pointer aspect-[4/3] rounded-xl border-2 border-dashed border-neutral-800 hover:border-amber-500/60 bg-neutral-950 flex flex-col items-center justify-center text-center p-3 sm:p-4 transition-all">
                 <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mb-1.5 sm:mb-2" />
                 <span className="text-xs font-semibold text-neutral-300">
-                  {uploadingImage ? 'Uploading...' : 'Add Images'}
+                  {uploadingImage ? t('postPublishing') : (isAmharic ? 'ፎቶዎችን ጨምር' : 'Add Images')}
                 </span>
-                <span className="text-[10px] text-neutral-500 mt-0.5 sm:mt-1">PNG, JPG up to 10MB</span>
+                <span className="text-[10px] text-neutral-500 mt-0.5 sm:mt-1">{isAmharic ? 'PNG, JPG እስከ 10MB' : 'PNG, JPG up to 10MB'}</span>
                 <input
                   type="file"
                   multiple
@@ -458,11 +471,11 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           <div className="card-obsidian space-y-3.5 sm:space-y-4 p-4 sm:p-6">
             <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Features & Amenities</span>
+              <span>{t('postLabelFeatures')}</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
-              {PRESET_FEATURES.map((feat) => {
+              {getPresetFeatures(isAmharic).map((feat) => {
                 const checked = selectedFeatures.includes(feat);
                 return (
                   <button
@@ -491,10 +504,10 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               className="w-full sm:w-auto btn-gold text-sm sm:text-base py-3.5 sm:py-4 px-8 sm:px-10 font-bold justify-center"
             >
               {submitting ? (
-                <span>Publishing Listing...</span>
+                <span>{t('postPublishing')}</span>
               ) : (
                 <>
-                  <span>Publish Rental Post</span>
+                  <span>{t('postPublishButton')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}

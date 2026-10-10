@@ -21,6 +21,7 @@ import { fetchListings, fetchCategories, setSelectedCategory } from '../store/sl
 import ListingCard from '../components/ListingCard';
 import ListingCardSkeleton from '../components/ListingCardSkeleton';
 import { CategoryPillSkeleton, CategoryCardSkeleton } from '../components/CategorySkeleton';
+import { useLanguage } from '../context/LanguageContext';
 
 // Map icon string names to Lucide components
 const iconMap = {
@@ -35,6 +36,7 @@ const iconMap = {
 
 export default function HomePage({ onSelectListing, onOpenAuth }) {
   const dispatch = useDispatch();
+  const { t, getCategoryTitle, isAmharic } = useLanguage();
   const { items, categories, selectedCategory, loading, categoriesLoading } = useSelector((state) => state.listings);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,16 +83,16 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
 
             {/* Main Headline (Pure color font, responsive scale) */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white font-sans leading-[1.15]">
-              Find and rent <br />
+              {t('heroTitleLine1')} <br />
               <span className="text-amber-400">
-                homes, vehicles
+                {t('heroTitleHighlight')}
               </span> <br />
-              & equipment.
+              {t('heroTitleLine2')}
             </h1>
 
             {/* Concise, Grounded Subtitle */}
             <p className="mt-3 sm:mt-5 text-sm sm:text-lg text-neutral-400 max-w-xl leading-relaxed font-normal">
-              Direct marketplace connecting renters with verified property and equipment owners across Ethiopia.
+              {t('heroSubtitle')}
             </p>
 
             {/* Integrated Left-Aligned Search Bar with Price & City Filters */}
@@ -104,7 +106,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   <Search className="w-4 h-4 text-amber-400 shrink-0" />
                   <input 
                     type="text"
-                    placeholder="Search villas, cars, tools..."
+                    placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none"
@@ -121,12 +123,14 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                     onChange={(e) => setSelectedCity(e.target.value)}
                     className="w-full bg-transparent text-xs sm:text-sm text-neutral-300 focus:outline-none cursor-pointer"
                   >
-                    <option value="" className="bg-[#0b0c10]">All Cities</option>
-                    <option value="Addis Ababa" className="bg-[#0b0c10]">Addis Ababa</option>
-                    <option value="Hawassa" className="bg-[#0b0c10]">Hawassa</option>
-                    <option value="Adama" className="bg-[#0b0c10]">Adama</option>
-                    <option value="Bahir Dar" className="bg-[#0b0c10]">Bahir Dar</option>
-                    <option value="Bishoftu" className="bg-[#0b0c10]">Bishoftu</option>
+                    <option value="" className="bg-[#0b0c10]">{t('filterAllCities')}</option>
+                    <option value="Addis Ababa" className="bg-[#0b0c10]">{t('cityAddisAbaba')}</option>
+                    <option value="Hawassa" className="bg-[#0b0c10]">{t('cityHawassa')}</option>
+                    <option value="Adama" className="bg-[#0b0c10]">{t('cityAdama')}</option>
+                    <option value="Bahir Dar" className="bg-[#0b0c10]">{t('cityBahirDar')}</option>
+                    <option value="Bishoftu" className="bg-[#0b0c10]">{t('cityBishoftu')}</option>
+                    <option value="Mekelle" className="bg-[#0b0c10]">{t('cityMekelle')}</option>
+                    <option value="Dire Dawa" className="bg-[#0b0c10]">{t('cityDireDawa')}</option>
                   </select>
                 </div>
 
@@ -159,11 +163,11 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                     }}
                     className="w-full bg-transparent text-xs sm:text-sm text-neutral-300 focus:outline-none cursor-pointer"
                   >
-                    <option value="" className="bg-[#0b0c10]">All Prices</option>
-                    <option value="under_10k" className="bg-[#0b0c10]">Under 10k ETB</option>
-                    <option value="10k_50k" className="bg-[#0b0c10]">10k - 50k ETB</option>
-                    <option value="50k_150k" className="bg-[#0b0c10]">50k - 150k ETB</option>
-                    <option value="above_150k" className="bg-[#0b0c10]">Above 150k ETB</option>
+                    <option value="" className="bg-[#0b0c10]">{t('filterAnyPrice')}</option>
+                    <option value="under_10k" className="bg-[#0b0c10]">{t('priceUnder10k')}</option>
+                    <option value="10k_50k" className="bg-[#0b0c10]">{t('price10kTo50k')}</option>
+                    <option value="50k_150k" className="bg-[#0b0c10]">{t('price50kTo150k')}</option>
+                    <option value="above_150k" className="bg-[#0b0c10]">{t('priceAbove150k')}</option>
                   </select>
                 </div>
 
@@ -172,14 +176,14 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   type="submit"
                   className="w-full sm:w-auto btn-gold text-xs py-2.5 px-6 font-semibold shrink-0"
                 >
-                  <span>Search</span>
+                  <span>{t('searchButton')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </form>
 
               {/* Dynamic Categories from DB as Popular Filter Pills */}
               <div className="mt-3.5 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-neutral-400">
-                <span className="text-neutral-500">Popular:</span>
+                <span className="text-neutral-500">{isAmharic ? 'ተወዳጅ፦' : 'Popular:'}</span>
                 {categories.slice(0, 5).map((cat) => (
                   <button
                     key={cat.id}
@@ -191,7 +195,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                         : 'bg-white/[0.03] hover:bg-white/[0.08] text-neutral-300 hover:text-white border-white/[0.06]'
                     }`}
                   >
-                    {cat.name}
+                    {getCategoryTitle(cat)}
                   </button>
                 ))}
               </div>
@@ -219,7 +223,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>All Categories</span>
+                <span>{t('allCategories')}</span>
               </button>
 
               {/* Dynamic Categories */}
@@ -238,7 +242,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                     }`}
                   >
                     <IconComp className="w-3.5 h-3.5" />
-                    <span>{cat.name}</span>
+                    <span>{getCategoryTitle(cat)}</span>
                     {cat.listings_count > 0 && (
                       <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                         isActive ? 'bg-black text-amber-400' : 'bg-white/[0.08] text-neutral-400'
@@ -260,10 +264,10 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         <div className="flex items-center justify-between mb-3.5">
           <div>
             <h2 className="text-base sm:text-xl font-bold text-white font-sans">
-              Explore Categories
+              {t('exploreCategories')}
             </h2>
             <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">
-              Select a rental category to explore available properties, vehicles, and equipment
+              {t('exploreCategoriesSubtitle')}
             </p>
           </div>
           {selectedCategory && (
@@ -271,7 +275,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               onClick={() => dispatch(setSelectedCategory(''))}
               className="text-xs text-amber-400 hover:underline font-medium"
             >
-              Clear filter
+              {t('clearFilter')}
             </button>
           )}
         </div>
@@ -296,16 +300,16 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   <div className="h-28 w-full relative">
                     <img
                       src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
-                      alt={cat.name}
+                      alt={getCategoryTitle(cat)}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                     <div className="absolute inset-x-2 bottom-2">
                       <h3 className="text-xs font-bold text-white leading-tight truncate drop-shadow-sm">
-                        {cat.name}
+                        {getCategoryTitle(cat)}
                       </h3>
                       <p className="text-[10px] text-amber-400/90 font-medium">
-                        {cat.listings_count || 0} rentals
+                        {cat.listings_count || 0} {t('rentals')}
                       </p>
                     </div>
                   </div>
@@ -321,16 +325,16 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
             <h2 className="text-lg sm:text-2xl font-bold text-white font-sans">
-              Available Listings
+              {t('availableListings')}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
-              Browse approved properties, vehicles, and equipment
+              {t('availableListingsSubtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-neutral-400 font-medium">
-              {items.length} {items.length === 1 ? 'item' : 'items'}
+              {items.length} {t('items')}
             </span>
           </div>
         </div>
@@ -347,9 +351,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
             <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-4 text-amber-400">
               <Layers className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-semibold text-white mb-1.5">No Listings Found</h3>
+            <h3 className="text-base font-semibold text-white mb-1.5">{t('noListingsFound')}</h3>
             <p className="text-xs text-neutral-400 mb-5 leading-relaxed">
-              No active listings match your current filters. Try changing your search query or city selection.
+              {t('noListingsFoundDesc')}
             </p>
             <button
               onClick={() => {
@@ -362,7 +366,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               }}
               className="btn-outline-gold text-xs py-2 px-4"
             >
-              Reset Filters
+              {t('clearAllFilters')}
             </button>
           </div>
         ) : (
@@ -387,9 +391,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">Direct Owner Contact</h4>
+              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustDirectContact')}</h4>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Connect directly with property or vehicle owners to arrange viewings and confirm availability.
+                {t('trustDirectContactDesc')}
               </p>
             </div>
 
@@ -397,9 +401,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
                 <MessageSquare className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">Direct Messaging</h4>
+              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustMessaging')}</h4>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Coordinate terms, ask questions, and negotiate rates directly within the platform.
+                {t('trustMessagingDesc')}
               </p>
             </div>
 
@@ -407,9 +411,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">Moderated Listings</h4>
+              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustModerated')}</h4>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Submissions are reviewed before publication to maintain quality standards across all rental categories.
+                {t('trustModeratedDesc')}
               </p>
             </div>
           </div>

@@ -18,9 +18,11 @@ import {
 import { fetchMyListings, clearPostSuccessData } from '../store/slices/listingSlice';
 import PaymentModal from '../components/PaymentModal';
 import api from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
+  const { t, getCategoryTitle, isAmharic } = useLanguage();
   const { myListings, myListingsLoading, postSuccessData } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -42,7 +44,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
   };
 
   const handleDeleteListing = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this listing?')) return;
+    if (!window.confirm(t('deleteConfirm'))) return;
     try {
       await api.delete(`/listings/${id}`);
       dispatch(fetchMyListings());
@@ -90,7 +92,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              <span>Back</span>
+              <span>{t('back')}</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
@@ -98,10 +100,10 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white font-sans leading-tight">
-                  My Posted Rentals
+                  {t('myListingsTitle')}
                 </h1>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  Manage your posted properties, vehicles, and track admin approval
+                  {t('myListingsSubtitle')}
                 </p>
               </div>
             </div>
@@ -112,7 +114,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
             className="w-full sm:w-auto btn-gold text-xs py-2.5 px-5 font-bold justify-center"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Post Another Rental</span>
+            <span>{t('myListingsPostAnother')}</span>
           </button>
         </div>
 
@@ -122,14 +124,14 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
             <div className="flex items-center gap-2.5">
               <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0" />
               <span>
-                <strong>Listing Added!</strong> Your rental post <strong className="text-white">"{postSuccessData.listing?.title}"</strong> has been successfully added to your listings!
+                <strong>{t('myListingsNewAdded')}</strong> {isAmharic ? 'የለጠፉት ኪራይ' : 'Your rental post'} <strong className="text-white">"{postSuccessData.listing?.title}"</strong> {isAmharic ? 'በተሳካ ሁኔታ ወደ ማስታወቂያዎችዎ ገብቷል!' : 'has been successfully added to your listings!'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => dispatch(clearPostSuccessData())}
               className="text-neutral-400 hover:text-white p-1"
-              title="Dismiss"
+              title={t('close')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -162,15 +164,15 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
         ) : myListings.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-[#0D0D0D] border border-neutral-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
             <Layers className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-white mb-1">No Listings Yet</h3>
+            <h3 className="text-lg font-bold text-white mb-1">{t('myListingsNoneTitle')}</h3>
             <p className="text-xs text-neutral-400 mb-6">
-              You haven't posted any rental items yet. Share your house, car, or tools to reach thousands of renters.
+              {t('myListingsNoneDesc')}
             </p>
             <button
               onClick={onNavigatePost}
               className="btn-gold text-xs py-2.5 px-6 font-bold"
             >
-              Post a Rent Now
+              {t('myListingsPostFirst')}
             </button>
           </div>
         ) : (
@@ -195,7 +197,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                     <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-amber-400">
-                          {listing.category_name || 'Rental'}
+                          {isAmharic && listing.category_name_am ? listing.category_name_am : (listing.category_name || (isAmharic ? 'ኪራይ' : 'Rental'))}
                         </span>
                         
                         {/* Status Chip */}
@@ -209,7 +211,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                           {listing.status === 'approved' && <CheckCircle2 className="w-3 h-3" />}
                           {listing.status === 'pending' && <Clock className="w-3 h-3" />}
                           {listing.status === 'rejected' && <AlertCircle className="w-3 h-3" />}
-                          <span>{listing.status}</span>
+                          <span>{listing.status === 'approved' ? t('statusApproved') : listing.status === 'pending' ? t('statusPending') : listing.status === 'rejected' ? t('statusRejected') : listing.status}</span>
                         </span>
                       </div>
 
@@ -233,9 +235,9 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                   {/* Pricing & Actions */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-800">
                     <div className="flex items-center justify-between sm:block text-left md:text-right">
-                      <p className="text-[11px] text-neutral-500 uppercase font-semibold">Rent Rate</p>
+                      <p className="text-[11px] text-neutral-500 uppercase font-semibold">{isAmharic ? 'የኪራይ ክፍያ' : 'Rent Rate'}</p>
                       <p className="text-base sm:text-lg font-black text-amber-400">
-                        {Number(listing.rental_price).toLocaleString()} <span className="text-xs text-white">ETB/{listing.price_period}</span>
+                        {Number(listing.rental_price).toLocaleString()} <span className="text-xs text-white">{t('etb')}/{listing.price_period === 'day' ? t('periodDay') : listing.price_period === 'hour' ? t('periodHour') : listing.price_period === 'year' ? t('periodYear') : t('periodMonth')}</span>
                       </p>
                     </div>
 
@@ -247,7 +249,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                           className="btn-gold text-xs py-2 px-3 font-bold flex items-center gap-1.5"
                         >
                           <CreditCard className="w-3.5 h-3.5" />
-                          <span>Proof</span>
+                          <span>{isAmharic ? 'የክፍያ ማረጋገጫ' : 'Proof'}</span>
                         </button>
                       )}
 
@@ -256,20 +258,20 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                         className="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-amber-400 border border-neutral-800 hover:border-amber-500/40 flex items-center justify-center gap-1"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
+                        <span>{t('edit')}</span>
                       </button>
 
                       <button
                         onClick={() => onSelectListing(listing)}
                         className="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white border border-neutral-700/60 text-center"
                       >
-                        Preview
+                        {t('detailsButton')}
                       </button>
 
                       <button
                         onClick={() => handleDeleteListing(listing.id)}
                         className="p-2 rounded-xl bg-neutral-900 hover:bg-rose-950 text-neutral-400 hover:text-rose-400 border border-neutral-800"
-                        title="Delete listing"
+                        title={t('delete')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -290,7 +292,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-amber-400" />
-                <span>Edit Rental Listing</span>
+                <span>{isAmharic ? 'የኪራይ ማስታወቂያ ማስተካከያ' : 'Edit Rental Listing'}</span>
               </h3>
               <button
                 onClick={() => setEditingListing(null)}
@@ -302,7 +304,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
 
             <form onSubmit={handleSaveListingEdit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Listing Title</label>
+                <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelTitle')}</label>
                 <input
                   type="text"
                   required
@@ -314,7 +316,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">Rental Price (ETB)</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelPrice')}</label>
                   <input
                     type="number"
                     required
@@ -324,50 +326,50 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">Price Period</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelPeriod')}</label>
                   <select
                     value={editingListing.price_period}
                     onChange={(e) => setEditingListing({ ...editingListing, price_period: e.target.value })}
                     className="input-luxury text-xs cursor-pointer"
                   >
-                    <option value="day" className="bg-[#111111]">Per Day</option>
-                    <option value="month" className="bg-[#111111]">Per Month</option>
-                    <option value="year" className="bg-[#111111]">Per Year</option>
-                    <option value="hour" className="bg-[#111111]">Per Hour</option>
+                    <option value="month" className="bg-[#111111]">{t('periodMonth')}</option>
+                    <option value="day" className="bg-[#111111]">{t('periodDay')}</option>
+                    <option value="year" className="bg-[#111111]">{t('periodYear')}</option>
+                    <option value="hour" className="bg-[#111111]">{t('periodHour')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">Category</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelCategory')}</label>
                   <select
                     value={editingListing.category_id || ''}
                     onChange={(e) => setEditingListing({ ...editingListing, category_id: e.target.value })}
                     className="input-luxury text-xs cursor-pointer"
                   >
-                    <option value="" className="bg-[#111111]">Select Category</option>
+                    <option value="" className="bg-[#111111]">{isAmharic ? 'የኪራይ ዘርፍ ይምረጡ' : 'Select Category'}</option>
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-[#111111]">{c.name}</option>
+                      <option key={c.id} value={c.id} className="bg-[#111111]">{getCategoryTitle(c)}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">Availability Status</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{isAmharic ? 'የማስታወቂያ ሁኔታ' : 'Availability Status'}</label>
                   <select
                     value={editingListing.status}
                     onChange={(e) => setEditingListing({ ...editingListing, status: e.target.value })}
                     className="input-luxury text-xs cursor-pointer"
                   >
-                    <option value="approved" className="bg-[#111111]">Available (Approved)</option>
-                    <option value="rented" className="bg-[#111111]">Marked as Rented</option>
+                    <option value="approved" className="bg-[#111111]">{isAmharic ? 'ክፍት / የሚከራይ' : 'Available (Approved)'}</option>
+                    <option value="rented" className="bg-[#111111]">{isAmharic ? 'ተከራይቷል' : 'Marked as Rented'}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">City</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelCity')}</label>
                   <input
                     type="text"
                     required
@@ -377,7 +379,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">Subcity</label>
+                  <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelSubcity')}</label>
                   <input
                     type="text"
                     value={editingListing.subcity || ''}
@@ -388,7 +390,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Contact Phone</label>
+                <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelPhone')}</label>
                 <input
                   type="text"
                   required
@@ -399,7 +401,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Description</label>
+                <label className="block text-neutral-400 font-semibold mb-1">{t('postLabelDesc')}</label>
                 <textarea
                   rows={3}
                   value={editingListing.description || ''}
@@ -414,13 +416,13 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                   onClick={() => setEditingListing(null)}
                   className="flex-1 py-2.5 rounded-xl bg-neutral-900 text-neutral-300 font-bold border border-neutral-800"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 btn-gold py-2.5 font-bold"
                 >
-                  Save Changes
+                  {t('save')}
                 </button>
               </div>
             </form>
