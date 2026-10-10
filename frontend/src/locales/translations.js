@@ -161,7 +161,7 @@ export const translations = {
     modalFeatures: 'የንብረቱ ዋና ዋና አገልግሎቶች',
     modalDescription: 'ሙሉ ማብራሪያ',
     modalCall: 'በስልክ ደውል',
-    modalMessage: 'በመልዕክት አነጋግር',
+    modalMessage: 'መልዕክት ጻፍ',
     modalEditListing: 'ይህን ኪራይ አስተካክል',
 
     // Chat & Messaging
