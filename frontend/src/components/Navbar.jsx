@@ -48,14 +48,9 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
             <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-250 p-1.5 flex items-center justify-center group-hover:border-amber-500/60 transition-all duration-200 shadow-xs">
               <img src="/logo-key.svg" alt="Logo" className="w-full h-full object-contain" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-neutral-950 font-sans leading-none">
-                የኔ <span className="text-amber-500 font-extrabold">ኪራይ</span>
-              </span>
-              <span className="text-[11px] text-neutral-500 font-medium tracking-wide mt-1">
-                Marketplace
-              </span>
-            </div>
+            <span className="text-xl font-bold tracking-tight text-neutral-950 font-sans leading-none">
+              የኔ <span className="text-amber-500 font-extrabold">ኪራይ</span>
+            </span>
           </div>
 
           {/* Desktop Navigation Links */}
