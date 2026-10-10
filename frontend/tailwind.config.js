@@ -31,6 +31,8 @@ export default {
         }
       },
       boxShadow: {
+        '2xs': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         'gold-sm': '0 2px 10px rgba(245, 158, 11, 0.15)',
         'gold-md': '0 4px 20px rgba(245, 158, 11, 0.25)',
         'gold-lg': '0 10px 35px -5px rgba(245, 158, 11, 0.35)',

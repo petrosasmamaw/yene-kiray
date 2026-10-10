@@ -130,7 +130,7 @@ export default function App() {
   }, [isAuthenticated, currentView]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent text-[#f3f4f6] font-sans selection:bg-amber-500 selection:text-black relative">
+    <div className="min-h-screen flex flex-col bg-[#f4f5f7] text-neutral-900 font-sans selection:bg-amber-500 selection:text-black relative">
       
       {/* Sticky Top Navbar */}
       <Navbar

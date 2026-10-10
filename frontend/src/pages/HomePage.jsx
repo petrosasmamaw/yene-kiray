@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Search, 
@@ -11,16 +11,14 @@ import {
   Sparkles, 
   Wrench, 
   Layers,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  Clock,
-  MessageSquare
+  Check,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { fetchListings, fetchCategories, setSelectedCategory } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
 import ListingCardSkeleton from '../components/ListingCardSkeleton';
-import { CategoryPillSkeleton, CategoryCardSkeleton } from '../components/CategorySkeleton';
+import { CategoryCardSkeleton } from '../components/CategorySkeleton';
 import { useLanguage } from '../context/LanguageContext';
 
 // Map icon string names to Lucide components
@@ -45,6 +43,18 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [selectedPricePreset, setSelectedPricePreset] = useState('');
+
+  const categoryScrollRef = useRef(null);
+
+  const scrollCategories = (direction) => {
+    if (categoryScrollRef.current) {
+      const scrollAmount = 320;
+      categoryScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -74,73 +84,95 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
   };
 
   return (
-    <div className="min-h-screen text-[#ededed]">
+    <div className="min-h-screen text-neutral-900 pb-16">
       
-      {/* Hero Section: Left-Aligned Clean Architecture */}
-      <section className="relative pt-6 sm:pt-16 pb-8 sm:pb-16 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06]">
+      {/* Top Search & Filter Bar */}
+      <section className="pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8 border-b border-neutral-200/80 bg-white/70 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-4xl flex flex-col items-start text-left">
-
-            {/* Main Headline (Pure color font, responsive scale) */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white font-sans leading-[1.15]">
-              {t('heroTitleLine1')} <br />
-              <span className="text-amber-400">
-                {t('heroTitleHighlight')}
-              </span> <br />
-              {t('heroTitleLine2')}
-            </h1>
-
-            {/* Concise, Grounded Subtitle */}
-            <p className="mt-3 sm:mt-5 text-sm sm:text-lg text-neutral-400 max-w-xl leading-relaxed font-normal">
-              {t('heroSubtitle')}
-            </p>
-
-            {/* Integrated Left-Aligned Search Bar with Price & City Filters */}
-            <div className="mt-6 sm:mt-8 w-full max-w-3xl">
-              <form 
-                onSubmit={handleSearchSubmit}
-                className="bg-[#0b0c10]/95 border border-white/[0.1] focus-within:border-amber-500/60 rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 transition-all duration-200 shadow-2xl backdrop-blur-md"
-              >
-                {/* Keyword Input */}
-                <div className="flex items-center gap-3 px-3 py-2 w-full sm:flex-1">
-                  <Search className="w-4 h-4 text-amber-400 shrink-0" />
+          <form 
+            onSubmit={handleSearchSubmit}
+            className="bg-white border border-neutral-200/90 hover:border-neutral-300 focus-within:border-amber-500 rounded-2xl sm:rounded-full p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-1.5 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            {/* Row 1 on mobile: Keyword Search Input + Search CTA Button side-by-side */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-neutral-50/80 rounded-xl sm:rounded-full transition-colors group/kw min-w-0">
+                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/kw:text-amber-600 transition-colors">
+                  {isAmharic ? 'የሚከራይ ዕቃ / አገልግሎት' : 'Search Rentals'}
+                </span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
                   <input 
                     type="text"
+                    aria-label={t('searchPlaceholder')}
                     placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none"
+                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 placeholder:font-normal focus:outline-none min-w-0"
                   />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm('')}
+                      aria-label="Clear search"
+                      className="text-neutral-400 hover:text-neutral-700 text-xs px-1 rounded shrink-0"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
+              </div>
 
-                <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
+              {/* Mobile-only inline Search CTA Button (Same Row as search bar) */}
+              <button
+                type="submit"
+                className="sm:hidden px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 active:scale-95 shrink-0 transition-transform"
+              >
+                <Search className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{t('searchButton')}</span>
+              </button>
+            </div>
 
-                {/* City Selector */}
-                <div className="flex items-center gap-2 px-3 py-2 w-full sm:w-40 bg-neutral-900/40 sm:bg-transparent rounded-xl sm:rounded-none">
-                  <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+            <div className="h-8 w-px bg-neutral-200 hidden sm:block mx-0.5" />
+
+            {/* Row 2 on mobile: City Filter & Price Filter in the SAME ROW */}
+            <div className="grid grid-cols-2 gap-2 sm:contents">
+              {/* City Selector Segment */}
+              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-neutral-50/80 sm:bg-transparent hover:bg-neutral-100/70 sm:hover:bg-neutral-50/80 border border-neutral-150 sm:border-0 rounded-xl sm:rounded-full transition-colors group/city sm:w-44">
+                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/city:text-amber-600 transition-colors">
+                  {isAmharic ? 'ከተማ / አካባቢ' : 'Location'}
+                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-neutral-400 group-focus-within/city:text-amber-500 shrink-0" />
                   <select
                     value={selectedCity}
+                    aria-label={t('filterAllCities')}
                     onChange={(e) => setSelectedCity(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm text-neutral-300 focus:outline-none cursor-pointer"
+                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-800 focus:outline-none cursor-pointer truncate"
                   >
-                    <option value="" className="bg-[#0b0c10]">{t('filterAllCities')}</option>
-                    <option value="Addis Ababa" className="bg-[#0b0c10]">{t('cityAddisAbaba')}</option>
-                    <option value="Hawassa" className="bg-[#0b0c10]">{t('cityHawassa')}</option>
-                    <option value="Adama" className="bg-[#0b0c10]">{t('cityAdama')}</option>
-                    <option value="Bahir Dar" className="bg-[#0b0c10]">{t('cityBahirDar')}</option>
-                    <option value="Bishoftu" className="bg-[#0b0c10]">{t('cityBishoftu')}</option>
-                    <option value="Mekelle" className="bg-[#0b0c10]">{t('cityMekelle')}</option>
-                    <option value="Dire Dawa" className="bg-[#0b0c10]">{t('cityDireDawa')}</option>
+                    <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAllCities')}</option>
+                    <option value="Addis Ababa" className="bg-white text-neutral-900 font-normal">{t('cityAddisAbaba')}</option>
+                    <option value="Hawassa" className="bg-white text-neutral-900 font-normal">{t('cityHawassa')}</option>
+                    <option value="Adama" className="bg-white text-neutral-900 font-normal">{t('cityAdama')}</option>
+                    <option value="Bahir Dar" className="bg-white text-neutral-900 font-normal">{t('cityBahirDar')}</option>
+                    <option value="Bishoftu" className="bg-white text-neutral-900 font-normal">{t('cityBishoftu')}</option>
+                    <option value="Mekelle" className="bg-white text-neutral-900 font-normal">{t('cityMekelle')}</option>
+                    <option value="Dire Dawa" className="bg-white text-neutral-900 font-normal">{t('cityDireDawa')}</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
+              <div className="h-8 w-px bg-neutral-200 hidden sm:block mx-0.5" />
 
-                {/* Price Range Filter */}
-                <div className="flex items-center gap-2 px-3 py-2 w-full sm:w-44 bg-neutral-900/40 sm:bg-transparent rounded-xl sm:rounded-none">
-                  <Filter className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              {/* Price Range Filter Segment */}
+              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-neutral-50/80 sm:bg-transparent hover:bg-neutral-100/70 sm:hover:bg-neutral-50/80 border border-neutral-150 sm:border-0 rounded-xl sm:rounded-full transition-colors group/price sm:w-48">
+                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/price:text-amber-600 transition-colors">
+                  {isAmharic ? 'የዋጋ ክልል' : 'Price Range'}
+                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Filter className="w-3.5 h-3.5 text-neutral-400 group-focus-within/price:text-amber-500 shrink-0" />
                   <select
                     value={selectedPricePreset}
+                    aria-label={t('filterAnyPrice')}
                     onChange={(e) => {
                       const val = e.target.value;
                       setSelectedPricePreset(val);
@@ -161,159 +193,197 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                         setMaxPrice('');
                       }
                     }}
-                    className="w-full bg-transparent text-xs sm:text-sm text-neutral-300 focus:outline-none cursor-pointer"
+                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-800 focus:outline-none cursor-pointer truncate"
                   >
-                    <option value="" className="bg-[#0b0c10]">{t('filterAnyPrice')}</option>
-                    <option value="under_10k" className="bg-[#0b0c10]">{t('priceUnder10k')}</option>
-                    <option value="10k_50k" className="bg-[#0b0c10]">{t('price10kTo50k')}</option>
-                    <option value="50k_150k" className="bg-[#0b0c10]">{t('price50kTo150k')}</option>
-                    <option value="above_150k" className="bg-[#0b0c10]">{t('priceAbove150k')}</option>
+                    <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAnyPrice')}</option>
+                    <option value="under_10k" className="bg-white text-neutral-900 font-normal">{t('priceUnder10k')}</option>
+                    <option value="10k_50k" className="bg-white text-neutral-900 font-normal">{t('price10kTo50k')}</option>
+                    <option value="50k_150k" className="bg-white text-neutral-900 font-normal">{t('price50kTo150k')}</option>
+                    <option value="above_150k" className="bg-white text-neutral-900 font-normal">{t('priceAbove150k')}</option>
                   </select>
                 </div>
-
-                {/* Search CTA */}
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto btn-gold text-xs py-2.5 px-6 font-semibold shrink-0"
-                >
-                  <span>{t('searchButton')}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </form>
-
-              {/* Dynamic Categories from DB as Popular Filter Pills */}
-              <div className="mt-3.5 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-neutral-400">
-                <span className="text-neutral-500">{isAmharic ? 'ተወዳጅ፦' : 'Popular:'}</span>
-                {categories.slice(0, 5).map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => dispatch(setSelectedCategory(cat.slug))}
-                    className={`px-2.5 py-1 rounded-md transition-colors border text-[11px] sm:text-xs ${
-                      selectedCategory === cat.slug 
-                        ? 'bg-amber-500 text-black border-amber-400 font-semibold' 
-                        : 'bg-white/[0.03] hover:bg-white/[0.08] text-neutral-300 hover:text-white border-white/[0.06]'
-                    }`}
-                  >
-                    {getCategoryTitle(cat)}
-                  </button>
-                ))}
               </div>
             </div>
 
-          </div>
+            {/* Desktop-only Search CTA Button */}
+            <button
+              type="submit"
+              className="hidden sm:flex sm:rounded-full px-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs sm:text-sm shadow-md hover:shadow-amber-500/25 items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
+            >
+              <Search className="w-4 h-4 stroke-[2.5]" />
+              <span>{t('searchButton')}</span>
+            </button>
+          </form>
         </div>
       </section>
 
-      {/* Category Navigation Bar */}
-      <section className="py-3 sm:py-6 border-b border-white/[0.06] bg-[#050608]/90 backdrop-blur-md sticky top-[72px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {categoriesLoading || (!categories.length && loading) ? (
-            <CategoryPillSkeleton />
-          ) : (
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-              
-              {/* "All" Filter Pill */}
-              <button
-                onClick={() => dispatch(setSelectedCategory(''))}
-                className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
-                  selectedCategory === ''
-                    ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
-                    : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>{t('allCategories')}</span>
-              </button>
-
-              {/* Dynamic Categories */}
-              {categories.map((cat) => {
-                const IconComp = iconMap[cat.icon_name] || Layers;
-                const isActive = selectedCategory === cat.slug;
-
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => dispatch(setSelectedCategory(cat.slug))}
-                    className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 border shrink-0 ${
-                      isActive
-                        ? 'bg-amber-500 text-black border-amber-400 font-semibold shadow-sm'
-                        : 'bg-white/[0.03] text-neutral-300 border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
-                    }`}
-                  >
-                    <IconComp className="w-3.5 h-3.5" />
-                    <span>{getCategoryTitle(cat)}</span>
-                    {cat.listings_count > 0 && (
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                        isActive ? 'bg-black text-amber-400' : 'bg-white/[0.08] text-neutral-400'
-                      }`}>
-                        {cat.listings_count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Featured Categories Carousel / Grid with Cover Images */}
-      <section className="pt-6 sm:pt-8 pb-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-3.5">
+      {/* Category Buttons with Images (Listed Once) */}
+      <section className="pt-6 sm:pt-8 pb-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base sm:text-xl font-bold text-white font-sans">
-              {t('exploreCategories')}
+            <h2 className="text-base sm:text-xl font-bold text-neutral-950 font-sans flex items-center gap-2">
+              <span>{t('exploreCategories')}</span>
+              {selectedCategory && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                  {isAmharic ? 'የተጣራ' : 'Filtered'}
+                </span>
+              )}
             </h2>
-            <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-neutral-500 mt-0.5">
               {t('exploreCategoriesSubtitle')}
             </p>
           </div>
-          {selectedCategory && (
-            <button
-              onClick={() => dispatch(setSelectedCategory(''))}
-              className="text-xs text-amber-400 hover:underline font-medium"
-            >
-              {t('clearFilter')}
-            </button>
-          )}
+
+          <div className="flex items-center gap-2">
+            {selectedCategory && (
+              <button
+                onClick={() => dispatch(setSelectedCategory(''))}
+                className="text-xs text-amber-600 hover:text-amber-700 font-bold hover:underline mr-1"
+              >
+                {t('clearFilter')}
+              </button>
+            )}
+
+            {/* Scroll Navigation Arrows */}
+            <div className="hidden sm:flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => scrollCategories('left')}
+                className="p-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 shadow-2xs transition-colors"
+                title="Scroll Left"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCategories('right')}
+                className="p-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 shadow-2xs transition-colors"
+                title="Scroll Right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Mobile Swipeable Carousel & Desktop Grid */}
+        {/* Categories Carousel/Grid */}
         {categoriesLoading || (!categories.length && loading) ? (
           <CategoryCardSkeleton />
         ) : (
-          <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div 
+            ref={categoryScrollRef}
+            className="flex sm:grid sm:grid-cols-4 lg:grid-cols-7 gap-3 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-3 sm:pb-1 -mx-4 px-4 sm:mx-0 sm:px-0"
+          >
+            {/* "All Categories" Button Card */}
+            <button
+              type="button"
+              onClick={() => dispatch(setSelectedCategory(''))}
+              aria-pressed={selectedCategory === ''}
+              aria-label={t('allCategories')}
+              className={`group relative rounded-2xl overflow-hidden cursor-pointer border text-left transition-all duration-300 shrink-0 w-36 sm:w-auto snap-start h-32 flex flex-col justify-end p-3 ${
+                selectedCategory === ''
+                  ? 'border-amber-500 ring-4 ring-amber-500/30 shadow-xl shadow-amber-500/15 -translate-y-1 bg-neutral-900'
+                  : 'border-neutral-200 hover:border-amber-400 hover:shadow-md hover:-translate-y-0.5 bg-neutral-900'
+              }`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900/80 to-amber-950/40" />
+
+              {/* Selected Checkmark Badge */}
+              {selectedCategory === '' && (
+                <div className="absolute top-2.5 left-2.5 z-20 px-2 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black flex items-center gap-1 shadow-md">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  <span>{isAmharic ? 'የተመረጠ' : 'Active'}</span>
+                </div>
+              )}
+
+              {/* Bottom Gold Line if selected */}
+              {selectedCategory === '' && (
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-amber-500 z-20" />
+              )}
+
+              <div className="relative z-10">
+                <div className="w-7 h-7 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-400 mb-2">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-white leading-tight truncate">
+                  {t('allCategories')}
+                </h3>
+                <p className="text-[10px] text-amber-400 font-semibold mt-0.5">
+                  {items.length} {t('rentals')}
+                </p>
+              </div>
+            </button>
+
+            {/* Dynamic Category Button Cards */}
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.slug;
+              const IconComp = iconMap[cat.icon_name] || Layers;
+
               return (
-                <div
+                <button
                   key={cat.id}
+                  type="button"
                   onClick={() => dispatch(setSelectedCategory(isSelected ? '' : cat.slug))}
-                  className={`group relative rounded-2xl overflow-hidden cursor-pointer border transition-all duration-300 shrink-0 w-36 sm:w-auto snap-start ${
+                  aria-pressed={isSelected}
+                  aria-label={getCategoryTitle(cat)}
+                  className={`group relative rounded-2xl overflow-hidden cursor-pointer border text-left transition-all duration-300 shrink-0 w-36 sm:w-auto snap-start h-32 flex flex-col justify-end p-3 ${
                     isSelected
-                      ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-gold-sm scale-[1.02]'
-                      : 'border-white/[0.08] hover:border-amber-500/50 hover:scale-[1.02]'
+                      ? 'border-amber-500 ring-4 ring-amber-500/30 shadow-xl shadow-amber-500/15 -translate-y-1'
+                      : 'border-neutral-200 hover:border-amber-400 hover:shadow-md hover:-translate-y-0.5'
                   }`}
                 >
-                  <div className="h-28 w-full relative">
-                    <img
-                      src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
-                      alt={getCategoryTitle(cat)}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                    <div className="absolute inset-x-2 bottom-2">
-                      <h3 className="text-xs font-bold text-white leading-tight truncate drop-shadow-sm">
-                        {getCategoryTitle(cat)}
-                      </h3>
-                      <p className="text-[10px] text-amber-400/90 font-medium">
-                        {cat.listings_count || 0} {t('rentals')}
-                      </p>
+                  {/* Category Image */}
+                  <img
+                    src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
+                    alt={getCategoryTitle(cat)}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80';
+                    }}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+
+                  {/* Gradient Overlay */}
+                  <div className={`absolute inset-0 transition-opacity ${
+                    isSelected 
+                      ? 'bg-gradient-to-t from-black/90 via-black/40 to-amber-500/15' 
+                      : 'bg-gradient-to-t from-black/85 via-black/40 to-transparent'
+                  }`} />
+
+                  {/* Selected Checkmark Badge */}
+                  {isSelected && (
+                    <div className="absolute top-2.5 left-2.5 z-20 px-2 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black flex items-center gap-1 shadow-md">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                      <span>{isAmharic ? 'የተመረጠ' : 'Active'}</span>
                     </div>
+                  )}
+
+                  {/* Bottom Gold Indicator */}
+                  {isSelected && (
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-amber-500 z-20" />
+                  )}
+
+                  {/* Icon badge in top right */}
+                  <div className={`absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-lg backdrop-blur-md flex items-center justify-center transition-colors ${
+                    isSelected 
+                      ? 'bg-amber-500 text-neutral-950 font-bold' 
+                      : 'bg-black/40 text-white border border-white/20'
+                  }`}>
+                    <IconComp className="w-3.5 h-3.5" />
                   </div>
-                </div>
+
+                  {/* Category Title & Count in Bottom */}
+                  <div className="relative z-10">
+                    <h3 className={`text-xs font-bold leading-tight truncate drop-shadow-sm ${
+                      isSelected ? 'text-amber-300 font-extrabold' : 'text-white'
+                    }`}>
+                      {getCategoryTitle(cat)}
+                    </h3>
+                    <p className="text-[10px] text-amber-400 font-semibold mt-0.5">
+                      {cat.listings_count || 0} {t('rentals')}
+                    </p>
+                  </div>
+                </button>
               );
             })}
           </div>
@@ -321,38 +391,55 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
       </section>
 
       {/* Main Listings Grid */}
-      <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
-            <h2 className="text-lg sm:text-2xl font-bold text-white font-sans">
+            <h2 className="text-lg sm:text-2xl font-bold text-neutral-950 font-sans">
               {t('availableListings')}
             </h2>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-neutral-500 mt-0.5">
               {t('availableListingsSubtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-400 font-medium">
+            <span className="text-xs text-neutral-500 font-semibold bg-white border border-neutral-200 px-2.5 py-1 rounded-full shadow-2xs">
               {items.length} {t('items')}
             </span>
           </div>
         </div>
 
-        {/* Listings Grid */}
+        {/* Listings Feed */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <ListingCardSkeleton key={n} />
-            ))}
-          </div>
+          <>
+            {/* Mobile Skeletons (2-col brick layout) */}
+            <div className="sm:hidden flex gap-2.5 items-start">
+              <div className="flex-1 flex flex-col gap-3 min-w-0">
+                {[1, 3, 5].map((n) => (
+                  <ListingCardSkeleton key={n} />
+                ))}
+              </div>
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+                {[2, 4, 6].map((n) => (
+                  <ListingCardSkeleton key={n} />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop Skeletons (preserved PC grid) */}
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <ListingCardSkeleton key={n} />
+              ))}
+            </div>
+          </>
         ) : items.length === 0 ? (
-          <div className="py-16 sm:py-20 text-center bg-[#09090d]/80 border border-white/[0.06] rounded-2xl p-6 sm:p-8 max-w-lg mx-auto">
-            <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-4 text-amber-400">
+          <div className="py-16 sm:py-20 text-center bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 text-amber-600">
               <Layers className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-semibold text-white mb-1.5">{t('noListingsFound')}</h3>
-            <p className="text-xs text-neutral-400 mb-5 leading-relaxed">
+            <h3 className="text-base font-bold text-neutral-950 mb-1.5">{t('noListingsFound')}</h3>
+            <p className="text-xs text-neutral-500 mb-5 leading-relaxed">
               {t('noListingsFoundDesc')}
             </p>
             <button
@@ -364,60 +451,57 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                 setSelectedPricePreset('');
                 dispatch(setSelectedCategory(''));
               }}
-              className="btn-outline-gold text-xs py-2 px-4"
+              className="btn-outline-gold text-xs py-2 px-4 font-semibold"
             >
               {t('clearAllFilters')}
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {items.map((listing) => (
-              <ListingCard 
-                key={listing.id} 
-                listing={listing} 
-                onSelect={onSelectListing}
-                onOpenAuth={onOpenAuth}
-              />
-            ))}
-          </div>
+          <>
+            {/* Mobile View: 2-column Staggered Brick Layout (Right column starts half-way down) */}
+            <div className="sm:hidden flex gap-2.5 items-start">
+              {/* Left Column (starts at y=0) */}
+              <div className="flex-1 flex flex-col gap-3 min-w-0">
+                {items
+                  .filter((_, idx) => idx % 2 === 0)
+                  .map((listing) => (
+                    <ListingCard 
+                      key={listing.id} 
+                      listing={listing} 
+                      onSelect={onSelectListing}
+                      onOpenAuth={onOpenAuth}
+                    />
+                  ))}
+              </div>
+
+              {/* Right Column (starts half-way down with pt-8 like interlocking building bricks) */}
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+                {items
+                  .filter((_, idx) => idx % 2 === 1)
+                  .map((listing) => (
+                    <ListingCard 
+                      key={listing.id} 
+                      listing={listing} 
+                      onSelect={onSelectListing}
+                      onOpenAuth={onOpenAuth}
+                    />
+                  ))}
+              </div>
+            </div>
+
+            {/* Desktop View: Preserved PC Grid */}
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((listing) => (
+                <ListingCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  onSelect={onSelectListing}
+                  onOpenAuth={onOpenAuth}
+                />
+              ))}
+            </div>
+          </>
         )}
-      </section>
-
-      {/* Trust & Architecture Principles */}
-      <section className="py-14 border-t border-white/[0.06] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-[#090a0d]/70 border border-white/[0.06]">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustDirectContact')}</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {t('trustDirectContactDesc')}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#090a0d]/70 border border-white/[0.06]">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustMessaging')}</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {t('trustMessagingDesc')}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#090a0d]/70 border border-white/[0.06]">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 mb-4">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-              <h4 className="text-sm font-semibold text-white mb-1.5">{t('trustModerated')}</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {t('trustModeratedDesc')}
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
     </div>

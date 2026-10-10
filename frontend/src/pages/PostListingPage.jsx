@@ -11,10 +11,10 @@ import {
   Building, 
   DollarSign, 
   MapPin, 
-  Phone,
-  ShieldCheck,
-  Sparkles,
-  Info
+  Phone, 
+  ShieldCheck, 
+  Sparkles, 
+  Info 
 } from 'lucide-react';
 import { createNewListing, fetchCategories } from '../store/slices/listingSlice';
 import api from '../services/api';
@@ -138,22 +138,24 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-
-    if (!formData.title || !formData.description || !formData.rental_price || !formData.contact_phone) {
-      setErrorMsg('Please complete all required fields.');
+    if (!formData.category_id) {
+      setErrorMsg(isAmharic ? 'እባክዎ የኪራይ ዘርፍ ይምረጡ' : 'Please select a category');
+      return;
+    }
+    if (!formData.rental_price || Number(formData.rental_price) <= 0) {
+      setErrorMsg(isAmharic ? 'እባክዎ ትክክለኛ የኪራይ ዋጋ ያስገቡ' : 'Please enter a valid rental price');
       return;
     }
 
     setSubmitting(true);
+    setErrorMsg('');
 
     try {
       const payload = {
         ...formData,
-        category_id: formData.category_id || (categories[0]?.id || 1),
-        rental_price: parseFloat(formData.rental_price),
+        rental_price: Number(formData.rental_price),
         features: selectedFeatures,
-        images
+        images: images.map((img) => img.image_url)
       };
 
       const result = await dispatch(createNewListing(payload)).unwrap();
@@ -183,15 +185,15 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
   if (paymentSuccess) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#0D0D0D] border border-amber-500/40 rounded-3xl p-8 text-center space-y-4 shadow-gold-lg">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+      <div className="min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border border-amber-300 rounded-3xl p-8 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-600">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-white font-sans">
+          <h2 className="text-2xl font-black text-neutral-950 font-sans">
             {t('postSuccessTitle')}
           </h2>
-          <p className="text-xs text-neutral-400 leading-relaxed">
+          <p className="text-xs text-neutral-600 leading-relaxed">
             {t('postSuccessDesc')}
           </p>
           <div className="pt-4">
@@ -211,11 +213,11 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#FAFAFA] py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f4f5f7] text-neutral-900 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Header */}
-        <div className="border-b border-neutral-800 pb-5 sm:pb-6">
+        <div className="border-b border-neutral-200 pb-5 sm:pb-6">
           <button
             type="button"
             onClick={() => {
@@ -223,26 +225,26 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               else if (onGoHome) onGoHome();
               else window.history.back();
             }}
-            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2.5 group"
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-amber-600 transition-colors mb-2.5 group font-medium"
           >
-            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform text-amber-600" />
             <span>{t('back')}</span>
           </button>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
-            <PlusCircle className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider mb-2">
+            <PlusCircle className="w-3.5 h-3.5 text-amber-600" />
             <span>{t('postPageBadge')}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white font-sans leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-neutral-950 font-sans leading-tight">
             {t('postPageTitle')}
           </h1>
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-neutral-600 mt-1">
             {t('postPageSubtitle')}
           </p>
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0" />
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -252,7 +254,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           
           {/* Card 1: Basic Info */}
           <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+            <h3 className="text-base font-bold text-neutral-950 flex items-center gap-2 border-b border-neutral-100 pb-3">
               <Building className="w-4 h-4 text-amber-500" />
               <span>{t('postCardRentalInfo')}</span>
             </h3>
@@ -261,7 +263,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               
               {/* Title */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelTitle')}
                 </label>
                 <input
@@ -277,7 +279,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
               {/* Category */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelCategory')}
                 </label>
                 <select
@@ -286,9 +288,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                   onChange={handleChange}
                   className="input-luxury text-sm cursor-pointer"
                 >
-                  <option value="" className="bg-[#111111]">{isAmharic ? 'የኪራይ ዘርፍ ይምረጡ' : 'Select Category'}</option>
+                  <option value="" className="bg-white text-neutral-900">{isAmharic ? 'የኪራይ ዘርፍ ይምረጡ' : 'Select Category'}</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-[#111111]">
+                    <option key={cat.id} value={cat.id} className="bg-white text-neutral-900">
                       {getCategoryTitle(cat)}
                     </option>
                   ))}
@@ -298,7 +300,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               {/* Price & Period */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                     {t('postLabelPrice')}
                   </label>
                   <input
@@ -313,7 +315,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                     {t('postLabelPeriod')}
                   </label>
                   <select
@@ -322,17 +324,17 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                     onChange={handleChange}
                     className="input-luxury text-sm cursor-pointer"
                   >
-                    <option value="month" className="bg-[#111111]">{t('periodMonth')}</option>
-                    <option value="day" className="bg-[#111111]">{t('periodDay')}</option>
-                    <option value="year" className="bg-[#111111]">{t('periodYear')}</option>
-                    <option value="hour" className="bg-[#111111]">{t('periodHour')}</option>
+                    <option value="month" className="bg-white text-neutral-900">{t('periodMonth')}</option>
+                    <option value="day" className="bg-white text-neutral-900">{t('periodDay')}</option>
+                    <option value="year" className="bg-white text-neutral-900">{t('periodYear')}</option>
+                    <option value="hour" className="bg-white text-neutral-900">{t('periodHour')}</option>
                   </select>
                 </div>
               </div>
 
               {/* Description */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelDesc')}
                 </label>
                 <textarea
@@ -351,14 +353,14 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
           {/* Card 2: Location & Contact */}
           <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+            <h3 className="text-base font-bold text-neutral-950 flex items-center gap-2 border-b border-neutral-100 pb-3">
               <MapPin className="w-4 h-4 text-amber-500" />
               <span>{t('postCardLocation')}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelCity')}
                 </label>
                 <input
@@ -372,7 +374,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelSubcity')}
                 </label>
                 <input
@@ -386,7 +388,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelLocation')}
                 </label>
                 <input
@@ -400,7 +402,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               </div>
 
               <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelPhone')}
                 </label>
                 <input
@@ -418,12 +420,12 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
           {/* Card 3: Cloudinary Image Uploads */}
           <div className="card-obsidian space-y-4 sm:space-y-5 p-4 sm:p-6">
-            <h3 className="text-base font-bold text-white flex items-center justify-between border-b border-neutral-800 pb-3">
+            <h3 className="text-base font-bold text-neutral-950 flex items-center justify-between border-b border-neutral-100 pb-3">
               <div className="flex items-center gap-2">
                 <Upload className="w-4 h-4 text-amber-500" />
                 <span>{t('postCardImages')}</span>
               </div>
-              <span className="text-xs text-neutral-400 font-normal">
+              <span className="text-xs text-neutral-500 font-medium">
                 {images.length} {isAmharic ? 'ፎቶዎች ተካተዋል' : 'uploaded'}
               </span>
             </h3>
@@ -431,17 +433,17 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
             {/* Image Preview Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {images.map((img, i) => (
-                <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900 group">
+                <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 group shadow-2xs">
                   <img src={img.image_url} alt="upload" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeImage(i)}
-                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/80 text-rose-400 hover:text-white transition-colors"
+                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/90 text-rose-500 hover:text-rose-700 shadow-sm transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                   {i === 0 && (
-                    <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black">
+                    <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-neutral-950 shadow-xs">
                       {isAmharic ? 'ዋና ፎቶ' : 'Cover'}
                     </span>
                   )}
@@ -449,9 +451,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               ))}
 
               {/* Upload Trigger Button */}
-              <label className="cursor-pointer aspect-[4/3] rounded-xl border-2 border-dashed border-neutral-800 hover:border-amber-500/60 bg-neutral-950 flex flex-col items-center justify-center text-center p-3 sm:p-4 transition-all">
+              <label className="cursor-pointer aspect-[4/3] rounded-xl border-2 border-dashed border-neutral-300 hover:border-amber-500 bg-neutral-50 hover:bg-neutral-100/70 flex flex-col items-center justify-center text-center p-3 sm:p-4 transition-all">
                 <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mb-1.5 sm:mb-2" />
-                <span className="text-xs font-semibold text-neutral-300">
+                <span className="text-xs font-semibold text-neutral-800">
                   {uploadingImage ? t('postPublishing') : (isAmharic ? 'ፎቶዎችን ጨምር' : 'Add Images')}
                 </span>
                 <span className="text-[10px] text-neutral-500 mt-0.5 sm:mt-1">{isAmharic ? 'PNG, JPG እስከ 10MB' : 'PNG, JPG up to 10MB'}</span>
@@ -469,7 +471,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
           {/* Card 4: Features & Amenities */}
           <div className="card-obsidian space-y-3.5 sm:space-y-4 p-4 sm:p-6">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+            <h3 className="text-base font-bold text-neutral-950 flex items-center gap-2 border-b border-neutral-100 pb-3">
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span>{t('postLabelFeatures')}</span>
             </h3>
@@ -482,13 +484,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                     type="button"
                     key={feat}
                     onClick={() => toggleFeature(feat)}
-                    className={`p-2.5 sm:p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center gap-2.5 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center gap-2.5 shadow-2xs ${
                       checked
-                        ? 'bg-amber-500/10 border-amber-500 text-amber-300'
-                        : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                        ? 'bg-amber-50 border-amber-500 text-amber-900'
+                        : 'bg-white border-neutral-200 text-neutral-700 hover:text-neutral-950 hover:border-neutral-300'
                     }`}
                   >
-                    <CheckCircle2 className={`w-4 h-4 shrink-0 ${checked ? 'text-amber-400' : 'text-neutral-600'}`} />
+                    <CheckCircle2 className={`w-4 h-4 shrink-0 ${checked ? 'text-amber-600' : 'text-neutral-400'}`} />
                     <span>{feat}</span>
                   </button>
                 );

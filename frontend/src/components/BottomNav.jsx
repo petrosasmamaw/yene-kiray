@@ -46,7 +46,7 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
   };
 
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 z-[60] bg-[#07080a]/98 backdrop-blur-2xl border-t border-white/[0.08] px-2 py-1.5 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.7)] h-[58px]">
+    <div className="md:hidden fixed bottom-0 inset-x-0 z-[60] bg-white/98 backdrop-blur-2xl border-t border-neutral-200 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] h-[58px]">
       <div className="flex items-center justify-around max-w-lg mx-auto h-full">
         
         {/* 1. Explore / Home */}
@@ -54,8 +54,8 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
           onClick={() => handleNavClick('home')}
           className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
             currentView === 'home' && !isOpen
-              ? 'text-amber-400 font-bold'
-              : 'text-neutral-400 hover:text-white'
+              ? 'text-amber-600 font-bold'
+              : 'text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <Home className={`w-5 h-5 ${currentView === 'home' && !isOpen ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
@@ -70,8 +70,8 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
           }}
           className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
             currentView === 'saved' && !isOpen
-              ? 'text-amber-400 font-bold'
-              : 'text-neutral-400 hover:text-white'
+              ? 'text-amber-600 font-bold'
+              : 'text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <div className="relative">
@@ -94,10 +94,10 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
           className="flex flex-col items-center justify-center -mt-4 group"
           title={t('navPostRent')}
         >
-          <div className="w-12 h-12 rounded-full bg-amber-500 group-hover:bg-amber-400 text-black flex items-center justify-center shadow-lg shadow-amber-500/30 transition-transform active:scale-95 border-2 border-[#07080a]">
+          <div className="w-12 h-12 rounded-full bg-amber-500 group-hover:bg-amber-400 text-black flex items-center justify-center shadow-lg shadow-amber-500/30 transition-transform active:scale-95 border-2 border-white">
             <PlusCircle className="w-6 h-6 stroke-[2.5]" />
           </div>
-          <span className="text-[10px] font-bold text-amber-400 mt-0.5">{t('navPostRent')}</span>
+          <span className="text-[10px] font-bold text-amber-700 mt-0.5">{t('navPostRent')}</span>
         </button>
 
         {/* 4. Real-time Messages (Always highlighted when Chat is Open) */}
@@ -105,14 +105,14 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
           onClick={handleMessagesClick}
           className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
             isOpen
-              ? 'text-amber-400 font-bold'
-              : 'text-neutral-400 hover:text-white'
+              ? 'text-amber-600 font-bold'
+              : 'text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <div className="relative">
             <MessageSquare className={`w-5 h-5 ${isOpen ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
             {unreadMessagesCount > 0 && (
-              <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 text-[9px] font-bold rounded-full bg-amber-500 text-black flex items-center justify-center animate-pulse border border-[#07080a]">
+              <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 text-[9px] font-bold rounded-full bg-amber-500 text-black flex items-center justify-center animate-pulse border border-white">
                 {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
               </span>
             )}
@@ -127,8 +127,8 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
               onClick={() => handleNavClick('admin')}
               className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
                 currentView === 'admin' && !isOpen
-                  ? 'text-amber-400 font-bold'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'text-amber-600 font-bold'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <ShieldCheck className="w-5 h-5 stroke-[2]" />
@@ -139,8 +139,8 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
               onClick={() => handleNavClick('my-listings')}
               className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
                 currentView === 'my-listings' && !isOpen
-                  ? 'text-amber-400 font-bold'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'text-amber-600 font-bold'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Layers className="w-5 h-5 stroke-[1.8]" />
@@ -150,7 +150,7 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
         ) : (
           <button
             onClick={() => onOpenAuth('login')}
-            className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-neutral-400 hover:text-white transition-all"
+            className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-neutral-500 hover:text-neutral-900 transition-all"
           >
             <User className="w-5 h-5 stroke-[1.8]" />
             <span className="text-[10px] mt-0.5 tracking-tight">{t('navSignIn')}</span>

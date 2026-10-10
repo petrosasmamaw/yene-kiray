@@ -233,11 +233,11 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#FAFAFA] py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f4f5f7] text-neutral-900 py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Top Header Bar */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-neutral-800 pb-5 sm:pb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-neutral-200 pb-5 sm:pb-6">
           <div>
             <button
               type="button"
@@ -246,25 +246,25 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 else if (onGoHome) onGoHome();
                 else window.history.back();
               }}
-              className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 transition-colors mb-2 group"
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-amber-600 transition-colors mb-2 group font-medium"
             >
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform text-amber-600" />
               <span>{t('back')}</span>
             </button>
             <div className="flex items-center gap-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500 text-black shadow-sm shrink-0">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl sm:text-3xl font-black text-white font-sans">
+                  <h1 className="text-xl sm:text-3xl font-black text-neutral-950 font-sans">
                     {t('adminTitle')}
                   </h1>
-                  <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
+                  <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-amber-50 border border-amber-300 text-amber-800 shrink-0">
                     Terminal Guard
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">
+                <p className="text-xs text-neutral-500 mt-0.5">
                   {isAmharic 
                     ? 'የገንዘብ፣ የክፍያ ማረጋገጫዎች፣ የኪራይ ማስታወቂያዎች፣ የዘርፎች እና የተጠቃሚዎች አስተዳደር ማዕከል' 
                     : 'Financials, payment approval pipeline, rental posts moderation, categories, and user administration'}
@@ -275,7 +275,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         </div>
 
         {/* Tab Navigation (Horizontal swipeable on mobile) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-neutral-800 no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-neutral-200 no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
           {[
             { id: 'financials', label: t('adminFinancials'), icon: DollarSign },
             { id: 'listings', label: t('adminListings'), icon: Building2, badge: adminListings.length },
@@ -292,15 +292,15 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 border ${
                   isActive
-                    ? 'bg-amber-500 text-black border-amber-400 shadow-gold-sm'
-                    : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white'
+                    ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-xs'
+                    : 'bg-white text-neutral-700 border-neutral-200 hover:text-neutral-950 hover:bg-neutral-100 shadow-2xs'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{tab.label}</span>
                 {tab.badge > 0 && (
                   <span className={`px-1.5 py-0.2 text-[10px] font-black rounded-full ${
-                    isActive ? 'bg-black text-amber-400' : 'bg-amber-500 text-black'
+                    isActive ? 'bg-neutral-950 text-amber-400' : 'bg-amber-500 text-neutral-950'
                   }`}>
                     {tab.badge}
                   </span>
@@ -319,15 +319,15 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               {/* Total Revenue */}
               <div className="card-obsidian border-amber-500/30 p-3.5 sm:p-5">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-500">
                     Total Revenue
                   </span>
-                  <div className="p-1.5 sm:p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
                     <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
-                <div className="text-xl sm:text-3xl font-black text-white font-sans">
-                  {Number(dashboardData?.financials?.totalRevenue || 0).toLocaleString()} <span className="text-xs sm:text-sm font-bold text-amber-400">ETB</span>
+                <div className="text-xl sm:text-3xl font-black text-neutral-950 font-sans">
+                  {Number(dashboardData?.financials?.totalRevenue || 0).toLocaleString()} <span className="text-xs sm:text-sm font-bold text-amber-600">ETB</span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 sm:mt-2">
                   Verified posting fees collected
@@ -337,17 +337,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               {/* Pending Approvals */}
               <div className="card-obsidian p-3.5 sm:p-5">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-500">
                     Pending Volume
                   </span>
-                  <div className="p-1.5 sm:p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
                     <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
-                <div className="text-xl sm:text-3xl font-black text-amber-400 font-sans">
-                  {Number(dashboardData?.financials?.pendingAmount || 0).toLocaleString()} <span className="text-xs sm:text-sm font-bold text-white">ETB</span>
+                <div className="text-xl sm:text-3xl font-black text-amber-600 font-sans">
+                  {Number(dashboardData?.financials?.pendingAmount || 0).toLocaleString()} <span className="text-xs sm:text-sm font-bold text-neutral-950">ETB</span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-amber-400/80 mt-1 sm:mt-2 font-medium">
+                <p className="text-[10px] sm:text-[11px] text-amber-700 mt-1 sm:mt-2 font-medium">
                   {dashboardData?.financials?.pendingCount || 0} transaction(s) pending
                 </p>
               </div>
@@ -355,14 +355,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               {/* Approved Transactions */}
               <div className="card-obsidian p-3.5 sm:p-5">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-500">
                     Approved
                   </span>
-                  <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
-                <div className="text-xl sm:text-3xl font-black text-white font-sans">
+                <div className="text-xl sm:text-3xl font-black text-neutral-950 font-sans">
                   {dashboardData?.counts?.approvedListings || 0}
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 sm:mt-2">
@@ -373,14 +373,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               {/* Registered Clients */}
               <div className="card-obsidian p-3.5 sm:p-5">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-500">
                     Accounts
                   </span>
-                  <div className="p-1.5 sm:p-2 rounded-xl bg-neutral-800 text-neutral-300">
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-neutral-100 text-neutral-700 border border-neutral-200">
                     <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
-                <div className="text-xl sm:text-3xl font-black text-white font-sans">
+                <div className="text-xl sm:text-3xl font-black text-neutral-950 font-sans">
                   {dashboardData?.counts?.totalUsers || 0}
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-neutral-500 mt-1 sm:mt-2">
@@ -392,18 +392,18 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             {/* Recent Payments Table */}
             <div className="card-obsidian space-y-4">
-              <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-                <h3 className="text-base font-bold text-white font-sans">
+              <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+                <h3 className="text-base font-bold text-neutral-950 font-sans">
                   Recent Financial Transactions
                 </h3>
-                <span className="text-xs text-amber-400 font-medium">
+                <span className="text-xs text-amber-600 font-semibold">
                   Direct Ledger
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-neutral-950 text-neutral-400 uppercase tracking-wider border-b border-neutral-800">
+                  <thead className="bg-neutral-50 text-neutral-600 uppercase tracking-wider border-b border-neutral-200">
                     <tr>
                       <th className="py-3 px-4">User</th>
                       <th className="py-3 px-4">Listing Target</th>
@@ -414,24 +414,24 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       <th className="py-3 px-4">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-850">
+                  <tbody className="divide-y divide-neutral-200">
                     {dashboardData?.recentPayments?.map((p) => (
-                      <tr key={p.id} className="hover:bg-neutral-900/50">
-                        <td className="py-3 px-4 font-semibold text-white">
+                      <tr key={p.id} className="hover:bg-neutral-50/80 transition-colors">
+                        <td className="py-3 px-4 font-semibold text-neutral-950">
                           <div>{p.user_name}</div>
                           <div className="text-[10px] text-neutral-500 font-normal">{p.user_phone || p.user_email}</div>
                         </td>
-                        <td className="py-3 px-4 text-neutral-300 truncate max-w-xs">{p.listing_title || 'Rental Post'}</td>
-                        <td className="py-3 px-4 font-bold text-amber-400">{Number(p.amount).toLocaleString()} ETB</td>
-                        <td className="py-3 px-4 text-neutral-300">{p.payment_method}</td>
-                        <td className="py-3 px-4 font-mono text-neutral-400">{p.transaction_reference || '—'}</td>
+                        <td className="py-3 px-4 text-neutral-700 truncate max-w-xs">{p.listing_title || 'Rental Post'}</td>
+                        <td className="py-3 px-4 font-bold text-amber-600">{Number(p.amount).toLocaleString()} ETB</td>
+                        <td className="py-3 px-4 text-neutral-700">{p.payment_method}</td>
+                        <td className="py-3 px-4 font-mono text-neutral-600">{p.transaction_reference || '—'}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${
                             p.status === 'approved' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-300' 
                               : p.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-300'
+                              : 'bg-rose-50 text-rose-700 border border-rose-300'
                           }`}>
                             {p.status}
                           </span>
@@ -450,18 +450,18 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         {activeTab === 'payments' && (
           <div className="card-obsidian space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white font-sans">
+              <h2 className="text-xl font-bold text-neutral-950 font-sans">
                 Pending Payment Verifications
               </h2>
-              <p className="text-xs text-neutral-400 mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 When you approve a payment, the associated rental listing is automatically marked <strong>Approved</strong> and published live.
               </p>
             </div>
 
             {payments.filter(p => p.status === 'pending').length === 0 ? (
-              <div className="py-16 text-center bg-neutral-950 rounded-2xl border border-neutral-800">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-white">Queue Cleared</h4>
+              <div className="py-16 text-center bg-neutral-50 rounded-2xl border border-neutral-200">
+                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-neutral-950">Queue Cleared</h4>
                 <p className="text-xs text-neutral-500 mt-1">
                   There are no pending user payments awaiting admin approval.
                 </p>
@@ -471,25 +471,25 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 {payments.filter(p => p.status === 'pending').map((p) => (
                   <div
                     key={p.id}
-                    className="p-5 rounded-2xl bg-neutral-950 border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-5"
+                    className="p-5 rounded-2xl bg-neutral-50 border border-amber-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-2xs"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-black">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-neutral-950">
                           Pending Approval
                         </span>
-                        <span className="text-xs font-bold text-white">{p.user_name}</span>
+                        <span className="text-xs font-bold text-neutral-950">{p.user_name}</span>
                         <span className="text-xs text-neutral-500">• {p.user_phone}</span>
                       </div>
 
-                      <h4 className="text-base font-bold text-amber-400">
+                      <h4 className="text-base font-bold text-amber-700">
                         Listing: {p.listing_title}
                       </h4>
 
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-400">
-                        <span>Method: <strong className="text-white">{p.payment_method}</strong></span>
-                        <span>Reference: <strong className="text-white font-mono">{p.transaction_reference || 'N/A'}</strong></span>
-                        <span>Amount: <strong className="text-amber-400">{Number(p.amount).toLocaleString()} ETB</strong></span>
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-600">
+                        <span>Method: <strong className="text-neutral-950">{p.payment_method}</strong></span>
+                        <span>Reference: <strong className="text-neutral-950 font-mono">{p.transaction_reference || 'N/A'}</strong></span>
+                        <span>Amount: <strong className="text-amber-600 font-bold">{Number(p.amount).toLocaleString()} ETB</strong></span>
                       </div>
 
                       {p.receipt_image_url && (
@@ -497,7 +497,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                           <button
                             type="button"
                             onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
-                            className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:underline"
+                            className="inline-flex items-center gap-1.5 text-xs text-amber-600 font-semibold hover:underline"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             <span>View Submitted Receipt Screenshot</span>
@@ -506,10 +506,10 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-800">
+                    <div className="flex items-center gap-3 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-200">
                       <button
                         onClick={() => handlePaymentDecision(p.id, 'rejected')}
-                        className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-rose-500/10 text-rose-400 border border-neutral-800 hover:border-rose-500 text-xs font-bold transition-all"
+                        className="px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-rose-50 text-rose-600 border border-neutral-250 hover:border-rose-300 text-xs font-bold transition-all"
                       >
                         Reject
                       </button>
@@ -533,17 +533,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         {activeTab === 'pricing' && (
           <div className="card-obsidian max-w-2xl space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white font-sans">
+              <h2 className="text-xl font-bold text-neutral-950 font-sans">
                 Monetization & Listing Fee Control
               </h2>
-              <p className="text-xs text-neutral-400 mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Toggle pay-to-post requirement and specify listing fee in Ethiopian Birr.
               </p>
             </div>
 
             {settingsSaved && (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
                 <span>Monetization settings saved successfully!</span>
               </div>
             )}
@@ -551,12 +551,12 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
             <form onSubmit={handleSaveSettings} className="space-y-6">
               
               {/* Pay to Post ON/OFF Switch */}
-              <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">
+                  <h4 className="text-sm font-bold text-neutral-950">
                     Pay-to-Post Requirement
                   </h4>
-                  <p className="text-xs text-neutral-400 mt-0.5">
+                  <p className="text-xs text-neutral-500 mt-0.5">
                     {payToPostEnabled 
                       ? 'ON: Users must pay fee and await admin approval before post goes live.' 
                       : 'OFF (Free): Users post rentals immediately for free to maximize platform growth.'}
@@ -567,10 +567,10 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   type="button"
                   onClick={() => setPayToPostEnabled(!payToPostEnabled)}
                   className={`w-14 h-8 rounded-full p-1 transition-all ${
-                    payToPostEnabled ? 'bg-amber-500 shadow-gold-sm' : 'bg-neutral-800'
+                    payToPostEnabled ? 'bg-amber-500 shadow-xs' : 'bg-neutral-300'
                   }`}
                 >
-                  <div className={`w-6 h-6 rounded-full bg-black transition-transform ${
+                  <div className={`w-6 h-6 rounded-full bg-white shadow-xs transition-transform ${
                     payToPostEnabled ? 'translate-x-6' : 'translate-x-0'
                   }`} />
                 </button>
@@ -578,7 +578,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
               {/* Posting Fee Amount in ETB */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   Posting Fee Amount (ETB)
                 </label>
                 <div className="relative">
@@ -589,7 +589,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     onChange={(e) => setPostingFee(e.target.value)}
                     className="input-luxury text-sm font-bold"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-400">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600">
                     ETB
                   </span>
                 </div>
@@ -600,7 +600,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
               {/* Payment Instructions Text */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   Payment Account Instructions (Displayed to Users)
                 </label>
                 <textarea
@@ -626,11 +626,11 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
           <div className="card-obsidian space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white font-sans flex items-center gap-2">
+                <h2 className="text-xl font-bold text-neutral-950 font-sans flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-amber-500" />
                   <span>All User Rental Posts & Moderation</span>
                 </h2>
-                <p className="text-xs text-neutral-400 mt-0.5">
+                <p className="text-xs text-neutral-500 mt-0.5">
                   Inspect all properties, vehicles, and equipment posted by clients. Approve, reject, or delete.
                 </p>
               </div>
@@ -638,7 +638,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               {/* Search & Status Filter */}
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <div className="relative flex-1 sm:w-64">
-                  <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="Search posts, city, owner..."
@@ -653,11 +653,11 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   onChange={(e) => setListingStatusFilter(e.target.value)}
                   className="input-luxury py-2 text-xs w-36 cursor-pointer"
                 >
-                  <option value="all" className="bg-[#111111]">All Statuses</option>
-                  <option value="approved" className="bg-[#111111]">Approved</option>
-                  <option value="pending" className="bg-[#111111]">Pending</option>
-                  <option value="rejected" className="bg-[#111111]">Rejected</option>
-                  <option value="rented" className="bg-[#111111]">Rented</option>
+                  <option value="all" className="bg-white text-neutral-900">All Statuses</option>
+                  <option value="approved" className="bg-white text-neutral-900">Approved</option>
+                  <option value="pending" className="bg-white text-neutral-900">Pending</option>
+                  <option value="rejected" className="bg-white text-neutral-900">Rejected</option>
+                  <option value="rented" className="bg-white text-neutral-900">Rented</option>
                 </select>
               </div>
             </div>
@@ -667,7 +667,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-neutral-950 text-neutral-400 uppercase tracking-wider border-b border-neutral-800">
+                  <thead className="bg-neutral-50 text-neutral-600 uppercase tracking-wider border-b border-neutral-200">
                     <tr>
                       <th className="py-3 px-4">Rental Item</th>
                       <th className="py-3 px-4">Category</th>
@@ -678,16 +678,16 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       <th className="py-3 px-4">Moderation Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-850">
+                  <tbody className="divide-y divide-neutral-200">
                     {loadingListings ? (
                       [1, 2, 3, 4, 5].map((n) => (
                         <tr key={n} className="animate-pulse">
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-lg bg-white/[0.05] skeleton-shimmer shrink-0" />
+                              <div className="w-12 h-12 rounded-lg bg-neutral-200 skeleton-shimmer shrink-0" />
                               <div className="space-y-1.5">
-                                <div className="h-3.5 w-36 rounded bg-white/[0.08] skeleton-shimmer" />
-                                <div className="h-2.5 w-20 rounded bg-white/[0.04] skeleton-shimmer" />
+                                <div className="h-3.5 w-36 rounded bg-neutral-200 skeleton-shimmer" />
+                                <div className="h-2.5 w-20 rounded bg-neutral-100 skeleton-shimmer" />
                               </div>
                             </div>
                           </td>
@@ -695,19 +695,19 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                             <div className="h-3 w-16 rounded bg-amber-500/20 skeleton-shimmer" />
                           </td>
                           <td className="py-3 px-4">
-                            <div className="h-3.5 w-20 rounded bg-white/[0.08] skeleton-shimmer" />
+                            <div className="h-3.5 w-20 rounded bg-neutral-200 skeleton-shimmer" />
                           </td>
                           <td className="py-3 px-4">
-                            <div className="h-3.5 w-24 rounded bg-white/[0.08] skeleton-shimmer" />
+                            <div className="h-3.5 w-24 rounded bg-neutral-200 skeleton-shimmer" />
                           </td>
                           <td className="py-3 px-4">
-                            <div className="h-3 w-20 rounded bg-white/[0.06] skeleton-shimmer" />
+                            <div className="h-3 w-20 rounded bg-neutral-100 skeleton-shimmer" />
                           </td>
                           <td className="py-3 px-4">
-                            <div className="h-5 w-16 rounded-full bg-white/[0.05] skeleton-shimmer" />
+                            <div className="h-5 w-16 rounded-full bg-neutral-200 skeleton-shimmer" />
                           </td>
                           <td className="py-3 px-4">
-                            <div className="h-7 w-24 rounded-lg bg-white/[0.06] skeleton-shimmer" />
+                            <div className="h-7 w-24 rounded-lg bg-neutral-200 skeleton-shimmer" />
                           </td>
                         </tr>
                       ))
@@ -729,22 +729,22 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                             : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80';
 
                         return (
-                          <tr key={l.id} className="hover:bg-neutral-900/50">
+                          <tr key={l.id} className="hover:bg-neutral-50/80 transition-colors">
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-3">
                                 <img
                                   src={thumb}
                                   alt={l.title}
-                                  className="w-12 h-12 rounded-lg object-cover border border-neutral-800 shrink-0"
+                                  className="w-12 h-12 rounded-lg object-cover border border-neutral-200 shrink-0"
                                 />
                                 <div>
-                                  <div className="font-bold text-white max-w-xs truncate">{l.title}</div>
+                                  <div className="font-bold text-neutral-950 max-w-xs truncate">{l.title}</div>
                                   <div className="text-[11px] text-neutral-500">{new Date(l.created_at).toLocaleDateString()}</div>
                                 </div>
                               </div>
                             </td>
 
-                            <td className="py-3 px-4 text-amber-400 font-medium">
+                            <td className="py-3 px-4 text-amber-700 font-semibold">
                               {l.category_name || 'General'}
                             </td>
 
@@ -854,7 +854,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-neutral-950 text-neutral-400 uppercase tracking-wider border-b border-neutral-800">
+                <thead className="bg-neutral-50 text-neutral-600 uppercase tracking-wider border-b border-neutral-200">
                   <tr>
                     <th className="py-3 px-4">User</th>
                     <th className="py-3 px-4">Role</th>
@@ -863,17 +863,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     <th className="py-3 px-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-850">
+                <tbody className="divide-y divide-neutral-200">
                   {users.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())).map((u) => (
-                    <tr key={u.id} className="hover:bg-neutral-900/50">
+                    <tr key={u.id} className="hover:bg-neutral-50/80 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center font-bold text-amber-400 text-xs">
+                          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center font-bold text-amber-700 text-xs">
                             {u.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-bold text-white">{u.name}</div>
-                            <div className="text-[11px] text-neutral-400">{u.email} • {u.phone || 'No phone'}</div>
+                            <div className="font-bold text-neutral-950">{u.name}</div>
+                            <div className="text-[11px] text-neutral-500">{u.email} • {u.phone || 'No phone'}</div>
                           </div>
                         </div>
                       </td>
@@ -881,24 +881,24 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       <td className="py-3 px-4">
                         <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] ${
                           u.role === 'admin' 
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-                            : 'bg-neutral-800 text-neutral-300'
+                            ? 'bg-amber-50 text-amber-800 border border-amber-300' 
+                            : 'bg-neutral-100 text-neutral-700'
                         }`}>
                           {u.role}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 font-semibold text-white">
+                      <td className="py-3 px-4 font-bold text-neutral-950">
                         {u.listings_count || 0}
                       </td>
 
                       <td className="py-3 px-4">
                         <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] flex items-center gap-1 w-fit ${
                           u.is_active 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-300' 
+                            : 'bg-rose-50 text-rose-700 border border-rose-300'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${u.is_active ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${u.is_active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                           <span>{u.is_active ? 'Active' : 'Inactive'}</span>
                         </span>
                       </td>
@@ -907,17 +907,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setEditingUser({ ...u })}
-                            className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-amber-400 border border-neutral-800 hover:border-amber-500/40 text-[11px] font-bold flex items-center gap-1"
+                            className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-250 text-[11px] font-bold flex items-center gap-1"
                           >
-                            <Edit3 className="w-3 h-3" />
+                            <Edit3 className="w-3 h-3 text-amber-600" />
                             <span>Edit</span>
                           </button>
                           <button
                             onClick={() => handleToggleUserActive(u)}
                             className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
                               u.is_active 
-                                ? 'bg-neutral-900 text-rose-400 border border-neutral-800 hover:border-rose-500/50' 
-                                : 'bg-amber-500 text-black shadow-gold-sm'
+                                ? 'bg-neutral-100 text-rose-600 border border-neutral-250 hover:bg-rose-50' 
+                                : 'bg-amber-500 text-neutral-950 shadow-xs'
                             }`}
                           >
                             {u.is_active ? 'Deactivate' : 'Activate'}
@@ -938,16 +938,16 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
             
             {/* Create Category Form */}
             <div className="card-obsidian space-y-4">
-              <h3 className="text-base font-bold text-white font-sans flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <h3 className="text-base font-bold text-neutral-950 font-sans flex items-center gap-2 border-b border-neutral-200 pb-3">
                 <PlusCircle className="w-4 h-4 text-amber-500" />
                 <span>Add Rental Category</span>
               </h3>
 
               <form onSubmit={handleCreateCategory} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <label className="block font-semibold text-neutral-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                     <span>Category Name (English)</span>
-                    <span className="text-[10px] text-amber-400 font-mono">Required</span>
+                    <span className="text-[10px] text-amber-600 font-mono font-bold">Required</span>
                   </label>
                   <input
                     type="text"
@@ -963,9 +963,9 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <label className="block font-semibold text-neutral-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                     <span>የዘርፉ የአማርኛ ስም (Amharic Name)</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">አማራጭ (Optional)</span>
+                    <span className="text-[10px] text-emerald-600 font-mono font-bold">አማራጭ (Optional)</span>
                   </label>
                   <input
                     type="text"
@@ -977,7 +977,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+                  <label className="block font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
                     Slug
                   </label>
                   <input
@@ -990,7 +990,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+                  <label className="block font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
                     Category Image URL
                   </label>
                   <input
@@ -1001,14 +1001,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     className="input-luxury text-xs font-mono"
                   />
                   {newCatImage && (
-                    <div className="mt-2 relative rounded-lg overflow-hidden h-24 border border-neutral-800">
+                    <div className="mt-2 relative rounded-lg overflow-hidden h-24 border border-neutral-200">
                       <img src={newCatImage} alt="Preview" className="w-full h-full object-cover" />
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+                  <label className="block font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
                     Lucide Icon Identifier
                   </label>
                   <select
@@ -1016,13 +1016,13 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     onChange={(e) => setNewCatIcon(e.target.value)}
                     className="input-luxury text-xs cursor-pointer"
                   >
-                    <option value="Home" className="bg-[#111111]">Home (Houses)</option>
-                    <option value="Car" className="bg-[#111111]">Car (Vehicles)</option>
-                    <option value="Building2" className="bg-[#111111]">Building2 (Commercial)</option>
-                    <option value="Truck" className="bg-[#111111]">Truck (Heavy Machinery)</option>
-                    <option value="Sparkles" className="bg-[#111111]">Sparkles (Events & Venues)</option>
-                    <option value="Wrench" className="bg-[#111111]">Wrench (Tools & Equipment)</option>
-                    <option value="Layers" className="bg-[#111111]">Layers (General)</option>
+                    <option value="Home" className="bg-white text-neutral-900">Home (Houses)</option>
+                    <option value="Car" className="bg-white text-neutral-900">Car (Vehicles)</option>
+                    <option value="Building2" className="bg-white text-neutral-900">Building2 (Commercial)</option>
+                    <option value="Truck" className="bg-white text-neutral-900">Truck (Heavy Machinery)</option>
+                    <option value="Sparkles" className="bg-white text-neutral-900">Sparkles (Events & Venues)</option>
+                    <option value="Wrench" className="bg-white text-neutral-900">Wrench (Tools & Equipment)</option>
+                    <option value="Layers" className="bg-white text-neutral-900">Layers (General)</option>
                   </select>
                 </div>
 
@@ -1037,41 +1037,41 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             {/* Existing Categories List */}
             <div className="lg:col-span-2 card-obsidian space-y-4">
-              <h3 className="text-base font-bold text-white font-sans border-b border-neutral-800 pb-3 flex items-center justify-between">
+              <h3 className="text-base font-bold text-neutral-950 font-sans border-b border-neutral-200 pb-3 flex items-center justify-between">
                 <span>Existing Categories ({categories.length})</span>
-                <span className="text-xs text-neutral-400 font-normal">Images & Live Controls</span>
+                <span className="text-xs text-neutral-500 font-normal">Images & Live Controls</span>
               </h3>
 
               <div className="space-y-3">
                 {categories.map((c) => (
                   <div
                     key={c.id}
-                    className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       {c.image_url ? (
                         <img
                           src={c.image_url}
                           alt={c.name}
-                          className="w-14 h-14 rounded-xl object-cover border border-neutral-800 shrink-0"
+                          className="w-14 h-14 rounded-xl object-cover border border-neutral-200 shrink-0"
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-amber-400 shrink-0">
+                        <div className="w-14 h-14 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
                           <Layers className="w-6 h-6" />
                         </div>
                       )}
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-sm text-white truncate">{c.name}</span>
+                          <span className="font-bold text-sm text-neutral-950 truncate">{c.name}</span>
                           {c.name_am && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-medium border border-amber-500/20">
+                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200">
                               {c.name_am}
                             </span>
                           )}
                           <span className="text-[10px] font-mono text-neutral-500">({c.slug})</span>
                         </div>
-                        <p className="text-xs text-neutral-400">
-                          Total Listings: <strong className="text-amber-400">{c.total_listings_count || 0}</strong>
+                        <p className="text-xs text-neutral-600">
+                          Total Listings: <strong className="text-amber-600 font-bold">{c.total_listings_count || 0}</strong>
                         </p>
                       </div>
                     </div>
@@ -1079,9 +1079,9 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     <div className="flex items-center gap-2 self-end sm:self-center">
                       <button
                         onClick={() => setEditingCategory({ ...c })}
-                        className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 text-amber-400 text-xs font-bold border border-neutral-800 hover:border-amber-500/40 flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold border border-neutral-250 flex items-center gap-1"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-3.5 h-3.5 text-amber-600" />
                         <span>Edit</span>
                       </button>
 
@@ -1089,8 +1089,8 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                         onClick={() => handleToggleCategory(c)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                           c.is_active 
-                            ? 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800' 
-                            : 'bg-amber-500 text-black'
+                            ? 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 border border-neutral-250' 
+                            : 'bg-amber-500 text-neutral-950 font-bold'
                         }`}
                       >
                         {c.is_active ? 'Disable' : 'Enable'}
@@ -1098,7 +1098,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
                       <button
                         onClick={() => handleDeleteCategory(c.id)}
-                        className="p-2 rounded-lg bg-neutral-900 hover:bg-rose-950 text-neutral-400 hover:text-rose-400 border border-neutral-800"
+                        className="p-2 rounded-lg bg-neutral-100 hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-neutral-250"
                         title="Delete category"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1116,16 +1116,16 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
       {/* Edit Category Modal */}
       {editingCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111111] border border-neutral-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-amber-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm">
+          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+              <h3 className="text-base font-bold text-neutral-950 flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-amber-500" />
                 <span>Edit Category</span>
               </h3>
               <button
                 onClick={() => setEditingCategory(null)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900"
+                className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1133,7 +1133,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             <form onSubmit={handleSaveCategoryEdit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Category Name (English)</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Category Name (English)</label>
                 <input
                   type="text"
                   required
@@ -1144,9 +1144,9 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1 flex items-center justify-between">
+                <label className="block text-neutral-700 font-semibold mb-1 flex items-center justify-between">
                   <span>የምድቡ የአማርኛ ስም (Amharic Name)</span>
-                  <span className="text-[10px] text-amber-400">አማራጭ (Optional)</span>
+                  <span className="text-[10px] text-amber-600 font-bold">አማራጭ (Optional)</span>
                 </label>
                 <input
                   type="text"
@@ -1158,7 +1158,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Slug</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Slug</label>
                 <input
                   type="text"
                   required
@@ -1169,7 +1169,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Image URL</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Image URL</label>
                 <input
                   type="url"
                   placeholder="https://images.unsplash.com/..."
@@ -1178,14 +1178,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   className="input-luxury text-xs font-mono"
                 />
                 {editingCategory.image_url && (
-                  <div className="mt-2 rounded-lg overflow-hidden h-24 border border-neutral-800">
+                  <div className="mt-2 rounded-lg overflow-hidden h-24 border border-neutral-200">
                     <img src={editingCategory.image_url} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Description</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Description</label>
                 <textarea
                   rows={2}
                   value={editingCategory.description || ''}
@@ -1198,7 +1198,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 <button
                   type="button"
                   onClick={() => setEditingCategory(null)}
-                  className="flex-1 py-2 rounded-xl bg-neutral-900 text-neutral-300 font-bold border border-neutral-800"
+                  className="flex-1 py-2 rounded-xl bg-neutral-100 text-neutral-700 font-bold border border-neutral-250 hover:bg-neutral-200"
                 >
                   Cancel
                 </button>
@@ -1216,16 +1216,16 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
       {/* Edit User Modal */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111111] border border-neutral-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-4 h-4 text-amber-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm">
+          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+              <h3 className="text-base font-bold text-neutral-950 flex items-center gap-2">
+                <Users className="w-4 h-4 text-amber-500" />
                 <span>Edit User Profile & Role</span>
               </h3>
               <button
                 onClick={() => setEditingUser(null)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900"
+                className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1233,7 +1233,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
             <form onSubmit={handleSaveUserEdit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Full Name</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Full Name</label>
                 <input
                   type="text"
                   required
@@ -1244,7 +1244,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Phone Number</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Phone Number</label>
                 <input
                   type="text"
                   value={editingUser.phone || ''}
@@ -1254,24 +1254,24 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               <div>
-                <label className="block text-neutral-400 font-semibold mb-1">Role</label>
+                <label className="block text-neutral-700 font-semibold mb-1">Role</label>
                 <select
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                   className="input-luxury text-xs cursor-pointer"
                 >
-                  <option value="user" className="bg-[#111111]">User (Standard Client)</option>
-                  <option value="admin" className="bg-[#111111]">Admin (Full Controls)</option>
+                  <option value="user" className="bg-white text-neutral-900">User (Standard Client)</option>
+                  <option value="admin" className="bg-white text-neutral-900">Admin (Full Controls)</option>
                 </select>
               </div>
 
               <div className="flex items-center gap-3 py-2">
-                <label className="text-neutral-300 font-semibold">Account Active Status:</label>
+                <label className="text-neutral-700 font-semibold">Account Active Status:</label>
                 <button
                   type="button"
                   onClick={() => setEditingUser({ ...editingUser, is_active: !editingUser.is_active })}
                   className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                    editingUser.is_active ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                    editingUser.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-300' : 'bg-rose-50 text-rose-700 border border-rose-300'
                   }`}
                 >
                   {editingUser.is_active ? 'Active' : 'Deactivated'}
@@ -1282,7 +1282,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 <button
                   type="button"
                   onClick={() => setEditingUser(null)}
-                  className="flex-1 py-2 rounded-xl bg-neutral-900 text-neutral-300 font-bold border border-neutral-800"
+                  className="flex-1 py-2 rounded-xl bg-neutral-100 text-neutral-700 font-bold border border-neutral-250 hover:bg-neutral-200"
                 >
                   Cancel
                 </button>
@@ -1301,13 +1301,13 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
       {/* Receipt Image Lightbox Modal */}
       {previewReceiptUrl && (
         <div 
-          className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+          className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex items-center justify-center p-4 bg-neutral-900/80 backdrop-blur-md"
           onClick={() => setPreviewReceiptUrl(null)}
         >
-          <div className="relative max-w-2xl w-full bg-black border border-neutral-800 rounded-3xl overflow-hidden p-2">
+          <div className="relative max-w-2xl w-full bg-white border border-neutral-200 rounded-3xl overflow-hidden p-2 shadow-2xl">
             <img src={previewReceiptUrl} alt="Receipt Screenshot" className="w-full h-auto rounded-2xl" />
             <div className="p-3 text-center">
-              <span className="text-xs text-neutral-400">Click anywhere to dismiss</span>
+              <span className="text-xs text-neutral-600 font-semibold">Click anywhere to dismiss</span>
             </div>
           </div>
         </div>

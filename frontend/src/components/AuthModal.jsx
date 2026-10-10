@@ -8,8 +8,8 @@ import {
   Phone, 
   ShieldAlert, 
   AlertCircle, 
-  ArrowRight,
-  ArrowLeft
+  ArrowRight, 
+  ArrowLeft 
 } from 'lucide-react';
 import { loginUser, registerUser, clearAuthError } from '../store/slices/authSlice';
 import { useLanguage } from '../context/LanguageContext';
@@ -44,25 +44,25 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex items-start sm:items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex items-start sm:items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm overflow-y-auto">
       <div 
-        className="relative w-full max-w-md bg-[#0D0D0D] border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-gold-lg my-4 sm:my-8"
+        className="relative w-full max-w-md bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 shadow-2xl my-4 sm:my-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header: Back to Home & Close */}
-        <div className="flex items-center justify-between pb-4 mb-5 border-b border-neutral-800">
+        <div className="flex items-center justify-between pb-4 mb-5 border-b border-neutral-100">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all group"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 border border-neutral-250 text-neutral-800 text-xs font-semibold tracking-wide transition-all group shadow-2xs"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft className="w-3.5 h-3.5 text-amber-600 group-hover:-translate-x-0.5 transition-transform" />
             <span>{t('back')}</span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 transition-colors"
+            className="p-1.5 rounded-xl bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200 border border-neutral-200 transition-colors"
             title={t('close')}
           >
             <X className="w-4 h-4" />
@@ -71,13 +71,13 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
         {/* Modal Brand Logo & Title */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-black border border-amber-500/40 p-2 flex items-center justify-center shadow-gold-sm mb-3">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 p-2 flex items-center justify-center shadow-xs mb-3">
             <img src="/logo-key.svg" alt="የኔ ኪራይ" className="w-full h-full object-contain" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white font-sans">
+          <h2 className="text-2xl font-black text-neutral-950 font-sans">
             {mode === 'login' ? (isAmharic ? 'እንኳን ደህና መጡ' : 'Welcome Back') : (isAmharic ? 'የኔ ኪራይ ይቀላቀሉ' : 'Join የኔ ኪራይ')}
           </h2>
-          <p className="text-xs text-neutral-400 mt-1 max-w-xs">
+          <p className="text-xs text-neutral-500 mt-1 max-w-xs">
             {mode === 'login' 
               ? (isAmharic ? 'የኪራይ ማስታወቂያዎችዎን፣ የተወደዱትን እና መልዕክቶችዎን ያግኙ' : 'Access your rental listings, favorites, and live chats') 
               : (isAmharic ? 'ኪራይ ለመለጠፍ እና ከአከራዮች ጋር ለመገናኘት መለያ ይክፈቱ' : 'Create an account to post rentals and contact owners')}
@@ -85,7 +85,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
         </div>
 
         {/* Mode Switch Tabs */}
-        <div className="grid grid-cols-2 p-1 bg-neutral-950 border border-neutral-850 rounded-2xl mb-6">
+        <div className="grid grid-cols-2 p-1 bg-neutral-100 border border-neutral-200 rounded-2xl mb-6">
           <button
             type="button"
             onClick={() => {
@@ -94,8 +94,8 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             }}
             className={`py-2 text-xs font-bold rounded-xl transition-all ${
               mode === 'login' 
-                ? 'bg-amber-500 text-black shadow-gold-sm' 
-                : 'text-neutral-400 hover:text-white'
+                ? 'bg-amber-500 text-neutral-950 shadow-xs' 
+                : 'text-neutral-600 hover:text-neutral-950'
             }`}
           >
             {t('navSignIn')}
@@ -108,8 +108,8 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             }}
             className={`py-2 text-xs font-bold rounded-xl transition-all ${
               mode === 'register' 
-                ? 'bg-amber-500 text-black shadow-gold-sm' 
-                : 'text-neutral-400 hover:text-white'
+                ? 'bg-amber-500 text-neutral-950 shadow-xs' 
+                : 'text-neutral-600 hover:text-neutral-950'
             }`}
           >
             {t('navCreateAccount')}
@@ -118,8 +118,8 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
         {/* Informational Security Notice */}
         {mode === 'register' && (
-          <div className="mb-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2.5 text-[11px] text-amber-300">
-            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="mb-5 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-[11px] text-amber-800">
+            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p>
               {isAmharic ? 'አዲስ የተመዘገቡ ተጠቃሚዎች መደበኛ የተጠቃሚ ፍቃድ ያገኛሉ። የአስተዳዳሪ ሚናዎች በውስጣዊ ቁጥጥር ብቻ ይሰጣሉ።' : 'Public registrations are assigned Client (User) privileges. Administrative roles are provisioned exclusively through internal terminal CLI seeds.'}
             </p>
@@ -131,11 +131,11 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
                 {t('authFullName')}
               </label>
               <div className="relative">
-                <UserIcon className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <UserIcon className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input 
                   type="text"
                   name="name"
@@ -150,11 +150,11 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
               {t('authEmail')}
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input 
                 type="email"
                 name="email"
@@ -169,11 +169,11 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
                 {t('authPhone')}
               </label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Phone className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input 
                   type="tel"
                   name="phone"
@@ -187,11 +187,11 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
               {t('authPassword')}
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-neutral-500 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input 
                 type="password"
                 name="password"
@@ -205,8 +205,8 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -215,7 +215,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-gold text-sm py-3.5"
+              className="w-full btn-gold text-sm py-3.5 font-bold"
             >
               {loading ? (
                 <span>{t('loading')}</span>
