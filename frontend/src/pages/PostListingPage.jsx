@@ -14,13 +14,15 @@ import {
   Phone, 
   ShieldCheck, 
   Sparkles, 
-  Info 
+  Info,
+  RefreshCw
 } from 'lucide-react';
 import { createNewListing, fetchCategories } from '../store/slices/listingSlice';
 import api from '../services/api';
 import PaymentModal from '../components/PaymentModal';
 import { compressImage, fileToDataUri } from '../utils/imageCompressor';
 import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 
 const getPresetFeatures = (isAmharic) => isAmharic ? [
   'ዕቃ የተሟላለት (Furnished)',
@@ -49,6 +51,7 @@ const getPresetFeatures = (isAmharic) => isAmharic ? [
 export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
   const { t, getCategoryTitle, isAmharic } = useLanguage();
+  const toast = useToast();
   const { categories } = useSelector((state) => state.listings);
   const { user } = useSelector((state) => state.auth);
 
@@ -80,6 +83,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errorMsg) setErrorMsg('');
   };
 
   const toggleFeature = (feature) => {
@@ -95,12 +99,37 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
     const rawFiles = Array.from(e.target.files);
     if (!rawFiles.length) return;
 
+    // Validate image mime types and file sizes
+    const validFiles = [];
+    for (const file of rawFiles) {
+      if (!file.type.startsWith('image/')) {
+        const msg = isAmharic 
+          ? `"${file.name}" ትክክለኛ የምስል ፋይል አይደለም` 
+          : `"${file.name}" is not a valid image file`;
+        toast.warning(msg);
+        continue;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        const msg = isAmharic 
+          ? `የምስሉ መጠን (${file.name}) ከ 20MB በታች መሆን አለበት` 
+          : `Image size for "${file.name}" must be under 20MB`;
+        toast.warning(msg);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (!validFiles.length) {
+      if (e.target) e.target.value = '';
+      return;
+    }
+
     setUploadingImage(true);
     setErrorMsg('');
 
     try {
-      for (const file of rawFiles) {
-        // 1. Compress image to reduce 10MB phone uploads to lightweight ~150KB
+      for (const file of validFiles) {
+        // 1. Compress image to reduce phone uploads to lightweight ~150KB
         const optimizedFile = await compressImage(file, 1280, 0.82);
 
         try {
@@ -123,9 +152,14 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           setImages((prev) => [...prev, { image_url: dataUri, public_id: 'client_stored' }]);
         }
       }
+      toast.success(isAmharic ? 'ምስሎች በተሳካ ሁኔታ ተጭነዋል' : 'Images processed successfully');
     } catch (err) {
       console.error('Image processing failed:', err);
-      setErrorMsg('Image processing error. Please try another image.');
+      const msg = isAmharic 
+        ? 'ምስሎችን በማዘጋጀት ላይ ስህተት ተፈጥሯል፤ እባክዎ እንደገና ይሞክሩ' 
+        : 'Image processing error. Please try another image.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setUploadingImage(false);
       if (e.target) e.target.value = '';
@@ -137,13 +171,31 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    
+    // Validation checks
+    if (!formData.title || formData.title.trim().length < 3) {
+      const msg = isAmharic ? 'እባክዎ ትክክለኛ የኪራይ ርዕስ ያስገቡ (ቢያንስ 3 ፊደላት)' : 'Please enter a valid listing title (at least 3 characters)';
+      setErrorMsg(msg);
+      toast.warning(msg);
+      return;
+    }
     if (!formData.category_id) {
-      setErrorMsg(isAmharic ? 'እባክዎ የኪራይ ዘርፍ ይምረጡ' : 'Please select a category');
+      const msg = isAmharic ? 'እባክዎ የኪራይ ዘርፍ ይምረጡ' : 'Please select a category';
+      setErrorMsg(msg);
+      toast.warning(msg);
       return;
     }
     if (!formData.rental_price || Number(formData.rental_price) <= 0) {
-      setErrorMsg(isAmharic ? 'እባክዎ ትክክለኛ የኪራይ ዋጋ ያስገቡ' : 'Please enter a valid rental price');
+      const msg = isAmharic ? 'እባክዎ ትክክለኛ የኪራይ ዋጋ ያስገቡ' : 'Please enter a valid rental price';
+      setErrorMsg(msg);
+      toast.warning(msg);
+      return;
+    }
+    if (formData.contact_phone && formData.contact_phone.trim().length < 9) {
+      const msg = isAmharic ? 'እባክዎ ትክክለኛ የስልክ ቁጥር ያስገቡ' : 'Please enter a valid phone number';
+      setErrorMsg(msg);
+      toast.warning(msg);
       return;
     }
 
@@ -159,6 +211,8 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
       };
 
       const result = await dispatch(createNewListing(payload)).unwrap();
+
+      toast.success(isAmharic ? 'ማስታወቂያዎ በተሳካ ሁኔታ ተመዝግቧል!' : 'Listing published successfully!');
 
       // Check if Admin requires payment
       if (result.requires_payment) {
@@ -177,7 +231,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
       }
     } catch (err) {
       console.error('Failed to post listing:', err);
-      setErrorMsg(typeof err === 'string' ? err : 'Error publishing listing');
+      const msg = typeof err === 'string' ? err : (isAmharic ? 'ማስታወቂያውን መለጠፍ አልተቻለም፤ እባክዎ የኔትወርክ ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ' : 'Could not publish listing. Please check your network and try again.');
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -243,9 +299,20 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
-            <span>{errorMsg}</span>
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs animate-shake">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+              <span className="font-medium leading-relaxed">{errorMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              {submitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
+              <span>{isAmharic ? 'እንደገና ሞክር' : 'Retry'}</span>
+            </button>
           </div>
         )}
 

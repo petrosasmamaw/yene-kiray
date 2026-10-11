@@ -7,7 +7,7 @@ export const loadUser = createAsyncThunk('auth/loadUser', async (_, { rejectWith
     return res.data.user;
   } catch (err) {
     localStorage.removeItem('yene_kiray_token');
-    return rejectWithValue(err.response?.data?.message || 'Failed to authenticate');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Failed to authenticate');
   }
 });
 
@@ -17,7 +17,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, 
     localStorage.setItem('yene_kiray_token', res.data.token);
     return res.data;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Login failed');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Login failed. Please check credentials or network.');
   }
 });
 
@@ -27,7 +27,7 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (formDat
     localStorage.setItem('yene_kiray_token', res.data.token);
     return res.data;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Registration failed');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Registration failed. Please check your information or network.');
   }
 });
 

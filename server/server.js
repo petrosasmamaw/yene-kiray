@@ -15,6 +15,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 import fs from 'fs';
 
@@ -171,13 +172,16 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-  console.error('Unhandled Server Error:', err);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error'
-  });
+// Production Centralized Error Handler (Catches all sync/async express errors)
+app.use(errorHandler);
+
+// Process-level Crash Prevention (Network drops, DB disconnects, unhandled promises)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ [Process] Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('🚨 [Process] Uncaught Exception:', err.message, err.stack);
 });
 
 server.listen(PORT, () => {

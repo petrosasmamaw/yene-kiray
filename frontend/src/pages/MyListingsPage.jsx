@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Layers, 
@@ -13,7 +13,8 @@ import {
   Calendar,
   Edit3,
   Trash2,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react';
 import { fetchMyListings, clearPostSuccessData } from '../store/slices/listingSlice';
 import PaymentModal from '../components/PaymentModal';
@@ -23,24 +24,54 @@ import { useLanguage } from '../context/LanguageContext';
 export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
   const { t, getCategoryTitle, isAmharic } = useLanguage();
-  const { myListings, myListingsLoading, postSuccessData } = useSelector((state) => state.listings);
+  const { 
+    myListings, 
+    myListingsLoading, 
+    myListingsLoadingMore,
+    hasMoreMyListings,
+    myListingsPage,
+    myListingsTotal,
+    postSuccessData 
+  } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [paymentTarget, setPaymentTarget] = useState(null);
   const [editingListing, setEditingListing] = useState(null);
   const [categories, setCategories] = useState([]);
+  const loadMoreSentinelRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (isAuthenticated) {
-      dispatch(fetchMyListings());
+      dispatch(fetchMyListings({ page: 1, limit: 10 }));
       api.get('/categories').then(res => setCategories(res.data.categories || [])).catch(() => {});
     }
   }, [isAuthenticated, dispatch]);
 
+  const handleLoadNextMyListings = () => {
+    if (!hasMoreMyListings || myListingsLoading || myListingsLoadingMore) return;
+    dispatch(fetchMyListings({ page: (myListingsPage || 1) + 1, limit: 10 }));
+  };
+
+  useEffect(() => {
+    if (!hasMoreMyListings || myListingsLoading || myListingsLoadingMore) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        handleLoadNextMyListings();
+      }
+    }, { rootMargin: '300px' });
+
+    if (loadMoreSentinelRef.current) {
+      observer.observe(loadMoreSentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMoreMyListings, myListingsLoading, myListingsLoadingMore, myListingsPage, dispatch]);
+
   const handlePaymentSuccess = () => {
     setPaymentTarget(null);
-    dispatch(fetchMyListings());
+    dispatch(fetchMyListings({ page: 1, limit: 10 }));
   };
 
   const handleDeleteListing = async (id) => {
@@ -176,7 +207,8 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
             </button>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <>
+            <div className="space-y-3 sm:space-y-4">
             {myListings.map((listing) => {
               const primaryImg = listing.images && listing.images.length > 0 
                 ? listing.images[0].image_url 
@@ -286,7 +318,40 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               );
             })}
           </div>
-        )}
+
+          {/* Instagram-style incremental load indicator & sentinel */}
+          {myListings.length > 0 && (
+            <div className="pt-8 pb-4">
+              {myListingsLoadingMore ? (
+                <div className="py-6 flex flex-col items-center justify-center gap-2 text-neutral-500">
+                  <RefreshCw className="w-5 h-5 text-amber-600 animate-spin" />
+                  <span className="text-xs font-semibold text-neutral-600">
+                    {isAmharic ? 'ተጨማሪ 10 ማስታወቂያዎችዎን በማምጣት ላይ...' : 'Loading next 10 of your listings...'}
+                  </span>
+                </div>
+              ) : hasMoreMyListings ? (
+                <div className="text-center pt-2">
+                  <div ref={loadMoreSentinelRef} className="h-6" />
+                  <button
+                    type="button"
+                    onClick={handleLoadNextMyListings}
+                    className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-2 cursor-pointer hover:shadow-xs active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{isAmharic ? 'ተጨማሪ 10 አሳይ' : 'Load Next 10'}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-xs text-neutral-400 font-medium flex items-center justify-center gap-3">
+                  <span className="w-16 h-px bg-neutral-200" />
+                  <span>{isAmharic ? '✨ ሁሉንም ማስታወቂያዎችዎን አይተዋል ✨' : "✨ You've seen all your listings ✨"}</span>
+                  <span className="w-16 h-px bg-neutral-200" />
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       </div>
 

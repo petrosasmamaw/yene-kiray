@@ -101,10 +101,10 @@ export const getListings = async (req, res) => {
       queryText += ` ORDER BY c.id ASC, l.created_at DESC`;
     }
 
-    // Only apply pagination limit if explicit numeric limit parameter is passed (and not 'all')
-    if (limit && limit !== 'all') {
-      const parsedLimit = parseInt(limit, 10);
-      const parsedPage = parseInt(page || 1, 10);
+    const parsedLimit = limit === 'all' ? null : (parseInt(limit, 10) || 10);
+    const parsedPage = Math.max(1, parseInt(page || 1, 10));
+
+    if (parsedLimit !== null) {
       const offset = (parsedPage - 1) * parsedLimit;
       queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
       params.push(parsedLimit, offset);
@@ -114,15 +114,17 @@ export const getListings = async (req, res) => {
     const result = await pool.query(queryText, params);
 
     const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].full_count, 10) : 0;
-    const parsedLimit = limit && limit !== 'all' ? parseInt(limit, 10) : totalCount;
-    const totalPages = parsedLimit > 0 ? Math.ceil(totalCount / parsedLimit) : 1;
+    const effectiveLimit = parsedLimit || totalCount || 10;
+    const totalPages = effectiveLimit > 0 ? Math.ceil(totalCount / effectiveLimit) : 1;
 
     const responseData = {
       success: true,
       count: result.rows.length,
       total: totalCount,
-      page: page ? parseInt(page, 10) : 1,
+      page: parsedPage,
+      limit: effectiveLimit,
       totalPages: totalPages || 1,
+      hasMore: parsedPage < totalPages,
       listings: result.rows
     };
 
@@ -309,17 +311,23 @@ export const createListing = async (req, res) => {
 // @access  Private
 export const getMyListings = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT 
+    const { page, limit } = req.query;
+    const parsedLimit = limit === 'all' ? null : (parseInt(limit, 10) || 10);
+    const parsedPage = Math.max(1, parseInt(page || 1, 10));
+
+    let queryText = `
+      SELECT 
         l.*,
         c.name AS category_name,
         c.name_am AS category_name_am,
         p.id AS payment_id,
         p.status AS payment_status,
         p.amount AS payment_amount,
+        COUNT(*) OVER() AS full_count,
         COALESCE(
           json_agg(
             json_build_object('id', li.id, 'image_url', li.image_url, 'is_primary', li.is_primary)
+            ORDER BY li.is_primary DESC, li.id ASC
           ) FILTER (WHERE li.id IS NOT NULL), '[]'
         ) AS images
       FROM listings l
@@ -328,11 +336,31 @@ export const getMyListings = async (req, res) => {
       LEFT JOIN payments p ON p.listing_id = l.id
       WHERE l.user_id = $1
       GROUP BY l.id, c.name, c.name_am, p.id, p.status, p.amount
-      ORDER BY l.created_at DESC`,
-      [req.user.id]
-    );
+      ORDER BY l.created_at DESC
+    `;
 
-    return res.json({ success: true, listings: result.rows });
+    const params = [req.user.id];
+    if (parsedLimit !== null) {
+      const offset = (parsedPage - 1) * parsedLimit;
+      queryText += ` LIMIT $2 OFFSET $3`;
+      params.push(parsedLimit, offset);
+    }
+
+    const result = await pool.query(queryText, params);
+    const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].full_count, 10) : 0;
+    const effectiveLimit = parsedLimit || totalCount || 10;
+    const totalPages = effectiveLimit > 0 ? Math.ceil(totalCount / effectiveLimit) : 1;
+
+    return res.json({
+      success: true,
+      count: result.rows.length,
+      total: totalCount,
+      page: parsedPage,
+      limit: effectiveLimit,
+      totalPages: totalPages || 1,
+      hasMore: parsedPage < totalPages,
+      listings: result.rows
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -373,15 +401,21 @@ export const toggleSaveListing = async (req, res) => {
 // @access  Private
 export const getSavedListings = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT 
+    const { page, limit } = req.query;
+    const parsedLimit = limit === 'all' ? null : (parseInt(limit, 10) || 10);
+    const parsedPage = Math.max(1, parseInt(page || 1, 10));
+
+    let queryText = `
+      SELECT 
         l.*,
         c.name AS category_name,
         c.name_am AS category_name_am,
         u.name AS owner_name,
+        COUNT(*) OVER() AS full_count,
         COALESCE(
           json_agg(
             json_build_object('id', li.id, 'image_url', li.image_url, 'is_primary', li.is_primary)
+            ORDER BY li.is_primary DESC, li.id ASC
           ) FILTER (WHERE li.id IS NOT NULL), '[]'
         ) AS images
       FROM saved_listings sl
@@ -391,11 +425,31 @@ export const getSavedListings = async (req, res) => {
       LEFT JOIN listing_images li ON li.listing_id = l.id
       WHERE sl.user_id = $1
       GROUP BY l.id, c.name, c.name_am, u.name, sl.created_at
-      ORDER BY sl.created_at DESC`,
-      [req.user.id]
-    );
+      ORDER BY sl.created_at DESC
+    `;
 
-    return res.json({ success: true, listings: result.rows });
+    const params = [req.user.id];
+    if (parsedLimit !== null) {
+      const offset = (parsedPage - 1) * parsedLimit;
+      queryText += ` LIMIT $2 OFFSET $3`;
+      params.push(parsedLimit, offset);
+    }
+
+    const result = await pool.query(queryText, params);
+    const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].full_count, 10) : 0;
+    const effectiveLimit = parsedLimit || totalCount || 10;
+    const totalPages = effectiveLimit > 0 ? Math.ceil(totalCount / effectiveLimit) : 1;
+
+    return res.json({
+      success: true,
+      count: result.rows.length,
+      total: totalCount,
+      page: parsedPage,
+      limit: effectiveLimit,
+      totalPages: totalPages || 1,
+      hasMore: parsedPage < totalPages,
+      listings: result.rows
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

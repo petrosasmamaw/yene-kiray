@@ -6,7 +6,7 @@ export const fetchConversations = createAsyncThunk('chat/fetchConversations', as
     const res = await api.get('/chat/conversations');
     return res.data.conversations;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to load conversations');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Failed to load conversations');
   }
 });
 
@@ -15,7 +15,7 @@ export const startConversation = createAsyncThunk('chat/startConversation', asyn
     const res = await api.post('/chat/conversations', { listing_id: listingId });
     return res.data.conversation;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to start chat');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Failed to start chat');
   }
 });
 
@@ -24,7 +24,7 @@ export const fetchMessages = createAsyncThunk('chat/fetchMessages', async (conve
     const res = await api.get(`/chat/conversations/${conversationId}/messages`);
     return { conversationId, messages: res.data.messages };
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to load messages');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Failed to load messages');
   }
 });
 
@@ -33,7 +33,7 @@ export const sendChatMessage = createAsyncThunk('chat/sendMessage', async ({ con
     const res = await api.post(`/chat/conversations/${conversationId}/messages`, { content });
     return res.data.message;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to send message');
+    return rejectWithValue(err.userMessage || err.response?.data?.message || 'Failed to send message');
   }
 });
 

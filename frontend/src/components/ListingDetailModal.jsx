@@ -17,6 +17,7 @@ import {
 import { toggleSave } from '../store/slices/listingSlice';
 import { startConversation } from '../store/slices/chatSlice';
 import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 
 export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
   const dispatch = useDispatch();
@@ -57,21 +58,33 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
     ? t('periodYear') 
     : t('periodMonth');
 
-  const handleStartChat = () => {
+  const toast = useToast();
+
+  const handleStartChat = async () => {
     if (!isAuthenticated) {
       onOpenAuth('login');
       return;
     }
-    dispatch(startConversation(listing.id));
-    onClose();
+    try {
+      await dispatch(startConversation(listing.id)).unwrap();
+      onClose();
+    } catch (err) {
+      console.error('Failed to start conversation:', err);
+      toast.error(typeof err === 'string' ? err : (isAmharic ? 'ውይይት መጀመር አልተቻለም፤ እባክዎ የኔትወርክ ግንኙነትዎን ያረጋግጡ' : 'Could not start conversation. Please check your connection.'));
+    }
   };
 
-  const handleToggleSave = () => {
+  const handleToggleSave = async () => {
     if (!isAuthenticated) {
       onOpenAuth('login');
       return;
     }
-    dispatch(toggleSave(listing.id));
+    try {
+      await dispatch(toggleSave(listing.id)).unwrap();
+    } catch (err) {
+      console.error('Failed to toggle save:', err);
+      toast.error(typeof err === 'string' ? err : (isAmharic ? 'ማስታወቂያውን ማስቀመጥ አልተቻለም' : 'Could not save listing'));
+    }
   };
 
   return (

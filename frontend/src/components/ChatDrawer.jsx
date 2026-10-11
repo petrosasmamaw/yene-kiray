@@ -9,7 +9,11 @@ import {
   Clock, 
   Check, 
   CheckCheck, 
-  Building 
+  Building,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   closeChat, 
@@ -25,10 +29,12 @@ import {
 import socketService from '../services/socket';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 
 export default function ChatDrawer() {
   const dispatch = useDispatch();
-  const { t } = useLanguage();
+  const { t, isAmharic } = useLanguage();
+  const toast = useToast();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { 
     isOpen, 
@@ -40,8 +46,19 @@ export default function ChatDrawer() {
   } = useSelector((state) => state.chat);
 
   const [inputText, setInputText] = useState('');
+  const [socketStatus, setSocketStatus] = useState(socketService.getStatus());
+  const [sendError, setSendError] = useState(null);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+
+  // Subscribe to socket connection status
+  useEffect(() => {
+    const unsubscribe = socketService.subscribeStatus((newStatus) => {
+      setSocketStatus(newStatus);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Load conversations once when chat opens only if not already loaded
   useEffect(() => {
@@ -72,22 +89,37 @@ export default function ChatDrawer() {
 
   if (!isOpen) return null;
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputText.trim() || !activeConversation?.id) return;
+    if (!inputText.trim() || !activeConversation?.id || sending) return;
 
-    dispatch(sendChatMessage({
-      conversationId: activeConversation.id,
-      content: inputText.trim()
-    }));
+    const messageText = inputText.trim();
+    setSending(true);
+    setSendError(null);
 
-    // Clear typing state
-    socketService.emitTyping(activeConversation.id, user.name, false);
-    setInputText('');
+    try {
+      await dispatch(sendChatMessage({
+        conversationId: activeConversation.id,
+        content: messageText
+      })).unwrap();
+
+      // Clear typing state
+      socketService.emitTyping(activeConversation.id, user.name, false);
+      setInputText('');
+    } catch (err) {
+      console.error('Failed to send chat message:', err);
+      const friendlyErr = typeof err === 'string' ? err : (isAmharic ? 'መልእክት መላክ አልተቻለም፤ እባክዎ የኔትወርክ ግንኙነትዎን ያረጋግጡ' : 'Could not send message. Please check your network connection.');
+      setSendError(friendlyErr);
+      toast.error(friendlyErr);
+      // Keep inputText so user doesn't lose typed text!
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
+    if (sendError) setSendError(null);
 
     if (activeConversation?.id) {
       socketService.emitTyping(activeConversation.id, user.name, true);
@@ -109,22 +141,37 @@ export default function ChatDrawer() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
-        <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-white">
+        <div className="p-3.5 sm:p-4 border-b border-neutral-200 flex items-center justify-between bg-white">
           {activeConversation ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
               <button
                 onClick={() => dispatch(setActiveConversation(null))}
-                className="p-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900"
+                className="p-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 shrink-0"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <div>
-                <h3 className="text-sm font-bold text-neutral-950 truncate max-w-[220px]">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-neutral-950 truncate max-w-[170px] sm:max-w-[220px]">
                   {activeConversation.listing_title || 'Listing Chat'}
                 </h3>
-                <p className="text-[11px] text-amber-600 font-semibold">
-                  {user.id === activeConversation.renter_id ? activeConversation.owner_name : activeConversation.renter_name}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[11px] text-amber-600 font-semibold truncate">
+                    {user.id === activeConversation.renter_id ? activeConversation.owner_name : activeConversation.renter_name}
+                  </p>
+                  <span className="text-neutral-300">•</span>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${
+                    socketStatus === 'connected' ? 'text-emerald-600' :
+                    socketStatus === 'reconnecting' || socketStatus === 'connecting' ? 'text-amber-600' : 'text-red-500'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      socketStatus === 'connected' ? 'bg-emerald-500' :
+                      socketStatus === 'reconnecting' || socketStatus === 'connecting' ? 'bg-amber-500 animate-ping' : 'bg-red-500'
+                    }`} />
+                    {socketStatus === 'connected' ? (isAmharic ? 'ቀጥታ' : 'Live') :
+                     socketStatus === 'reconnecting' || socketStatus === 'connecting' ? (isAmharic ? 'እየተገናኘ...' : 'Connecting...') :
+                     (isAmharic ? 'ተቋርጧል' : 'Offline')}
+                  </span>
+                </div>
               </div>
             </div>
           ) : (
@@ -133,9 +180,24 @@ export default function ChatDrawer() {
                 <MessageSquare className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-neutral-950 font-sans">
-                  {t('chatTitle')}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-neutral-950 font-sans">
+                    {t('chatTitle')}
+                  </h3>
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                    socketStatus === 'connected' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    socketStatus === 'reconnecting' || socketStatus === 'connecting' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                    'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      socketStatus === 'connected' ? 'bg-emerald-500' :
+                      socketStatus === 'reconnecting' || socketStatus === 'connecting' ? 'bg-amber-500 animate-ping' : 'bg-red-500'
+                    }`} />
+                    {socketStatus === 'connected' ? (isAmharic ? 'የቀጥታ መስመር' : 'Online') :
+                     socketStatus === 'reconnecting' || socketStatus === 'connecting' ? (isAmharic ? 'በመገናኘት ላይ...' : 'Connecting...') :
+                     (isAmharic ? 'ከመስመር ውጭ' : 'Offline')}
+                  </span>
+                </div>
                 <p className="text-[11px] text-neutral-500">
                   {t('chatSubtitle')}
                 </p>
@@ -143,12 +205,23 @@ export default function ChatDrawer() {
             </div>
           )}
 
-          <button
-            onClick={() => dispatch(closeChat())}
-            className="p-2 rounded-xl text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {socketStatus !== 'connected' && (
+              <button
+                onClick={() => socketService.connect(user?.id)}
+                title={isAmharic ? 'እንደገና አገናኝ' : 'Reconnect'}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-amber-600 hover:bg-neutral-100 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              </button>
+            )}
+            <button
+              onClick={() => dispatch(closeChat())}
+              className="p-2 rounded-xl text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Drawer Body */}
@@ -244,22 +317,40 @@ export default function ChatDrawer() {
             </div>
 
             {/* Message Input Form */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-neutral-200 flex items-center gap-2">
-              <input
-                type="text"
-                value={inputText}
-                onChange={handleInputChange}
-                placeholder={t('chatInputPlaceholder')}
-                className="flex-1 bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-amber-500"
-              />
-              <button
-                type="submit"
-                disabled={!inputText.trim()}
-                className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold disabled:opacity-40 transition-colors shadow-xs"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
+            <div className="bg-white border-t border-neutral-200 p-3 space-y-2">
+              {sendError && (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between animate-shake">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                    <span className="truncate">{sendError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendMessage}
+                    disabled={sending}
+                    className="text-[11px] font-bold text-red-800 underline hover:no-underline ml-2 shrink-0 cursor-pointer"
+                  >
+                    {isAmharic ? 'እንደገና ሞክር' : 'Retry'}
+                  </button>
+                </div>
+              )}
+              <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={handleInputChange}
+                  placeholder={t('chatInputPlaceholder')}
+                  className="flex-1 bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim() || sending}
+                  className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold disabled:opacity-40 transition-colors shadow-xs flex items-center justify-center shrink-0"
+                >
+                  {sending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </form>
+            </div>
           </div>
         ) : (
           /* Conversations List */

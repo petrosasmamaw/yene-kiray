@@ -16,7 +16,9 @@ import {
   ChevronRight,
   ArrowUpDown,
   LayoutGrid,
-  List
+  List,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { fetchListings, fetchCategories, setSelectedCategory } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
@@ -38,7 +40,18 @@ const iconMap = {
 export default function HomePage({ onSelectListing, onOpenAuth }) {
   const dispatch = useDispatch();
   const { t, getCategoryTitle, isAmharic, getCityTitle } = useLanguage();
-  const { items, categories, selectedCategory, loading, categoriesLoading } = useSelector((state) => state.listings);
+  const { 
+    items, 
+    categories, 
+    selectedCategory, 
+    loading, 
+    categoriesLoading, 
+    error,
+    hasMore,
+    loadingMore,
+    page,
+    total
+  } = useSelector((state) => state.listings);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -58,6 +71,8 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
   };
 
   const categoryScrollRef = useRef(null);
+  const loadMoreMobileSentinelRef = useRef(null);
+  const loadMoreDesktopSentinelRef = useRef(null);
 
   const scrollCategories = (direction) => {
     if (categoryScrollRef.current) {
@@ -67,6 +82,21 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleRetry = () => {
+    dispatch(fetchCategories());
+    dispatch(fetchListings({
+      category: selectedCategory || undefined,
+      search: debouncedSearch.trim() || undefined,
+      city: selectedCity || undefined,
+      period: selectedPeriod || undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      sort: sortBy || undefined,
+      page: 1,
+      limit: 10
+    }));
   };
 
   useEffect(() => {
@@ -82,7 +112,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Real-time instant fetch on filter changes & debounced search
+  // Real-time instant fetch on filter changes & debounced search (Initial first 10)
   useEffect(() => {
     dispatch(fetchListings({
       category: selectedCategory || undefined,
@@ -91,9 +121,47 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
       period: selectedPeriod || undefined,
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
-      sort: sortBy || undefined
+      sort: sortBy || undefined,
+      page: 1,
+      limit: 10
     }));
   }, [debouncedSearch, selectedCategory, selectedCity, selectedPeriod, minPrice, maxPrice, sortBy, dispatch]);
+
+  // Trigger next 10 items (Instagram-style)
+  const handleLoadNextPage = () => {
+    if (!hasMore || loading || loadingMore) return;
+    dispatch(fetchListings({
+      category: selectedCategory || undefined,
+      search: debouncedSearch.trim() || undefined,
+      city: selectedCity || undefined,
+      period: selectedPeriod || undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      sort: sortBy || undefined,
+      page: (page || 1) + 1,
+      limit: 10
+    }));
+  };
+
+  // IntersectionObserver for seamless infinite scrolling
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        handleLoadNextPage();
+      }
+    }, { rootMargin: '350px' });
+
+    if (loadMoreMobileSentinelRef.current) {
+      observer.observe(loadMoreMobileSentinelRef.current);
+    }
+    if (loadMoreDesktopSentinelRef.current) {
+      observer.observe(loadMoreDesktopSentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, page, selectedCategory, debouncedSearch, selectedCity, selectedPeriod, minPrice, maxPrice, sortBy, dispatch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -104,7 +172,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
       period: selectedPeriod || undefined,
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
-      sort: sortBy || undefined
+      sort: sortBy || undefined,
+      page: 1,
+      limit: 10
     }));
   };
 
@@ -443,6 +513,25 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               ))}
             </div>
           )
+        ) : error && items.length === 0 ? (
+          <div className="py-12 sm:py-16 text-center bg-white border border-rose-200 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-4 text-rose-600">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-neutral-950 mb-1.5">
+              {isAmharic ? 'የመጫን ችግር አጋጥሟል' : 'Failed to Load Listings'}
+            </h3>
+            <p className="text-xs text-rose-700 mb-5 leading-relaxed font-medium">
+              {typeof error === 'string' ? error : (isAmharic ? 'የኔትወርክ ወይም የአገልጋይ ችግር አጋጥሟል፤ እባክዎ እንደገና ይሞክሩ' : 'Network or server connection issue. Please try again.')}
+            </p>
+            <button
+              onClick={handleRetry}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{isAmharic ? 'እንደገና ሞክር' : 'Try Again'}</span>
+            </button>
+          </div>
         ) : items.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto shadow-xs">
             <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 text-amber-600">
@@ -486,6 +575,38 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               ))}
             </div>
           )
+        )}
+
+        {/* Mobile Instagram-style incremental load indicator & sentinel */}
+        {items.length > 0 && (
+          <div className="pt-4 pb-2">
+            {loadingMore ? (
+              <div className="py-4 flex flex-col items-center justify-center gap-2 text-neutral-500">
+                <RefreshCw className="w-5 h-5 text-amber-600 animate-spin" />
+                <span className="text-[11px] font-semibold text-neutral-600">
+                  {isAmharic ? 'ተጨማሪ 10 ማስታወቂያዎችን በማምጣት ላይ...' : 'Loading next 10 listings...'}
+                </span>
+              </div>
+            ) : hasMore ? (
+              <div className="text-center pt-2">
+                <div ref={loadMoreMobileSentinelRef} className="h-6" />
+                <button
+                  type="button"
+                  onClick={handleLoadNextPage}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{isAmharic ? 'ተጨማሪ 10 አሳይ' : 'Load Next 10'}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="py-6 text-center text-[11px] text-neutral-400 font-medium flex items-center justify-center gap-2">
+                <span className="w-8 h-px bg-neutral-200" />
+                <span>{isAmharic ? '✨ ሁሉንም ማስታወቂያዎች አይተዋል ✨' : "✨ You've seen all listings ✨"}</span>
+                <span className="w-8 h-px bg-neutral-200" />
+              </div>
+            )}
+          </div>
         )}
       </section>
 
@@ -853,6 +974,25 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                 <ListingCardSkeleton key={n} />
               ))}
             </div>
+          ) : error && items.length === 0 ? (
+            <div className="py-16 text-center bg-white border border-rose-200 rounded-2xl p-8 shadow-xs">
+              <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-4 text-rose-600">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-neutral-950 mb-1.5">
+                {isAmharic ? 'የመጫን ችግር አጋጥሟል' : 'Failed to Load Listings'}
+              </h3>
+              <p className="text-xs text-rose-700 mb-5 leading-relaxed font-medium max-w-md mx-auto">
+                {typeof error === 'string' ? error : (isAmharic ? 'የኔትወርክ ወይም የአገልጋይ ችግር አጋጥሟል፤ እባክዎ እንደገና ይሞክሩ' : 'Network or server connection issue. Please try again.')}
+              </p>
+              <button
+                onClick={handleRetry}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{isAmharic ? 'እንደገና ሞክር' : 'Try Again'}</span>
+              </button>
+            </div>
           ) : items.length === 0 ? (
             <div className="py-16 text-center bg-white border border-slate-200 rounded-2xl p-8 shadow-xs">
               <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4 text-slate-600">
@@ -879,6 +1019,38 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   onOpenAuth={onOpenAuth}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Desktop Instagram-style incremental load indicator & sentinel */}
+          {items.length > 0 && (
+            <div className="pt-8 pb-4">
+              {loadingMore ? (
+                <div className="py-6 flex flex-col items-center justify-center gap-2.5 text-slate-500">
+                  <RefreshCw className="w-5 h-5 text-amber-600 animate-spin" />
+                  <span className="text-xs font-semibold text-slate-700">
+                    {isAmharic ? 'ተጨማሪ 10 ማስታወቂያዎችን በማምጣት ላይ...' : 'Loading next 10 listings...'}
+                  </span>
+                </div>
+              ) : hasMore ? (
+                <div className="text-center pt-2">
+                  <div ref={loadMoreDesktopSentinelRef} className="h-6" />
+                  <button
+                    type="button"
+                    onClick={handleLoadNextPage}
+                    className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-2 cursor-pointer hover:shadow-xs active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{isAmharic ? 'ተጨማሪ 10 ማስታወቂያዎችን አሳይ' : 'Load Next 10 Listings'}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-xs text-slate-400 font-medium flex items-center justify-center gap-3">
+                  <span className="w-16 h-px bg-slate-200" />
+                  <span>{isAmharic ? '✨ ሁሉንም ማስታወቂያዎች አይተዋል ✨' : "✨ You've seen all listings ✨"}</span>
+                  <span className="w-16 h-px bg-slate-200" />
+                </div>
+              )}
             </div>
           )}
         </main>

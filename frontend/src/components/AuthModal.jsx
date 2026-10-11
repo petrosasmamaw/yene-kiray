@@ -9,14 +9,17 @@ import {
   ShieldAlert, 
   AlertCircle, 
   ArrowRight, 
-  ArrowLeft 
+  ArrowLeft,
+  Loader2
 } from 'lucide-react';
 import { loginUser, registerUser, clearAuthError } from '../store/slices/authSlice';
 import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 
 export default function AuthModal({ initialMode = 'login', onClose }) {
   const dispatch = useDispatch();
   const { t, isAmharic } = useLanguage();
+  const toast = useToast();
   const { loading, error } = useSelector((state) => state.auth);
 
   const [mode, setMode] = useState(initialMode); // 'login' or 'register'
@@ -26,20 +29,61 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
     phone: '',
     password: ''
   });
+  const [validationError, setValidationError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (validationError) setValidationError('');
     if (error) dispatch(clearAuthError());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setValidationError('');
+
+    // Client-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      const msg = isAmharic ? 'እባክዎ ትክክለኛ የኢሜይል አድራሻ ያስገቡ' : 'Please enter a valid email address.';
+      setValidationError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      const msg = isAmharic ? 'የይለፍ ቃል ቢያንስ 6 ፊደላት ወይም ቁጥሮች መሆን አለበት' : 'Password must be at least 6 characters.';
+      setValidationError(msg);
+      toast.error(msg);
+      return;
+    }
+
     if (mode === 'login') {
-      const res = await dispatch(loginUser({ email: formData.email, password: formData.password }));
-      if (!res.error) onClose();
+      const res = await dispatch(loginUser({ email: formData.email.trim(), password: formData.password }));
+      if (!res.error) {
+        toast.success(isAmharic ? 'በተሳካ ሁኔታ ገብተዋል!' : 'Welcome back! Signed in successfully.');
+        onClose();
+      } else {
+        toast.error(res.payload || (isAmharic ? 'መግባት አልተሳካም' : 'Login failed'));
+      }
     } else {
-      const res = await dispatch(registerUser(formData));
-      if (!res.error) onClose();
+      if (!formData.name.trim()) {
+        const msg = isAmharic ? 'እባክዎ ሙሉ ስምዎን ያስገቡ' : 'Please enter your full name.';
+        setValidationError(msg);
+        toast.error(msg);
+        return;
+      }
+      const res = await dispatch(registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        password: formData.password
+      }));
+      if (!res.error) {
+        toast.success(isAmharic ? 'መለያዎ በተሳካ ሁኔታ ተፈጥሯል!' : 'Account created successfully!');
+        onClose();
+      } else {
+        toast.error(res.payload || (isAmharic ? 'ምዝገባ አልተሳካም' : 'Registration failed'));
+      }
     }
   };
 

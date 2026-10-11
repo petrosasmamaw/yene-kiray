@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Bookmark, Layers, ArrowLeft } from 'lucide-react';
+import { Bookmark, Layers, ArrowLeft, RefreshCw } from 'lucide-react';
 import { fetchSavedListings } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
 import ListingCardSkeleton from '../components/ListingCardSkeleton';
@@ -9,14 +9,44 @@ import { useLanguage } from '../context/LanguageContext';
 export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoHome }) {
   const dispatch = useDispatch();
   const { t, isAmharic } = useLanguage();
-  const { savedItems, savedLoading } = useSelector((state) => state.listings);
+  const { 
+    savedItems, 
+    savedLoading, 
+    savedLoadingMore, 
+    hasMoreSaved, 
+    savedPage, 
+    savedTotal 
+  } = useSelector((state) => state.listings);
   const { isAuthenticated } = useSelector((state) => state.auth);
+
+  const loadMoreSentinelRef = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchSavedListings());
+      dispatch(fetchSavedListings({ page: 1, limit: 10 }));
     }
   }, [isAuthenticated, dispatch]);
+
+  const handleLoadNextSaved = () => {
+    if (!hasMoreSaved || savedLoading || savedLoadingMore) return;
+    dispatch(fetchSavedListings({ page: (savedPage || 1) + 1, limit: 10 }));
+  };
+
+  useEffect(() => {
+    if (!hasMoreSaved || savedLoading || savedLoadingMore) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        handleLoadNextSaved();
+      }
+    }, { rootMargin: '300px' });
+
+    if (loadMoreSentinelRef.current) {
+      observer.observe(loadMoreSentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMoreSaved, savedLoading, savedLoadingMore, savedPage, dispatch]);
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-neutral-900 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
@@ -129,6 +159,38 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
                 />
               ))}
             </div>
+
+            {/* Instagram-style incremental load indicator & sentinel */}
+            {savedItems.length > 0 && (
+              <div className="pt-8 pb-4">
+                {savedLoadingMore ? (
+                  <div className="py-6 flex flex-col items-center justify-center gap-2 text-neutral-500">
+                    <RefreshCw className="w-5 h-5 text-amber-600 animate-spin" />
+                    <span className="text-xs font-semibold text-neutral-600">
+                      {isAmharic ? 'ተጨማሪ 10 የተቀመጡ ማስታወቂያዎችን በማምጣት ላይ...' : 'Loading next 10 saved listings...'}
+                    </span>
+                  </div>
+                ) : hasMoreSaved ? (
+                  <div className="text-center pt-2">
+                    <div ref={loadMoreSentinelRef} className="h-6" />
+                    <button
+                      type="button"
+                      onClick={handleLoadNextSaved}
+                      className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-2 cursor-pointer hover:shadow-xs active:scale-95"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{isAmharic ? 'ተጨማሪ 10 አሳይ' : 'Load Next 10'}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-xs text-neutral-400 font-medium flex items-center justify-center gap-3">
+                    <span className="w-16 h-px bg-neutral-200" />
+                    <span>{isAmharic ? '✨ ሁሉንም የተቀመጡ ማስታወቂያዎች አይተዋል ✨' : "✨ You've seen all saved listings ✨"}</span>
+                    <span className="w-16 h-px bg-neutral-200" />
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
 
