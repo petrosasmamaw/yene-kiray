@@ -41,6 +41,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
 
   const isSaved = savedItems.some((item) => String(item.id) === String(listing.id));
   const isOwner = user?.id === listing.user_id;
+  const isAdmin = user?.role === 'admin';
 
   const images = listing.images && listing.images.length > 0 
     ? listing.images 
@@ -276,17 +277,19 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                 <span>{t('back')}</span>
               </button>
 
-              <button
-                onClick={handleToggleSave}
-                className={`p-3 rounded-xl border transition-all shadow-2xs ${
-                  isSaved 
-                    ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold' 
-                    : 'bg-neutral-100 text-neutral-700 border-neutral-200 hover:text-amber-600 hover:border-amber-400'
-                }`}
-                title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
-              >
-                <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-neutral-950' : ''}`} />
-              </button>
+              {!isAdmin && (
+                <button
+                  onClick={handleToggleSave}
+                  className={`p-3 rounded-xl border transition-all shadow-2xs ${
+                    isSaved 
+                      ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold' 
+                      : 'bg-neutral-100 text-neutral-700 border-neutral-200 hover:text-amber-600 hover:border-amber-400'
+                  }`}
+                  title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
+                >
+                  <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-neutral-950' : ''}`} />
+                </button>
+              )}
 
               <a
                 href={`tel:${listing.contact_phone}`}
@@ -296,7 +299,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
                 <span>{t('modalCall')} ({listing.contact_phone})</span>
               </a>
 
-              {!isOwner && (
+              {!isAdmin && !isOwner && (
                 <button
                   onClick={handleStartChat}
                   className="btn-gold text-sm py-3 px-6 flex items-center gap-2 font-bold"
@@ -313,17 +316,19 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
 
         {/* Mobile Sticky Bottom Floating Action Bar */}
         <div className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-2xl border-t border-neutral-200 p-3 z-50 flex items-center gap-2 shadow-lg">
-          <button
-            onClick={handleToggleSave}
-            className={`p-3 rounded-xl border transition-all shrink-0 ${
-              isSaved 
-                ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold' 
-                : 'bg-neutral-100 text-neutral-700 border-neutral-200'
-            }`}
-            title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
-          >
-            <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-neutral-950' : ''}`} />
-          </button>
+          {!isAdmin && (
+            <button
+              onClick={handleToggleSave}
+              className={`p-3 rounded-xl border transition-all shrink-0 ${
+                isSaved 
+                  ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold' 
+                  : 'bg-neutral-100 text-neutral-700 border-neutral-200'
+              }`}
+              title={isSaved ? t('savedToFavorites') : t('saveFavorite')}
+            >
+              <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-neutral-950' : ''}`} />
+            </button>
+          )}
 
           <a
             href={`tel:${listing.contact_phone}`}
@@ -333,7 +338,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
             <span>{t('modalCall')}</span>
           </a>
 
-          {!isOwner && (
+          {!isAdmin && !isOwner && (
             <button
               onClick={handleStartChat}
               className="flex-1 btn-gold text-xs py-2.5 px-3 flex items-center justify-center gap-1.5 font-bold"

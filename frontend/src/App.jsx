@@ -80,9 +80,9 @@ export default function App() {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  // Global socket connection: initialized ONCE per session, no infinite fetching loops
+  // Global socket connection: initialized ONCE per session, only for normal users (not admin)
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
+    if (isAuthenticated && user?.id && user?.role !== 'admin') {
       const socket = socketService.connect(user.id);
       socketService.joinUser(user.id);
 
@@ -122,14 +122,16 @@ export default function App() {
     } else {
       socketService.disconnect();
     }
-  }, [isAuthenticated, user?.id, dispatch]);
+  }, [isAuthenticated, user?.id, user?.role, dispatch]);
 
-  // Handle protected page redirection if logged out
+  // Handle protected page redirection if logged out or if admin visits normal user routes
   useEffect(() => {
     if (!isAuthenticated && ['post', 'saved', 'my-listings', 'admin'].includes(currentView)) {
       setViewHistory(['home']);
+    } else if (isAuthenticated && user?.role === 'admin' && ['post', 'saved', 'my-listings'].includes(currentView)) {
+      setViewHistory(['admin']);
     }
-  }, [isAuthenticated, currentView]);
+  }, [isAuthenticated, user?.role, currentView]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f5f7] text-neutral-900 font-sans selection:bg-amber-500 selection:text-black relative">
@@ -227,8 +229,8 @@ export default function App() {
         />
       )}
 
-      {/* Real-time Socket.io Chat Slide-over Drawer */}
-      <ChatDrawer />
+      {/* Real-time Socket.io Chat Slide-over Drawer (Only for normal users, not admin) */}
+      {user?.role !== 'admin' && <ChatDrawer />}
 
     </div>
   );

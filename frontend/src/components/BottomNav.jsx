@@ -7,9 +7,11 @@ import {
   MessageSquare, 
   Layers, 
   ShieldCheck, 
-  User 
+  User,
+  LogOut
 } from 'lucide-react';
 import { openChat, closeChat, setActiveConversation } from '../store/slices/chatSlice';
+import { logout } from '../store/slices/authSlice';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
@@ -44,6 +46,52 @@ export default function BottomNav({ currentView, setCurrentView, onOpenAuth }) {
       dispatch(openChat());
     }
   };
+
+  // Dedicated Admin Bottom Navigation (Omit all normal user features: Saved, Post, Chat, My Listings)
+  if (isAuthenticated && user?.role === 'admin') {
+    return (
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-[60] bg-white/98 backdrop-blur-2xl border-t border-neutral-200 px-4 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] h-[58px]">
+        <div className="flex items-center justify-around max-w-md mx-auto h-full">
+          {/* 1. Explore / Home */}
+          <button
+            onClick={() => handleNavClick('home')}
+            className={`flex flex-col items-center justify-center py-1 px-4 rounded-xl transition-all ${
+              currentView === 'home'
+                ? 'text-amber-600 font-bold'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <Home className={`w-5 h-5 ${currentView === 'home' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+            <span className="text-[10px] mt-0.5 tracking-tight">{t('navExplore')}</span>
+          </button>
+
+          {/* 2. Admin Dashboard */}
+          <button
+            onClick={() => handleNavClick('admin')}
+            className={`flex flex-col items-center justify-center py-1 px-4 rounded-xl transition-all ${
+              currentView === 'admin'
+                ? 'text-amber-600 font-bold'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <ShieldCheck className={`w-5 h-5 ${currentView === 'admin' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold">{t('navAdmin')}</span>
+          </button>
+
+          {/* 3. Logout */}
+          <button
+            onClick={() => {
+              dispatch(logout());
+            }}
+            className="flex flex-col items-center justify-center py-1 px-4 rounded-xl text-rose-600 hover:text-rose-700 transition-all"
+          >
+            <LogOut className="w-5 h-5 stroke-[1.8]" />
+            <span className="text-[10px] mt-0.5 tracking-tight">{t('navLogout')}</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="md:hidden fixed bottom-0 inset-x-0 z-[60] bg-white/98 backdrop-blur-2xl border-t border-neutral-200 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] h-[58px]">

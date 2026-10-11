@@ -19,6 +19,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 
 
   const isSaved = savedItems.some((item) => String(item.id) === String(listing.id));
   const isOwner = user?.id === listing.user_id;
+  const isAdmin = user?.role === 'admin';
 
   const handleSaveClick = (e) => {
     e.stopPropagation();
@@ -111,29 +112,31 @@ export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 
             </div>
           </div>
 
-          {/* Actions: Bookmark & Chat */}
-          <div className="flex items-center justify-end gap-1.5 pt-1">
-            <button
-              type="button"
-              onClick={handleSaveClick}
-              aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
-              className={`p-1.5 rounded-full transition-all ${
-                isSaved ? 'text-amber-500 bg-amber-50' : 'text-neutral-400 hover:text-amber-600 hover:bg-neutral-100'
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-500' : ''}`} />
-            </button>
-            {!isOwner && (
+          {/* Actions: Bookmark & Chat (Only for non-admin) */}
+          {!isAdmin && (
+            <div className="flex items-center justify-end gap-1.5 pt-1">
               <button
                 type="button"
-                onClick={handleChatClick}
-                aria-label={t('messageOwner')}
-                className="p-1.5 rounded-full text-neutral-400 hover:text-amber-500 hover:bg-amber-50 transition-colors"
+                onClick={handleSaveClick}
+                aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
+                className={`p-1.5 rounded-full transition-all ${
+                  isSaved ? 'text-amber-500 bg-amber-50' : 'text-neutral-400 hover:text-amber-600 hover:bg-neutral-100'
+                }`}
               >
-                <MessageSquare className="w-4 h-4" />
+                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-500' : ''}`} />
               </button>
-            )}
-          </div>
+              {!isOwner && (
+                <button
+                  type="button"
+                  onClick={handleChatClick}
+                  aria-label={t('messageOwner')}
+                  className="p-1.5 rounded-full text-neutral-400 hover:text-amber-500 hover:bg-amber-50 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -174,22 +177,24 @@ export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 
           </div>
         )}
 
-        {/* Top Right: Favorite / Bookmark Button */}
-        <div className="absolute top-2 right-2 z-10">
-          <button
-            type="button"
-            onClick={handleSaveClick}
-            aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
-            title={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
-            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center ${
-              isSaved 
-                ? 'bg-amber-500 text-neutral-950 shadow-md scale-105' 
-                : 'bg-white/80 text-neutral-600 hover:bg-white hover:text-amber-600 hover:scale-105 shadow-xs'
-            }`}
-          >
-            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-neutral-950' : ''}`} />
-          </button>
-        </div>
+        {/* Top Right: Favorite / Bookmark Button (Only for non-admin) */}
+        {!isAdmin && (
+          <div className="absolute top-2 right-2 z-10">
+            <button
+              type="button"
+              onClick={handleSaveClick}
+              aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
+              title={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center ${
+                isSaved 
+                  ? 'bg-amber-500 text-neutral-950 shadow-md scale-105' 
+                  : 'bg-white/80 text-neutral-600 hover:bg-white hover:text-amber-600 hover:scale-105 shadow-xs'
+              }`}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-neutral-950' : ''}`} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 2. Text Box (Responsive Height, Strictly Contained Within Box, Category removed) */}
@@ -222,8 +227,8 @@ export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 
           </div>
         </div>
 
-        {/* Action Row - Chat button */}
-        {!isOwner && (
+        {/* Action Row - Chat button (Only for non-admin) */}
+        {!isAdmin && !isOwner && (
           <div className="pt-0.5 flex items-center justify-end w-full">
             <button
               type="button"

@@ -66,7 +66,7 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
               {t('navBrowse')}
             </button>
 
-            {isAuthenticated && (
+            {isAuthenticated && user?.role !== 'admin' && (
               <>
                 <button
                   onClick={() => handleNavClick('saved')}
@@ -133,23 +133,25 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
               </span>
             </button>
 
-            {/* Post Listing Button */}
-            <button
-              onClick={() => {
-                if (!isAuthenticated) {
-                  onOpenAuth('login');
-                } else {
-                  handleNavClick('post');
-                }
-              }}
-              className="btn-gold text-xs py-2 px-4.5 font-bold tracking-wide shadow-xs hover:shadow-md transition-all active:scale-95 flex items-center gap-1.5"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>{t('navPostRent')}</span>
-            </button>
+            {/* Post Listing Button (Only visible if NOT admin) */}
+            {user?.role !== 'admin' && (
+              <button
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    onOpenAuth('login');
+                  } else {
+                    handleNavClick('post');
+                  }
+                }}
+                className="btn-gold text-xs py-2 px-4.5 font-bold tracking-wide shadow-xs hover:shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>{t('navPostRent')}</span>
+              </button>
+            )}
 
-            {/* Real-time Chat Trigger */}
-            {isAuthenticated && (
+            {/* Real-time Chat Trigger (Only visible for non-admin authenticated users) */}
+            {isAuthenticated && user?.role !== 'admin' && (
               <button
                 onClick={() => dispatch(openChat())}
                 title={t('navMessages')}
@@ -189,21 +191,25 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => handleNavClick('my-listings')}
-                      className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 flex items-center gap-2.5"
-                    >
-                      <Layers className="w-4 h-4 text-amber-600" />
-                      <span>{t('navMyListings')}</span>
-                    </button>
+                    {user?.role !== 'admin' && (
+                      <>
+                        <button
+                          onClick={() => handleNavClick('my-listings')}
+                          className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 flex items-center gap-2.5"
+                        >
+                          <Layers className="w-4 h-4 text-amber-600" />
+                          <span>{t('navMyListings')}</span>
+                        </button>
 
-                    <button
-                      onClick={() => handleNavClick('saved')}
-                      className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 flex items-center gap-2.5"
-                    >
-                      <Bookmark className="w-4 h-4 text-amber-600" />
-                      <span>{t('navSaved')}</span>
-                    </button>
+                        <button
+                          onClick={() => handleNavClick('saved')}
+                          className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950 flex items-center gap-2.5"
+                        >
+                          <Bookmark className="w-4 h-4 text-amber-600" />
+                          <span>{t('navSaved')}</span>
+                        </button>
+                      </>
+                    )}
 
                     {user?.role === 'admin' && (
                       <button
@@ -293,51 +299,57 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
           >
             {t('navBrowse')}
           </button>
-          <button
-            onClick={() => {
-              if (!isAuthenticated) onOpenAuth('login');
-              else handleNavClick('post');
-            }}
-            className="w-full btn-gold text-sm py-2.5"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>{t('navPostRent')}</span>
-          </button>
+          {user?.role !== 'admin' && (
+            <button
+              onClick={() => {
+                if (!isAuthenticated) onOpenAuth('login');
+                else handleNavClick('post');
+              }}
+              className="w-full btn-gold text-sm py-2.5"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>{t('navPostRent')}</span>
+            </button>
+          )}
 
           {isAuthenticated ? (
             <>
-              <button
-                onClick={() => {
-                  dispatch(openChat());
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-amber-600" />
-                  <span>{t('navMessages')}</span>
-                </div>
-                {unreadMessagesCount > 0 && (
-                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500 text-black shadow-sm">
-                    {unreadMessagesCount}
-                  </span>
-                )}
-              </button>
+              {user?.role !== 'admin' && (
+                <>
+                  <button
+                    onClick={() => {
+                      dispatch(openChat());
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-amber-600" />
+                      <span>{t('navMessages')}</span>
+                    </div>
+                    {unreadMessagesCount > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500 text-black shadow-sm">
+                        {unreadMessagesCount}
+                      </span>
+                    )}
+                  </button>
 
-              <button
-                onClick={() => handleNavClick('my-listings')}
-                className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center gap-2"
-              >
-                <Layers className="w-4 h-4 text-amber-600" />
-                <span>{t('navMyListings')}</span>
-              </button>
-              <button
-                onClick={() => handleNavClick('saved')}
-                className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center gap-2"
-              >
-                <Bookmark className="w-4 h-4 text-amber-600" />
-                <span>{t('navSaved')} ({savedItems.length})</span>
-              </button>
+                  <button
+                    onClick={() => handleNavClick('my-listings')}
+                    className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center gap-2"
+                  >
+                    <Layers className="w-4 h-4 text-amber-600" />
+                    <span>{t('navMyListings')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick('saved')}
+                    className="w-full text-left py-2.5 text-sm font-medium text-neutral-800 hover:text-amber-600 flex items-center gap-2"
+                  >
+                    <Bookmark className="w-4 h-4 text-amber-600" />
+                    <span>{t('navSaved')} ({savedItems.length})</span>
+                  </button>
+                </>
+              )}
 
               {user?.role === 'admin' && (
                 <button
