@@ -37,7 +37,7 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-neutral-200/90 transition-all duration-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex items-center justify-between h-[72px]">
           
           {/* Brand Logo & Name */}
@@ -54,13 +54,13 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1.5">
             <button
               onClick={() => handleNavClick('home')}
-              className={`px-3.5 py-1.5 text-sm font-semibold rounded-lg transition-colors ${
+              className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
                 currentView === 'home' 
-                  ? 'text-neutral-950 bg-neutral-100 border border-neutral-200 shadow-xs' 
-                  : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70'
+                  ? 'text-neutral-950 bg-neutral-100/90 border border-neutral-250 shadow-2xs font-bold' 
+                  : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 border border-transparent'
               }`}
             >
               {t('navBrowse')}
@@ -70,10 +70,10 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
               <>
                 <button
                   onClick={() => handleNavClick('saved')}
-                  className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 ${
+                  className={`relative px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-2 ${
                     currentView === 'saved' 
-                      ? 'text-amber-700 bg-amber-50 border border-amber-300' 
-                      : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100'
+                      ? 'text-amber-800 bg-amber-50 border border-amber-300 shadow-2xs font-bold' 
+                      : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 border border-transparent'
                   }`}
                 >
                   <Bookmark className="w-4 h-4 text-amber-500" />
@@ -87,10 +87,10 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
 
                 <button
                   onClick={() => handleNavClick('my-listings')}
-                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 ${
+                  className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-2 ${
                     currentView === 'my-listings' 
-                      ? 'text-amber-700 bg-amber-50 border border-amber-300' 
-                      : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100'
+                      ? 'text-amber-800 bg-amber-50 border border-amber-300 shadow-2xs font-bold' 
+                      : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 border border-transparent'
                   }`}
                 >
                   <Layers className="w-4 h-4 text-amber-500" />
@@ -103,7 +103,7 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
             {user?.role === 'admin' && (
               <button
                 onClick={() => handleNavClick('admin')}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
+                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-2 ${
                   currentView === 'admin'
                     ? 'text-black bg-amber-400 font-bold shadow-xs'
                     : 'text-amber-800 bg-amber-100/80 border border-amber-300 hover:bg-amber-200'
@@ -142,9 +142,9 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                   handleNavClick('post');
                 }
               }}
-              className="btn-gold text-xs py-2 px-4 font-semibold tracking-wide"
+              className="btn-gold text-xs py-2 px-4.5 font-bold tracking-wide shadow-xs hover:shadow-md transition-all active:scale-95 flex items-center gap-1.5"
             >
-              <PlusCircle className="w-3.5 h-3.5" />
+              <PlusCircle className="w-4 h-4" />
               <span>{t('navPostRent')}</span>
             </button>
 

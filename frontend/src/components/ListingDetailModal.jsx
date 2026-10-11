@@ -38,7 +38,7 @@ export default function ListingDetailModal({ listing, onClose, onOpenAuth }) {
 
   if (!listing) return null;
 
-  const isSaved = savedItems.some((item) => item.id === listing.id);
+  const isSaved = savedItems.some((item) => String(item.id) === String(listing.id));
   const isOwner = user?.id === listing.user_id;
 
   const images = listing.images && listing.images.length > 0 

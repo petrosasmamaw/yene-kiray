@@ -17,7 +17,7 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { savedItems } = useSelector((state) => state.listings);
 
-  const isSaved = savedItems.some((item) => item.id === listing.id);
+  const isSaved = savedItems.some((item) => String(item.id) === String(listing.id));
   const isOwner = user?.id === listing.user_id;
 
   const handleSaveClick = (e) => {

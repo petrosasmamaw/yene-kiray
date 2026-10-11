@@ -133,7 +133,15 @@ const listingSlice = createSlice({
     builder.addCase(toggleSave.fulfilled, (state, action) => {
       const { listingId, saved } = action.payload;
       if (!saved) {
-        state.savedItems = state.savedItems.filter(item => item.id !== listingId);
+        state.savedItems = state.savedItems.filter(item => String(item.id) !== String(listingId));
+      } else {
+        const alreadySaved = state.savedItems.some(item => String(item.id) === String(listingId));
+        if (!alreadySaved) {
+          const item = state.items.find(i => String(i.id) === String(listingId)) || 
+                       state.myListings.find(i => String(i.id) === String(listingId)) || 
+                       { id: listingId };
+          state.savedItems.push(item);
+        }
       }
     });
 

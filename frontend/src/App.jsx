@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './store/slices/authSlice';
+import { fetchSavedListings } from './store/slices/listingSlice';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -85,8 +86,9 @@ export default function App() {
       const socket = socketService.connect(user.id);
       socketService.joinUser(user.id);
 
-      // Fetch conversations ONCE upon initial login/page load
+      // Fetch conversations and saved listings ONCE upon initial login/page load
       dispatch(fetchConversations());
+      dispatch(fetchSavedListings());
 
       const handleNewMessage = (msg) => {
         // If drawer is open and currently on this chat, mark read immediately
