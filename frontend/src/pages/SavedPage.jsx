@@ -91,8 +91,8 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
         ) : (
           <>
             {/* Mobile View: 2-column Staggered Brick Layout */}
-            <div className="sm:hidden flex gap-2.5 items-start">
-              <div className="flex-1 flex flex-col gap-3 min-w-0">
+            <div className="sm:hidden flex gap-2.5 items-start w-full max-w-full overflow-hidden">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)]">
                 {savedItems
                   .filter((_, idx) => idx % 2 === 0)
                   .map((listing) => (
@@ -104,7 +104,7 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
                     />
                   ))}
               </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)] pt-24">
                 {savedItems
                   .filter((_, idx) => idx % 2 === 1)
                   .map((listing) => (

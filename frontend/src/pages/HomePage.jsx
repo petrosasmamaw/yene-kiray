@@ -303,7 +303,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               </div>
 
               <span
-                className={`block mt-1.5 sm:mt-2 text-[10px] sm:text-xs leading-tight font-medium line-clamp-2 max-w-[72px] sm:max-w-[88px] md:max-w-[100px] transition-colors ${
+                className={`block mt-1.5 sm:mt-2 text-xs sm:text-sm leading-snug font-semibold line-clamp-2 max-w-[85px] sm:max-w-[100px] md:max-w-[110px] transition-colors ${
                   selectedCategory === '' ? 'text-amber-700 font-bold' : 'text-neutral-800 group-hover:text-amber-600'
                 }`}
               >
@@ -351,9 +351,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                     )}
                   </div>
 
-                  {/* Text Below the Image (Clean, Not in the image) */}
+                  {/* Text Below the Image (Balanced Medium Size: Not Too Small, Not Too Big) */}
                   <span
-                    className={`block mt-1.5 sm:mt-2 text-[10px] sm:text-xs leading-tight font-medium line-clamp-2 max-w-[72px] sm:max-w-[88px] md:max-w-[100px] transition-colors ${
+                    className={`block mt-1.5 sm:mt-2 text-xs sm:text-sm leading-snug font-semibold line-clamp-2 max-w-[85px] sm:max-w-[100px] md:max-w-[110px] transition-colors ${
                       isSelected ? 'text-amber-700 font-bold' : 'text-neutral-800 group-hover:text-amber-600'
                     }`}
                   >
@@ -389,13 +389,13 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         {loading ? (
           <>
             {/* Mobile Skeletons (Brick Layout) */}
-            <div className="sm:hidden flex gap-2.5 items-start">
-              <div className="flex-1 flex flex-col gap-3 min-w-0">
+            <div className="sm:hidden flex gap-2.5 items-start w-full max-w-full overflow-hidden">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)]">
                 {[1, 3, 5].map((n) => (
                   <ListingCardSkeleton key={n} />
                 ))}
               </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)] pt-24">
                 {[2, 4, 6].map((n) => (
                   <ListingCardSkeleton key={n} />
                 ))}
@@ -435,9 +435,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         ) : (
           <>
             {/* Mobile View: 2-column Staggered Brick Layout (Right column starts in the middle of left) */}
-            <div className="sm:hidden flex gap-2.5 items-start">
+            <div className="sm:hidden flex gap-2.5 items-start w-full max-w-full overflow-hidden">
               {/* Left Column (starts at y=0) */}
-              <div className="flex-1 flex flex-col gap-3 min-w-0">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)]">
                 {items
                   .filter((_, idx) => idx % 2 === 0)
                   .map((listing) => (
@@ -451,7 +451,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               </div>
 
               {/* Right Column (starts in the middle of left with pt-24 like interlocking bricks) */}
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)] pt-24">
                 {items
                   .filter((_, idx) => idx % 2 === 1)
                   .map((listing) => (

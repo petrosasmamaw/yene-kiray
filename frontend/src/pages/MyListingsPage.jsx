@@ -144,13 +144,13 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
             {[1, 2, 3].map((n) => (
               <div 
                 key={n} 
-                className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 animate-pulse shadow-xs"
+                className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 animate-pulse shadow-xs w-full max-w-full min-w-0 overflow-hidden"
               >
-                <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 w-full flex-1 min-w-0 overflow-hidden">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-neutral-200 skeleton-shimmer shrink-0" />
-                  <div className="space-y-2 flex-1">
+                  <div className="space-y-2 flex-1 min-w-0 overflow-hidden">
                     <div className="h-4 w-20 rounded bg-neutral-200 skeleton-shimmer" />
-                    <div className="h-4 w-48 sm:w-64 rounded bg-neutral-200 skeleton-shimmer" />
+                    <div className="h-4 w-full max-w-xs rounded bg-neutral-200 skeleton-shimmer" />
                     <div className="h-3 w-32 rounded bg-neutral-200 skeleton-shimmer" />
                   </div>
                 </div>
@@ -185,10 +185,10 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
               return (
                 <div
                   key={listing.id}
-                  className="bg-white border border-neutral-200 hover:border-amber-500/50 rounded-2xl p-3.5 sm:p-5 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 shadow-xs"
+                  className="bg-white border border-neutral-200 hover:border-amber-500/50 rounded-2xl p-3.5 sm:p-5 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 shadow-xs w-full max-w-full min-w-0 overflow-hidden"
                 >
                   {/* Thumbnail & Title */}
-                  <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 w-full flex-1 min-w-0 overflow-hidden">
                     <img
                       src={primaryImg}
                       alt={listing.title}
@@ -198,14 +198,14 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                       }}
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border border-neutral-200 shrink-0"
                     />
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200 text-neutral-800">
+                    <div className="flex-1 min-w-0 space-y-1.5 overflow-hidden">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200 text-neutral-800 shrink-0">
                           {isAmharic && listing.category_name_am ? listing.category_name_am : (listing.category_name || (isAmharic ? 'ኪራይ' : 'Rental'))}
                         </span>
                         
                         {/* Status Chip */}
-                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0 ${
                           listing.status === 'approved'
                             ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                             : listing.status === 'pending'
@@ -219,17 +219,18 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
                         </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-neutral-950 truncate max-w-lg">
+                      {/* Product Name: Fully Contained, Wraps Elegantly Inside Card Box */}
+                      <h3 className="text-sm sm:text-base font-bold text-neutral-950 leading-snug break-words [overflow-wrap:anywhere] [word-break:break-word] w-full min-w-0 line-clamp-2">
                         {listing.title}
                       </h3>
 
-                      <div className="flex items-center gap-4 text-xs text-neutral-500">
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs text-neutral-500 flex-wrap min-w-0">
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-amber-500" />
-                          <span>{listing.city}</span>
+                          <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <span className="truncate">{listing.city}</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                          <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                           <span>{new Date(listing.created_at || Date.now()).toLocaleDateString()}</span>
                         </span>
                       </div>

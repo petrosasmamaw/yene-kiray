@@ -57,10 +57,10 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
   return (
     <div 
       onClick={() => onSelect(listing)}
-      className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border border-neutral-100 hover:border-amber-400/40 shadow-xs"
+      className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border border-neutral-100 hover:border-amber-400/40 shadow-xs w-full max-w-full min-w-0"
     >
-      {/* 1. Item Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
+      {/* 1. Item Image Container (Decreased Height by 15%, 100% Width Fit, No White Space) */}
+      <div className="relative aspect-[15/17] sm:aspect-[16/17] w-full max-w-full overflow-hidden bg-neutral-100">
         <img 
           src={primaryImage} 
           alt={listing.title}
@@ -104,15 +104,15 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
         </div>
       </div>
 
-      {/* 2. Text Box (Clean, No Internal Borders, Matching Reference UI) */}
-      <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2 bg-white">
-        <div className="space-y-1">
+      {/* 2. Text Box (Responsive Height, Strictly Contained Within Box) */}
+      <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between gap-2 bg-white w-full max-w-full min-w-0 overflow-hidden">
+        <div className="space-y-1 w-full max-w-full min-w-0 overflow-hidden">
           {/* Price at Top of Text Section */}
-          <div className="flex items-baseline gap-1 font-sans">
+          <div className="flex items-baseline gap-1 font-sans flex-wrap min-w-0 max-w-full overflow-hidden">
             <span className="text-[11px] sm:text-xs font-black text-amber-600 uppercase tracking-tight">
               {t('etb')}
             </span>
-            <span className="text-sm sm:text-base font-black text-amber-600 tracking-tight">
+            <span className="text-sm sm:text-base font-black text-amber-600 tracking-tight truncate">
               {Number(listing.rental_price).toLocaleString()}
             </span>
             <span className="text-[10px] sm:text-[11px] text-neutral-400 font-medium">
@@ -120,13 +120,13 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
             </span>
           </div>
 
-          {/* Listing Title */}
-          <h3 className="text-xs sm:text-[13px] font-semibold text-neutral-900 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
+          {/* Listing Title: Strictly Contained In Box, Limited to 2 Lines on Mobile */}
+          <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-amber-600 transition-colors leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] [word-break:break-word] w-full max-w-full min-w-0">
             {listing.title}
           </h3>
 
           {/* Location */}
-          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-neutral-500 font-medium truncate pt-0.5">
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-neutral-500 font-medium truncate pt-0.5 w-full min-w-0 max-w-full">
             <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
             <span className="truncate">
               {getCityTitle(listing.city)}{listing.subcity ? ` • ${listing.subcity}` : ''}
@@ -134,9 +134,9 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
           </div>
         </div>
 
-        {/* Bottom Tag Row: Clean Category Badge (like 'Brand New' in reference) + Action */}
-        <div className="pt-1 flex items-center justify-between gap-1.5">
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium rounded-md bg-neutral-100 text-neutral-600 truncate max-w-[110px] sm:max-w-[130px]">
+        {/* Bottom Tag Row: Clean Category Badge + Action */}
+        <div className="pt-1 flex items-center justify-between gap-1.5 w-full min-w-0 max-w-full overflow-hidden">
+          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-medium rounded-md bg-neutral-100 text-neutral-600 truncate min-w-0 max-w-[calc(100%-2rem)]">
             {categoryTitle}
           </span>
 
