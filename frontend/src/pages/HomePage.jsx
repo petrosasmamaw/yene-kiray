@@ -115,132 +115,119 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
           1. MOBILE / TABLET VIEW (< lg screen size) - UNTOUCHED & 100% PRESERVED
           ========================================================================= */}
       
-      {/* Mobile/Tablet Top Search & Filter Bar */}
-      <section className="lg:hidden pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 border-b border-neutral-200/80 bg-white/70 backdrop-blur-sm">
+      {/* Mobile/Tablet Top Search & Filter Bar - Clean single-line compact PC-style */}
+      <section className="lg:hidden pt-2.5 pb-2.5 px-3 sm:px-6 border-b border-slate-200/90 bg-white/90 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <form 
             onSubmit={handleSearchSubmit}
-            className="bg-white border border-neutral-200/90 hover:border-neutral-300 focus-within:border-amber-500 rounded-2xl sm:rounded-full p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-1.5 transition-all duration-300 shadow-md hover:shadow-lg"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
           >
-            {/* Row 1 on mobile: Keyword Search Input + Search CTA Button side-by-side */}
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-neutral-50/80 rounded-xl sm:rounded-full transition-colors group/kw min-w-0">
-                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/kw:text-amber-600 transition-colors">
-                  {isAmharic ? 'የሚከራይ ዕቃ / አገልግሎት' : 'Search Rentals'}
-                </span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
-                  <input 
-                    type="text"
-                    aria-label={t('searchPlaceholder')}
-                    placeholder={t('searchPlaceholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 placeholder:font-normal focus:outline-none min-w-0"
-                  />
-                  {searchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchTerm('')}
-                      aria-label="Clear search"
-                      className="text-neutral-400 hover:text-neutral-700 text-xs px-1 rounded shrink-0"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Mobile-only inline Search CTA Button */}
+            {/* Search Input - Single line, compact, no top text label */}
+            <div className="bg-white border border-slate-300 hover:border-slate-400 focus-within:border-slate-600 rounded-full p-1 pl-3.5 pr-1 flex items-center gap-2 transition-all duration-200 shadow-2xs hover:shadow-xs flex-1 min-w-0">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
+              <input 
+                type="text"
+                aria-label={t('searchPlaceholder')}
+                placeholder={isAmharic ? 'የሚከራይ ዕቃ ወይም አገልግሎት ይፈልጉ...' : 'Search rentals in Ethiopia...'}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 placeholder:font-normal focus:outline-none min-w-0"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Clear search"
+                  className="text-neutral-400 hover:text-neutral-700 text-xs px-1.5 py-0.5 rounded shrink-0"
+                >
+                  ✕
+                </button>
+              )}
+              {/* Compact Search Action Button inside search pill */}
               <button
                 type="submit"
-                className="sm:hidden px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 active:scale-95 shrink-0 transition-transform"
+                className="rounded-full px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs hover:shadow flex items-center justify-center gap-1 transition-all active:scale-95 shrink-0"
               >
                 <Search className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>{t('searchButton')}</span>
+                <span className="hidden sm:inline">{t('searchButton')}</span>
               </button>
             </div>
 
-            <div className="h-8 w-px bg-neutral-200 hidden sm:block mx-0.5" />
-
-            {/* Row 2 on mobile: City Filter & Price Filter */}
-            <div className="grid grid-cols-2 gap-2 sm:contents">
-              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-neutral-50/80 sm:bg-transparent hover:bg-neutral-100/70 sm:hover:bg-neutral-50/80 border border-neutral-150 sm:border-0 rounded-xl sm:rounded-full transition-colors group/city sm:w-44">
-                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/city:text-amber-600 transition-colors">
-                  {isAmharic ? 'ከተማ / አካባቢ' : 'Location'}
-                </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <MapPin className="w-3.5 h-3.5 text-neutral-400 group-focus-within/city:text-amber-500 shrink-0" />
-                  <select
-                    value={selectedCity}
-                    aria-label={t('filterAllCities')}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-800 focus:outline-none cursor-pointer truncate"
-                  >
-                    <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAllCities')}</option>
-                    <option value="Addis Ababa" className="bg-white text-neutral-900 font-normal">{t('cityAddisAbaba')}</option>
-                    <option value="Hawassa" className="bg-white text-neutral-900 font-normal">{t('cityHawassa')}</option>
-                    <option value="Adama" className="bg-white text-neutral-900 font-normal">{t('cityAdama')}</option>
-                    <option value="Bahir Dar" className="bg-white text-neutral-900 font-normal">{t('cityBahirDar')}</option>
-                    <option value="Bishoftu" className="bg-white text-neutral-900 font-normal">{t('cityBishoftu')}</option>
-                    <option value="Mekelle" className="bg-white text-neutral-900 font-normal">{t('cityMekelle')}</option>
-                    <option value="Dire Dawa" className="bg-white text-neutral-900 font-normal">{t('cityDireDawa')}</option>
-                  </select>
-                </div>
+            {/* Filters Row on mobile: 2 Single-line compact pills side-by-side (no top text) */}
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2">
+              {/* Location Pill - Single line, no top text */}
+              <div className="bg-white border border-slate-300 hover:border-slate-400 rounded-full px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-2xs sm:w-44 min-w-0">
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedCity}
+                  aria-label={t('filterAllCities')}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer truncate"
+                >
+                  <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAllCities')}</option>
+                  <option value="Addis Ababa" className="bg-white text-neutral-900 font-normal">{t('cityAddisAbaba')}</option>
+                  <option value="Hawassa" className="bg-white text-neutral-900 font-normal">{t('cityHawassa')}</option>
+                  <option value="Adama" className="bg-white text-neutral-900 font-normal">{t('cityAdama')}</option>
+                  <option value="Bahir Dar" className="bg-white text-neutral-900 font-normal">{t('cityBahirDar')}</option>
+                  <option value="Bishoftu" className="bg-white text-neutral-900 font-normal">{t('cityBishoftu')}</option>
+                  <option value="Mekelle" className="bg-white text-neutral-900 font-normal">{t('cityMekelle')}</option>
+                  <option value="Dire Dawa" className="bg-white text-neutral-900 font-normal">{t('cityDireDawa')}</option>
+                </select>
               </div>
 
-              <div className="h-8 w-px bg-neutral-200 hidden sm:block mx-0.5" />
-
-              <div className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-neutral-50/80 sm:bg-transparent hover:bg-neutral-100/70 sm:hover:bg-neutral-50/80 border border-neutral-150 sm:border-0 rounded-xl sm:rounded-full transition-colors group/price sm:w-48">
-                <span className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-focus-within/price:text-amber-600 transition-colors">
-                  {isAmharic ? 'የዋጋ ክልል' : 'Price Range'}
-                </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Filter className="w-3.5 h-3.5 text-neutral-400 group-focus-within/price:text-amber-500 shrink-0" />
-                  <select
-                    value={selectedPricePreset}
-                    aria-label={t('filterAnyPrice')}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSelectedPricePreset(val);
-                      if (val === 'under_10k') {
-                        setMinPrice('');
-                        setMaxPrice('10000');
-                      } else if (val === '10k_50k') {
-                        setMinPrice('10000');
-                        setMaxPrice('50000');
-                      } else if (val === '50k_150k') {
-                        setMinPrice('50000');
-                        setMaxPrice('150000');
-                      } else if (val === 'above_150k') {
-                        setMinPrice('150000');
-                        setMaxPrice('');
-                      } else {
-                        setMinPrice('');
-                        setMaxPrice('');
-                      }
-                    }}
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-neutral-800 focus:outline-none cursor-pointer truncate"
-                  >
-                    <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAnyPrice')}</option>
-                    <option value="under_10k" className="bg-white text-neutral-900 font-normal">{t('priceUnder10k')}</option>
-                    <option value="10k_50k" className="bg-white text-neutral-900 font-normal">{t('price10kTo50k')}</option>
-                    <option value="50k_150k" className="bg-white text-neutral-900 font-normal">{t('price50kTo150k')}</option>
-                    <option value="above_150k" className="bg-white text-neutral-900 font-normal">{t('priceAbove150k')}</option>
-                  </select>
-                </div>
+              {/* Price Preset Pill - Single line, no top text */}
+              <div className="bg-white border border-slate-300 hover:border-slate-400 rounded-full px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-2xs sm:w-44 min-w-0">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedPricePreset}
+                  aria-label={t('filterAnyPrice')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedPricePreset(val);
+                    if (val === 'under_10k') {
+                      setMinPrice('');
+                      setMaxPrice('10000');
+                    } else if (val === '10k_50k') {
+                      setMinPrice('10000');
+                      setMaxPrice('50000');
+                    } else if (val === '50k_150k') {
+                      setMinPrice('50000');
+                      setMaxPrice('150000');
+                    } else if (val === 'above_150k') {
+                      setMinPrice('150000');
+                      setMaxPrice('');
+                    } else {
+                      setMinPrice('');
+                      setMaxPrice('');
+                    }
+                  }}
+                  className="w-full bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer truncate"
+                >
+                  <option value="" className="bg-white text-neutral-900 font-normal">{t('filterAnyPrice')}</option>
+                  <option value="under_10k" className="bg-white text-neutral-900 font-normal">{t('priceUnder10k')}</option>
+                  <option value="10k_50k" className="bg-white text-neutral-900 font-normal">{t('price10kTo50k')}</option>
+                  <option value="50k_150k" className="bg-white text-neutral-900 font-normal">{t('price50kTo150k')}</option>
+                  <option value="above_150k" className="bg-white text-neutral-900 font-normal">{t('priceAbove150k')}</option>
+                </select>
               </div>
             </div>
-
-            {/* Tablet-only Search CTA Button */}
-            <button
-              type="submit"
-              className="hidden sm:flex sm:rounded-full px-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs sm:text-sm shadow-md hover:shadow-amber-500/25 items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
-            >
-              <Search className="w-4 h-4 stroke-[2.5]" />
-              <span>{t('searchButton')}</span>
-            </button>
           </form>
+
+          {/* Active filter summary & clear link on mobile */}
+          {(selectedCategory || selectedCity || selectedPricePreset || searchTerm || minPrice || maxPrice) && (
+            <div className="flex items-center justify-between pt-2 px-1 text-xs text-slate-500">
+              <span className="font-medium">
+                {items.length} {t('items')}
+              </span>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="text-xs text-slate-600 hover:text-slate-900 font-bold hover:underline"
+              >
+                {t('clearAllFilters')}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
