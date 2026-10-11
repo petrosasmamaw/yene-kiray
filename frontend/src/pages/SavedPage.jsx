@@ -62,14 +62,14 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
                   <ListingCardSkeleton key={n} />
                 ))}
               </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
                 {[2].map((n) => (
                   <ListingCardSkeleton key={n} />
                 ))}
               </div>
             </div>
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {[1, 2, 3].map((n) => (
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((n) => (
                 <ListingCardSkeleton key={n} />
               ))}
             </div>
@@ -90,6 +90,7 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
           </div>
         ) : (
           <>
+            {/* Mobile View: 2-column Staggered Brick Layout */}
             <div className="sm:hidden flex gap-2.5 items-start">
               <div className="flex-1 flex flex-col gap-3 min-w-0">
                 {savedItems
@@ -103,7 +104,7 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
                     />
                   ))}
               </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
                 {savedItems
                   .filter((_, idx) => idx % 2 === 1)
                   .map((listing) => (
@@ -116,7 +117,9 @@ export default function SavedPage({ onSelectListing, onOpenAuth, onGoBack, onGoH
                   ))}
               </div>
             </div>
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+
+            {/* Desktop View */}
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {savedItems.map((listing) => (
                 <ListingCard
                   key={listing.id}

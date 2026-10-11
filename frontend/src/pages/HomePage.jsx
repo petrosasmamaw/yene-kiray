@@ -272,52 +272,48 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         ) : (
           <div 
             ref={categoryScrollRef}
-            className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3 pb-2 sm:pb-1"
+            className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-2.5 sm:gap-4 pb-2 sm:pb-1"
           >
-            {/* "All Categories" Button Card */}
+            {/* "All Categories" Tile */}
             <button
               type="button"
               onClick={() => dispatch(setSelectedCategory(''))}
               aria-pressed={selectedCategory === ''}
               aria-label={t('allCategories')}
-              className={`group relative rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer border text-left transition-all duration-300 w-full h-20 sm:h-32 flex flex-col justify-end p-1.5 sm:p-3 ${
-                selectedCategory === ''
-                  ? 'border-amber-500 ring-2 sm:ring-4 ring-amber-500/30 shadow-md sm:shadow-xl shadow-amber-500/15 -translate-y-0.5 sm:-translate-y-1 bg-neutral-900'
-                  : 'border-neutral-200 hover:border-amber-400 hover:shadow-md hover:-translate-y-0.5 bg-neutral-900'
-              }`}
+              className="group flex flex-col items-center cursor-pointer text-center w-full transition-transform active:scale-95"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900/80 to-amber-950/40" />
-
-              {/* Selected Checkmark Badge */}
-              {selectedCategory === '' && (
-                <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-20 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[8px] sm:text-[10px] font-black flex items-center gap-0.5 sm:gap-1 shadow-md">
-                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[3]" />
-                  <span>{isAmharic ? 'የተመረጠ' : 'Active'}</span>
+              <div
+                className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden flex items-center justify-center transition-all duration-300 ${
+                  selectedCategory === ''
+                    ? 'bg-neutral-950 shadow-md ring-2 ring-amber-500 -translate-y-0.5'
+                    : 'bg-neutral-900 shadow-2xs hover:shadow-md hover:-translate-y-0.5'
+                }`}
+              >
+                <div className={`w-full h-full flex items-center justify-center transition-colors ${
+                  selectedCategory === '' ? 'text-amber-400' : 'text-amber-400/90'
+                }`}>
+                  <Layers className="w-6 h-6 sm:w-7 sm:h-7 md:w-9 md:h-9" />
                 </div>
-              )}
 
-              {/* Bottom Gold Line if selected */}
-              {selectedCategory === '' && (
-                <div className="absolute inset-x-0 bottom-0 h-0.5 sm:h-1 bg-amber-500 z-20" />
-              )}
-
-              <div className="relative z-10">
-                <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-400 mb-1 sm:mb-2">
-                  <Layers className="w-3 h-3 sm:w-4 sm:h-4" />
-                </div>
-                <h3 className="text-[10px] sm:text-xs font-bold text-white leading-tight truncate">
-                  {t('allCategories')}
-                </h3>
-                <p className="text-[8px] sm:text-[10px] text-amber-400 font-semibold mt-0.5 truncate">
-                  {items.length} {t('rentals')}
-                </p>
+                {selectedCategory === '' && (
+                  <div className="absolute top-1 right-1 z-10 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-xs">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </div>
+                )}
               </div>
+
+              <span
+                className={`block mt-1.5 sm:mt-2 text-[10px] sm:text-xs leading-tight font-medium line-clamp-2 max-w-[72px] sm:max-w-[88px] md:max-w-[100px] transition-colors ${
+                  selectedCategory === '' ? 'text-amber-700 font-bold' : 'text-neutral-800 group-hover:text-amber-600'
+                }`}
+              >
+                {t('allCategories')}
+              </span>
             </button>
 
-            {/* Dynamic Category Button Cards */}
+            {/* Dynamic Category Tiles */}
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.slug;
-              const IconComp = iconMap[cat.icon_name] || Layers;
 
               return (
                 <button
@@ -326,63 +322,43 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   onClick={() => dispatch(setSelectedCategory(isSelected ? '' : cat.slug))}
                   aria-pressed={isSelected}
                   aria-label={getCategoryTitle(cat)}
-                  className={`group relative rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer border text-left transition-all duration-300 w-full h-20 sm:h-32 flex flex-col justify-end p-1.5 sm:p-3 ${
-                    isSelected
-                      ? 'border-amber-500 ring-2 sm:ring-4 ring-amber-500/30 shadow-md sm:shadow-xl shadow-amber-500/15 -translate-y-0.5 sm:-translate-y-1'
-                      : 'border-neutral-200 hover:border-amber-400 hover:shadow-md hover:-translate-y-0.5'
-                  }`}
+                  className="group flex flex-col items-center cursor-pointer text-center w-full transition-transform active:scale-95"
                 >
-                  {/* Category Image */}
-                  <img
-                    src={cat.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'}
-                    alt={getCategoryTitle(cat)}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80';
-                    }}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                  {/* Square Tile: Border-free, Zoomed to fill without white border */}
+                  <div
+                    className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden flex items-center justify-center p-0 transition-all duration-300 ${
+                      isSelected
+                        ? 'shadow-md ring-2 sm:ring-3 ring-amber-500/80 -translate-y-0.5'
+                        : 'shadow-2xs hover:shadow-md hover:-translate-y-0.5'
+                    }`}
+                  >
+                    <img
+                      src={cat.image_url || '/categories/cat_houses.jpg'}
+                      alt={getCategoryTitle(cat)}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/categories/cat_houses.jpg';
+                      }}
+                      className="w-full h-full object-cover scale-125 group-hover:scale-135 transition-transform duration-300"
+                      loading="lazy"
+                    />
 
-                  {/* Gradient Overlay */}
-                  <div className={`absolute inset-0 transition-opacity ${
-                    isSelected 
-                      ? 'bg-gradient-to-t from-black/90 via-black/40 to-amber-500/15' 
-                      : 'bg-gradient-to-t from-black/85 via-black/40 to-transparent'
-                  }`} />
-
-                  {/* Selected Checkmark Badge */}
-                  {isSelected && (
-                    <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-20 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[8px] sm:text-[10px] font-black flex items-center gap-0.5 sm:gap-1 shadow-md">
-                      <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[3]" />
-                      <span>{isAmharic ? 'የተመረጠ' : 'Active'}</span>
-                    </div>
-                  )}
-
-                  {/* Bottom Gold Indicator */}
-                  {isSelected && (
-                    <div className="absolute inset-x-0 bottom-0 h-0.5 sm:h-1 bg-amber-500 z-20" />
-                  )}
-
-                  {/* Icon badge in top right */}
-                  <div className={`absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg backdrop-blur-md flex items-center justify-center transition-colors ${
-                    isSelected 
-                      ? 'bg-amber-500 text-neutral-950 font-bold' 
-                      : 'bg-black/40 text-white border border-white/20'
-                  }`}>
-                    <IconComp className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    {/* Selected Checkmark Badge */}
+                    {isSelected && (
+                      <div className="absolute top-1 right-1 z-10 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-xs">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      </div>
+                    )}
                   </div>
 
-                  {/* Category Title & Count in Bottom */}
-                  <div className="relative z-10">
-                    <h3 className={`text-[10px] sm:text-xs font-bold leading-tight truncate drop-shadow-sm ${
-                      isSelected ? 'text-amber-300 font-extrabold' : 'text-white'
-                    }`}>
-                      {getCategoryTitle(cat)}
-                    </h3>
-                    <p className="text-[8px] sm:text-[10px] text-amber-400 font-semibold mt-0.5 truncate">
-                      {cat.listings_count || 0} {t('rentals')}
-                    </p>
-                  </div>
+                  {/* Text Below the Image (Clean, Not in the image) */}
+                  <span
+                    className={`block mt-1.5 sm:mt-2 text-[10px] sm:text-xs leading-tight font-medium line-clamp-2 max-w-[72px] sm:max-w-[88px] md:max-w-[100px] transition-colors ${
+                      isSelected ? 'text-amber-700 font-bold' : 'text-neutral-800 group-hover:text-amber-600'
+                    }`}
+                  >
+                    {getCategoryTitle(cat)}
+                  </span>
                 </button>
               );
             })}
@@ -412,23 +388,23 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
         {/* Listings Feed */}
         {loading ? (
           <>
-            {/* Mobile Skeletons (2-col brick layout) */}
+            {/* Mobile Skeletons (Brick Layout) */}
             <div className="sm:hidden flex gap-2.5 items-start">
               <div className="flex-1 flex flex-col gap-3 min-w-0">
                 {[1, 3, 5].map((n) => (
                   <ListingCardSkeleton key={n} />
                 ))}
               </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
                 {[2, 4, 6].map((n) => (
                   <ListingCardSkeleton key={n} />
                 ))}
               </div>
             </div>
 
-            {/* Desktop Skeletons (preserved PC grid) */}
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
+            {/* Desktop Skeletons */}
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <ListingCardSkeleton key={n} />
               ))}
             </div>
@@ -458,7 +434,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
           </div>
         ) : (
           <>
-            {/* Mobile View: 2-column Staggered Brick Layout (Right column starts half-way down) */}
+            {/* Mobile View: 2-column Staggered Brick Layout (Right column starts in the middle of left) */}
             <div className="sm:hidden flex gap-2.5 items-start">
               {/* Left Column (starts at y=0) */}
               <div className="flex-1 flex flex-col gap-3 min-w-0">
@@ -474,8 +450,8 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   ))}
               </div>
 
-              {/* Right Column (starts half-way down with pt-8 like interlocking building bricks) */}
-              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-28">
+              {/* Right Column (starts in the middle of left with pt-24 like interlocking bricks) */}
+              <div className="flex-1 flex flex-col gap-3 min-w-0 pt-24">
                 {items
                   .filter((_, idx) => idx % 2 === 1)
                   .map((listing) => (
@@ -490,7 +466,7 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
             </div>
 
             {/* Desktop View: Preserved PC Grid */}
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((listing) => (
                 <ListingCard 
                   key={listing.id} 

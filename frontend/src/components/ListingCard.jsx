@@ -4,11 +4,8 @@ import {
   MapPin, 
   Bookmark, 
   MessageSquare, 
-  Eye, 
-  CheckCircle2, 
   Clock, 
-  AlertCircle,
-  Tag
+  AlertCircle 
 } from 'lucide-react';
 import { toggleSave } from '../store/slices/listingSlice';
 import { startConversation } from '../store/slices/chatSlice';
@@ -60,10 +57,10 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
   return (
     <div 
       onClick={() => onSelect(listing)}
-      className="group relative bg-white border border-neutral-200/90 rounded-xl sm:rounded-2xl overflow-hidden hover:border-amber-500/70 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer shadow-xs"
+      className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border border-neutral-100 hover:border-amber-400/40 shadow-xs"
     >
-      {/* Image Container with ONLY Favorite Button & Price */}
-      <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+      {/* 1. Item Image Container */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         <img 
           src={primaryImage} 
           alt={listing.title}
@@ -71,123 +68,90 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
             e.currentTarget.onerror = null;
             e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
           }}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-0"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
 
-        {/* Subtle Ambient Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+        {/* Status Badge if Pending/Rejected */}
+        {listing.status && listing.status !== 'approved' && (
+          <div className="absolute top-2 left-2 z-10">
+            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider shadow-xs ${
+              listing.status === 'pending' 
+                ? 'bg-amber-500 text-neutral-950' 
+                : 'bg-rose-500 text-white'
+            }`}>
+              {listing.status === 'pending' ? <Clock className="w-2.5 h-2.5" /> : <AlertCircle className="w-2.5 h-2.5" />}
+              <span>{listing.status === 'pending' ? t('statusPending') : listing.status === 'rejected' ? t('statusRejected') : listing.status}</span>
+            </span>
+          </div>
+        )}
 
-        {/* Top Right: ONLY Favorite Button */}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+        {/* Top Right: Favorite / Bookmark Button */}
+        <div className="absolute top-2 right-2 z-10">
           <button
             type="button"
             onClick={handleSaveClick}
             aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
             title={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
-            className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full backdrop-blur-md transition-all duration-200 border shadow-sm flex items-center justify-center ${
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center ${
               isSaved 
-                ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-md scale-105' 
-                : 'bg-white/90 text-neutral-700 border-white/80 hover:bg-white hover:text-amber-600 hover:scale-105'
+                ? 'bg-amber-500 text-neutral-950 shadow-md scale-105' 
+                : 'bg-white/80 text-neutral-600 hover:bg-white hover:text-amber-600 hover:scale-105 shadow-xs'
             }`}
           >
-            <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSaved ? 'fill-neutral-950' : ''}`} />
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-neutral-950' : ''}`} />
           </button>
-        </div>
-
-        {/* Bottom Left: ONLY Floating Price Pill */}
-        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-10">
-          <div className="px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 text-neutral-900 flex items-baseline gap-1 sm:gap-1.5 shadow-md">
-            <span className="text-xs sm:text-base font-black text-amber-600 font-sans tracking-tight">
-              {Number(listing.rental_price).toLocaleString()}
-            </span>
-            <span className="text-[9px] sm:text-[11px] text-neutral-600 font-bold">
-              {t('etb')}<span className="hidden sm:inline"> / {periodLabel}</span>
-            </span>
-          </div>
         </div>
       </div>
 
-      {/* Content Section: Category is inside this box */}
-      <div className="p-2.5 sm:p-4 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
-        <div className="space-y-1.5 sm:space-y-2">
-          {/* Category Tag & Location Row in the Box */}
-          <div className="flex items-center justify-between gap-1.5">
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[11px] font-bold rounded-md sm:rounded-lg bg-amber-50 text-amber-800 border border-amber-200/90 shadow-2xs truncate">
-              <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 shrink-0" />
-              <span className="truncate">{categoryTitle}</span>
+      {/* 2. Text Box (Clean, No Internal Borders, Matching Reference UI) */}
+      <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2 bg-white">
+        <div className="space-y-1">
+          {/* Price at Top of Text Section */}
+          <div className="flex items-baseline gap-1 font-sans">
+            <span className="text-[11px] sm:text-xs font-black text-amber-600 uppercase tracking-tight">
+              {t('etb')}
             </span>
-
-            {/* Location */}
-            <div className="flex items-center gap-1 text-[10px] sm:text-xs text-neutral-500 font-medium truncate">
-              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 shrink-0" />
-              <span className="truncate">
-                {getCityTitle(listing.city)}{listing.subcity ? ` • ${listing.subcity}` : ''}
-              </span>
-            </div>
+            <span className="text-sm sm:text-base font-black text-amber-600 tracking-tight">
+              {Number(listing.rental_price).toLocaleString()}
+            </span>
+            <span className="text-[10px] sm:text-[11px] text-neutral-400 font-medium">
+              /{periodLabel}
+            </span>
           </div>
 
-          {/* Title */}
-          <h3 className="text-xs sm:text-[15px] font-bold text-neutral-950 group-hover:text-amber-600 transition-colors line-clamp-1 leading-snug">
+          {/* Listing Title */}
+          <h3 className="text-xs sm:text-[13px] font-semibold text-neutral-900 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
             {listing.title}
           </h3>
 
-          {/* Description Snippet (Desktop only for compact mobile height) */}
-          {listing.description && (
-            <p className="hidden sm:block text-xs text-neutral-600 line-clamp-2 leading-relaxed font-normal">
-              {listing.description}
-            </p>
-          )}
-
-          {/* Status Badge if Pending/Rejected */}
-          {listing.status && listing.status !== 'approved' && (
-            <div className="pt-0.5">
-              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-semibold rounded-md uppercase tracking-wide ${
-                listing.status === 'pending' 
-                  ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                  : 'bg-rose-100 text-rose-800 border border-rose-200'
-              }`}>
-                {listing.status === 'pending' ? <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
-                <span>{listing.status === 'pending' ? t('statusPending') : listing.status === 'rejected' ? t('statusRejected') : listing.status}</span>
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Card Footer: Owner Info & Action CTAs */}
-        <div className="pt-2 sm:pt-3 border-t border-neutral-100 flex items-center justify-between gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-amber-700 shrink-0">
-              {listing.owner_name ? listing.owner_name.charAt(0).toUpperCase() : 'O'}
-            </div>
-            <span className="text-[10px] sm:text-xs text-neutral-700 font-semibold truncate max-w-[55px] sm:max-w-none">
-              {listing.owner_name || t('verifiedOwner')}
+          {/* Location */}
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-neutral-500 font-medium truncate pt-0.5">
+            <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
+            <span className="truncate">
+              {getCityTitle(listing.city)}{listing.subcity ? ` • ${listing.subcity}` : ''}
             </span>
           </div>
-
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            {!isOwner && (
-              <button
-                type="button"
-                onClick={handleChatClick}
-                title={t('messageOwner')}
-                className="p-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-colors"
-              >
-                <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
-                <span className="hidden sm:inline">{isAmharic ? 'መልዕክት' : 'Chat'}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => onSelect(listing)}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-neutral-900 hover:bg-amber-500 hover:text-neutral-950 text-white text-[10px] sm:text-xs font-bold transition-all shadow-2xs"
-            >
-              {t('detailsButton')}
-            </button>
-          </div>
         </div>
 
+        {/* Bottom Tag Row: Clean Category Badge (like 'Brand New' in reference) + Action */}
+        <div className="pt-1 flex items-center justify-between gap-1.5">
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium rounded-md bg-neutral-100 text-neutral-600 truncate max-w-[110px] sm:max-w-[130px]">
+            {categoryTitle}
+          </span>
+
+          {!isOwner && (
+            <button
+              type="button"
+              onClick={handleChatClick}
+              aria-label={t('messageOwner')}
+              title={t('messageOwner')}
+              className="p-1 rounded-md text-neutral-400 hover:text-amber-600 hover:bg-amber-50 transition-colors shrink-0"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
