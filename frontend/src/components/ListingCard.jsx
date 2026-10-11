@@ -11,7 +11,7 @@ import { toggleSave } from '../store/slices/listingSlice';
 import { startConversation } from '../store/slices/chatSlice';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function ListingCard({ listing, onSelect, onOpenAuth }) {
+export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 'grid' }) {
   const dispatch = useDispatch();
   const { t, isAmharic, getCityTitle } = useLanguage();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -42,10 +42,6 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
     ? listing.images[0].image_url 
     : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
 
-  const categoryTitle = isAmharic && listing.category_name_am 
-    ? listing.category_name_am 
-    : (listing.category_name || (isAmharic ? 'ኪራይ' : 'Rental'));
-
   const periodLabel = listing.price_period === 'day' 
     ? t('periodDay') 
     : listing.price_period === 'hour' 
@@ -54,13 +50,105 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
     ? t('periodYear') 
     : t('periodMonth');
 
+  // ==========================================
+  // LIST VIEW LAYOUT (Matches Screenshot 2)
+  // ==========================================
+  if (viewMode === 'list') {
+    return (
+      <div 
+        onClick={() => onSelect(listing)}
+        className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 flex items-stretch gap-3 p-2.5 sm:p-3 cursor-pointer border border-neutral-150 hover:border-amber-400/50 shadow-xs w-full max-w-full min-w-0"
+      >
+        {/* Left: Thumbnail Image */}
+        <div className="relative w-28 sm:w-36 h-28 sm:h-36 shrink-0 rounded-lg sm:rounded-xl overflow-hidden bg-neutral-100">
+          <img 
+            src={primaryImage} 
+            alt={listing.title}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+            }}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+
+          {/* Status Badge if Pending/Rejected */}
+          {listing.status && listing.status !== 'approved' && (
+            <div className="absolute top-1.5 left-1.5 z-10">
+              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider ${
+                listing.status === 'pending' ? 'bg-amber-500 text-neutral-950' : 'bg-rose-500 text-white'
+              }`}>
+                {listing.status === 'pending' ? <Clock className="w-2.5 h-2.5" /> : <AlertCircle className="w-2.5 h-2.5" />}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Info Details */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+          <div className="space-y-1">
+            {/* Yellow / Amber Price */}
+            <div className="flex items-baseline gap-1 font-sans">
+              <span className="text-xs sm:text-sm font-black text-amber-500 tracking-tight">
+                {t('etb')} {Number(listing.rental_price).toLocaleString()}
+              </span>
+              <span className="text-[10px] sm:text-xs text-neutral-400 font-medium">
+                /{periodLabel}
+              </span>
+            </div>
+
+            {/* Title (max 2 lines) - Yellow hover */}
+            <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-amber-500 transition-colors leading-snug line-clamp-2 break-words">
+              {listing.title}
+            </h3>
+
+            {/* Location */}
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-neutral-500 font-medium truncate pt-0.5">
+              <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
+              <span className="truncate">
+                {getCityTitle(listing.city)}{listing.subcity ? ` • ${listing.subcity}` : ''}
+              </span>
+            </div>
+          </div>
+
+          {/* Actions: Bookmark & Chat */}
+          <div className="flex items-center justify-end gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={handleSaveClick}
+              aria-label={isSaved ? (isAmharic ? 'ከተወደዱ አውጣ' : 'Remove from Saved') : (isAmharic ? 'አስቀምጥ' : 'Save to Favorites')}
+              className={`p-1.5 rounded-full transition-all ${
+                isSaved ? 'text-amber-500 bg-amber-50' : 'text-neutral-400 hover:text-amber-600 hover:bg-neutral-100'
+              }`}
+            >
+              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-500' : ''}`} />
+            </button>
+            {!isOwner && (
+              <button
+                type="button"
+                onClick={handleChatClick}
+                aria-label={t('messageOwner')}
+                className="p-1.5 rounded-full text-neutral-400 hover:text-amber-500 hover:bg-amber-50 transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // GRID VIEW LAYOUT (Matches Screenshot 1)
+  // ==========================================
   return (
     <div 
       onClick={() => onSelect(listing)}
-      className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border border-neutral-100 hover:border-amber-400/40 shadow-xs w-full max-w-full min-w-0"
+      className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border border-neutral-100 hover:border-amber-400/50 shadow-xs w-full max-w-full min-w-0"
     >
-      {/* 1. Item Image Container (Decreased Height by 15%, 100% Width Fit, No White Space) */}
-      <div className="relative aspect-[15/17] sm:aspect-[16/17] w-full max-w-full overflow-hidden bg-neutral-100">
+      {/* 1. Item Image Container (Height increased by 30% on mobile: aspect-[10/14], 100% width fit) */}
+      <div className="relative aspect-[10/14] sm:aspect-[16/17] w-full max-w-full overflow-hidden bg-neutral-100">
         <img 
           src={primaryImage} 
           alt={listing.title}
@@ -104,24 +192,24 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
         </div>
       </div>
 
-      {/* 2. Text Box (Responsive Height, Strictly Contained Within Box) */}
-      <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between gap-2 bg-white w-full max-w-full min-w-0 overflow-hidden">
+      {/* 2. Text Box (Responsive Height, Strictly Contained Within Box, Category removed) */}
+      <div className="p-2 sm:p-3 flex-1 flex flex-col justify-between gap-1.5 bg-white w-full max-w-full min-w-0 overflow-hidden">
         <div className="space-y-1 w-full max-w-full min-w-0 overflow-hidden">
-          {/* Price at Top of Text Section */}
+          {/* Price at Top of Text Section - Yellow / Amber color */}
           <div className="flex items-baseline gap-1 font-sans flex-wrap min-w-0 max-w-full overflow-hidden">
-            <span className="text-[11px] sm:text-xs font-black text-amber-600 uppercase tracking-tight">
+            <span className="text-[11px] sm:text-xs font-black text-amber-500 uppercase tracking-tight">
               {t('etb')}
             </span>
-            <span className="text-sm sm:text-base font-black text-amber-600 tracking-tight truncate">
+            <span className="text-xs sm:text-sm font-black text-amber-500 tracking-tight truncate">
               {Number(listing.rental_price).toLocaleString()}
             </span>
-            <span className="text-[10px] sm:text-[11px] text-neutral-400 font-medium">
+            <span className="text-[9px] sm:text-[10px] text-neutral-400 font-medium">
               /{periodLabel}
             </span>
           </div>
 
-          {/* Listing Title: Strictly Contained In Box, Limited to 2 Lines on Mobile */}
-          <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-amber-600 transition-colors leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] [word-break:break-word] w-full max-w-full min-w-0">
+          {/* Listing Title: Strictly Contained In Box, Limited to 2 Lines on Mobile - Yellow hover */}
+          <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-amber-500 transition-colors leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] [word-break:break-word] w-full max-w-full min-w-0">
             {listing.title}
           </h3>
 
@@ -134,24 +222,20 @@ export default function ListingCard({ listing, onSelect, onOpenAuth }) {
           </div>
         </div>
 
-        {/* Bottom Tag Row: Clean Category Badge + Action */}
-        <div className="pt-1 flex items-center justify-between gap-1.5 w-full min-w-0 max-w-full overflow-hidden">
-          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-medium rounded-md bg-neutral-100 text-neutral-600 truncate min-w-0 max-w-[calc(100%-2rem)]">
-            {categoryTitle}
-          </span>
-
-          {!isOwner && (
+        {/* Action Row - Chat button */}
+        {!isOwner && (
+          <div className="pt-0.5 flex items-center justify-end w-full">
             <button
               type="button"
               onClick={handleChatClick}
               aria-label={t('messageOwner')}
               title={t('messageOwner')}
-              className="p-1 rounded-md text-neutral-400 hover:text-amber-600 hover:bg-amber-50 transition-colors shrink-0"
+              className="p-1 rounded-md text-neutral-400 hover:text-amber-500 hover:bg-amber-50 transition-colors shrink-0"
             >
               <MessageSquare className="w-3.5 h-3.5" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

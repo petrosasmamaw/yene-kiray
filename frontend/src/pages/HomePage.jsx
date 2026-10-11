@@ -14,7 +14,9 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown
+  ArrowUpDown,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { fetchListings, fetchCategories, setSelectedCategory } from '../store/slices/listingSlice';
 import ListingCard from '../components/ListingCard';
@@ -45,6 +47,15 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
   const [maxPrice, setMaxPrice] = useState('');
   const [selectedPricePreset, setSelectedPricePreset] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('yene_kiray_view_mode') || 'grid');
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => {
+      const next = prev === 'grid' ? 'list' : 'grid';
+      localStorage.setItem('yene_kiray_view_mode', next);
+      return next;
+    });
+  };
 
   const categoryScrollRef = useRef(null);
 
@@ -376,47 +387,57 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
       </section>
 
       {/* Mobile/Tablet Main Listings Feed (< lg) */}
-      <section className="lg:hidden py-6 sm:py-10 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <div>
-            <h2 className="text-lg sm:text-2xl font-bold text-neutral-950 font-sans">
-              {t('availableListings')}
+      <section className="lg:hidden py-4 sm:py-8 px-3 sm:px-6 max-w-7xl mx-auto">
+        {/* Section Header with Category Title and Grid/List View Toggle Button */}
+        <div className="flex items-center justify-between mb-3.5 sm:mb-6">
+          <div className="min-w-0 pr-2">
+            <h2 className="text-base sm:text-xl font-bold text-neutral-950 font-sans truncate">
+              {currentCategoryName || t('availableListings')}
             </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              {t('availableListingsSubtitle')}
+            <p className="text-[11px] sm:text-xs text-neutral-500 mt-0.5">
+              {items.length} {t('items')}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-500 font-semibold bg-white border border-neutral-200 px-2.5 py-1 rounded-full shadow-2xs">
-              {items.length} {t('items')}
-            </span>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* View Mode Toggle Button (Matches Screenshot 1 & 2) */}
+            <button
+              type="button"
+              onClick={toggleViewMode}
+              aria-label={viewMode === 'grid' ? 'Switch to List view' : 'Switch to Grid view'}
+              title={viewMode === 'grid' ? 'Switch to List view' : 'Switch to Grid view'}
+              className="p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 active:scale-95 text-white shadow-xs transition-all flex items-center justify-center border border-neutral-700"
+            >
+              {viewMode === 'grid' ? (
+                <List className="w-5 h-5 stroke-[2.2]" />
+              ) : (
+                <LayoutGrid className="w-5 h-5 stroke-[2.2]" />
+              )}
+            </button>
           </div>
         </div>
 
         {loading ? (
-          <>
-            {/* Mobile Skeletons (Brick Layout) */}
-            <div className="sm:hidden flex gap-2.5 items-start w-full max-w-full overflow-hidden">
-              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)]">
-                {[1, 3, 5].map((n) => (
-                  <ListingCardSkeleton key={n} />
-                ))}
-              </div>
-              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)] pt-24">
-                {[2, 4, 6].map((n) => (
-                  <ListingCardSkeleton key={n} />
-                ))}
-              </div>
-            </div>
-
-            {/* Tablet Skeletons */}
-            <div className="hidden sm:grid sm:grid-cols-2 gap-6">
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <ListingCardSkeleton key={n} />
               ))}
             </div>
-          </>
+          ) : (
+            <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="h-28 sm:h-32 bg-white border border-neutral-200 rounded-xl p-3 flex gap-3 animate-pulse">
+                  <div className="w-28 sm:w-36 h-full bg-neutral-200 rounded-lg shrink-0" />
+                  <div className="flex-1 py-1 space-y-2">
+                    <div className="h-4 bg-amber-100 rounded w-24" />
+                    <div className="h-4 bg-neutral-200 rounded w-full" />
+                    <div className="h-3 bg-neutral-100 rounded w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : items.length === 0 ? (
           <div className="py-16 sm:py-20 text-center bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 max-w-lg mx-auto shadow-xs">
             <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 text-amber-600">
@@ -434,48 +455,32 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
             </button>
           </div>
         ) : (
-          <>
-            {/* Mobile View: 2-column Staggered Brick Layout */}
-            <div className="sm:hidden flex gap-2.5 items-start w-full max-w-full overflow-hidden">
-              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)]">
-                {items
-                  .filter((_, idx) => idx % 2 === 0)
-                  .map((listing) => (
-                    <ListingCard 
-                      key={listing.id} 
-                      listing={listing} 
-                      onSelect={onSelectListing}
-                      onOpenAuth={onOpenAuth}
-                    />
-                  ))}
-              </div>
-
-              <div className="flex-1 flex flex-col gap-3 min-w-0 max-w-[calc(50%-0.3125rem)] pt-24">
-                {items
-                  .filter((_, idx) => idx % 2 === 1)
-                  .map((listing) => (
-                    <ListingCard 
-                      key={listing.id} 
-                      listing={listing} 
-                      onSelect={onSelectListing}
-                      onOpenAuth={onOpenAuth}
-                    />
-                  ))}
-              </div>
-            </div>
-
-            {/* Tablet View: 2 Columns */}
-            <div className="hidden sm:grid sm:grid-cols-2 gap-6">
+          /* Render Straight 2-Column Grid or 1-Column List (Equal start position, no staggered offset) */
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
               {items.map((listing) => (
                 <ListingCard 
                   key={listing.id} 
                   listing={listing} 
+                  viewMode="grid"
                   onSelect={onSelectListing}
                   onOpenAuth={onOpenAuth}
                 />
               ))}
             </div>
-          </>
+          ) : (
+            <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
+              {items.map((listing) => (
+                <ListingCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  viewMode="list"
+                  onSelect={onSelectListing}
+                  onOpenAuth={onOpenAuth}
+                />
+              ))}
+            </div>
+          )
         )}
       </section>
 
