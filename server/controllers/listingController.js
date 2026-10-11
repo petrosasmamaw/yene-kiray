@@ -1,11 +1,27 @@
 import pool from '../config/db.js';
 
+// Fast in-memory cache for listings queries (20 seconds TTL)
+const listingsCache = new Map();
+const CACHE_TTL_MS = 20000;
+
+export const clearListingsCache = () => {
+  listingsCache.clear();
+};
+
 // @desc    Get public approved listings (with search, category & location filters)
 // @route   GET /api/listings
 // @access  Public
 export const getListings = async (req, res) => {
   try {
     const { category, search, city, minPrice, maxPrice, period, sort, page, limit } = req.query;
+
+    // Check fast cache
+    const cacheKey = JSON.stringify(req.query);
+    const cached = listingsCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      res.setHeader('X-Cache', 'HIT');
+      return res.json(cached.data);
+    }
 
     const params = [];
     let paramIndex = 1;
@@ -19,6 +35,7 @@ export const getListings = async (req, res) => {
         u.name AS owner_name,
         u.phone AS owner_phone,
         u.avatar_url AS owner_avatar,
+        COUNT(*) OVER() AS full_count,
         COALESCE(
           json_agg(
             json_build_object(
@@ -71,15 +88,17 @@ export const getListings = async (req, res) => {
       paramIndex++;
     }
 
-    queryText += ` GROUP BY l.id, c.name, c.name_am, c.slug, u.name, u.phone, u.avatar_url`;
+    queryText += ` GROUP BY l.id, c.id, c.name, c.name_am, c.slug, u.name, u.phone, u.avatar_url`;
 
-    // Sorting
+    // Sorting: when viewing all listings (no category filter), group by category order (houses, cars, shops, machinery, venues, tools)
     if (sort === 'price_asc') {
       queryText += ` ORDER BY l.rental_price ASC`;
     } else if (sort === 'price_desc') {
       queryText += ` ORDER BY l.rental_price DESC`;
-    } else {
+    } else if (category) {
       queryText += ` ORDER BY l.created_at DESC`;
+    } else {
+      queryText += ` ORDER BY c.id ASC, l.created_at DESC`;
     }
 
     // Only apply pagination limit if explicit numeric limit parameter is passed (and not 'all')
@@ -94,61 +113,25 @@ export const getListings = async (req, res) => {
 
     const result = await pool.query(queryText, params);
 
-    // Filtered total count calculation
-    let countQueryText = `
-      SELECT COUNT(DISTINCT l.id) 
-      FROM listings l
-      LEFT JOIN categories c ON l.category_id = c.id
-      WHERE l.status = 'approved'
-    `;
-    const countParams = [];
-    let countIndex = 1;
-
-    if (category) {
-      countQueryText += ` AND (c.slug = $${countIndex} OR l.category_id::text = $${countIndex})`;
-      countParams.push(category);
-      countIndex++;
-    }
-    if (search) {
-      countQueryText += ` AND (l.title ILIKE $${countIndex} OR l.description ILIKE $${countIndex} OR l.specific_location ILIKE $${countIndex})`;
-      countParams.push(`%${search}%`);
-      countIndex++;
-    }
-    if (city) {
-      countQueryText += ` AND l.city ILIKE $${countIndex}`;
-      countParams.push(`%${city}%`);
-      countIndex++;
-    }
-    if (minPrice) {
-      countQueryText += ` AND l.rental_price >= $${countIndex}`;
-      countParams.push(Number(minPrice));
-      countIndex++;
-    }
-    if (maxPrice) {
-      countQueryText += ` AND l.rental_price <= $${countIndex}`;
-      countParams.push(Number(maxPrice));
-      countIndex++;
-    }
-    if (period) {
-      countQueryText += ` AND l.price_period = $${countIndex}`;
-      countParams.push(period);
-      countIndex++;
-    }
-
-    const countRes = await pool.query(countQueryText, countParams);
-    const totalCount = parseInt(countRes.rows[0].count, 10);
-
+    const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].full_count, 10) : 0;
     const parsedLimit = limit && limit !== 'all' ? parseInt(limit, 10) : totalCount;
     const totalPages = parsedLimit > 0 ? Math.ceil(totalCount / parsedLimit) : 1;
 
-    return res.json({
+    const responseData = {
       success: true,
       count: result.rows.length,
       total: totalCount,
       page: page ? parseInt(page, 10) : 1,
       totalPages: totalPages || 1,
       listings: result.rows
-    });
+    };
+
+    // Cache the response in memory
+    listingsCache.set(cacheKey, { timestamp: Date.now(), data: responseData });
+    res.setHeader('X-Cache', 'MISS');
+    res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=45');
+
+    return res.json(responseData);
   } catch (error) {
     console.error('getListings error:', error);
     return res.status(500).json({ success: false, message: error.message });
@@ -300,6 +283,7 @@ export const createListing = async (req, res) => {
     }
 
     await client.query('COMMIT');
+    clearListingsCache();
 
     return res.status(201).json({
       success: true,

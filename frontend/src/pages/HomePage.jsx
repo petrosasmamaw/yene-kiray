@@ -73,22 +73,27 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // Real-time automatic search on typing (with 300ms debounce), filter changes, and auto-reset when search text is cleared
+  // Fast debounced search text input
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(fetchListings({
-        category: selectedCategory || undefined,
-        search: searchTerm.trim() || undefined,
-        city: selectedCity || undefined,
-        period: selectedPeriod || undefined,
-        minPrice: minPrice || undefined,
-        maxPrice: maxPrice || undefined,
-        sort: sortBy || undefined
-      }));
-    }, 300);
-
+      setDebouncedSearch(searchTerm);
+    }, 250);
     return () => clearTimeout(timer);
-  }, [searchTerm, selectedCategory, selectedCity, selectedPeriod, minPrice, maxPrice, sortBy, dispatch]);
+  }, [searchTerm]);
+
+  // Real-time instant fetch on filter changes & debounced search
+  useEffect(() => {
+    dispatch(fetchListings({
+      category: selectedCategory || undefined,
+      search: debouncedSearch.trim() || undefined,
+      city: selectedCity || undefined,
+      period: selectedPeriod || undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      sort: sortBy || undefined
+    }));
+  }, [debouncedSearch, selectedCategory, selectedCity, selectedPeriod, minPrice, maxPrice, sortBy, dispatch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
