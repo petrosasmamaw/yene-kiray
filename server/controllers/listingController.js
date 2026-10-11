@@ -5,9 +5,8 @@ import pool from '../config/db.js';
 // @access  Public
 export const getListings = async (req, res) => {
   try {
-    const { category, search, city, minPrice, maxPrice, period, sort, page = 1, limit = 12 } = req.query;
+    const { category, search, city, minPrice, maxPrice, period, sort, page, limit } = req.query;
 
-    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const params = [];
     let paramIndex = 1;
 
@@ -26,7 +25,7 @@ export const getListings = async (req, res) => {
               'id', li.id,
               'image_url', li.image_url,
               'is_primary', li.is_primary
-            )
+            ) ORDER BY li.is_primary DESC, li.id ASC
           ) FILTER (WHERE li.id IS NOT NULL), '[]'
         ) AS images
       FROM listings l
@@ -83,21 +82,71 @@ export const getListings = async (req, res) => {
       queryText += ` ORDER BY l.created_at DESC`;
     }
 
-    queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    params.push(parseInt(limit, 10), offset);
+    // Only apply pagination limit if explicit numeric limit parameter is passed (and not 'all')
+    if (limit && limit !== 'all') {
+      const parsedLimit = parseInt(limit, 10);
+      const parsedPage = parseInt(page || 1, 10);
+      const offset = (parsedPage - 1) * parsedLimit;
+      queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(parsedLimit, offset);
+      paramIndex += 2;
+    }
 
     const result = await pool.query(queryText, params);
 
-    // Get total count
-    const countRes = await pool.query("SELECT COUNT(*) FROM listings WHERE status = 'approved'");
+    // Filtered total count calculation
+    let countQueryText = `
+      SELECT COUNT(DISTINCT l.id) 
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      WHERE l.status = 'approved'
+    `;
+    const countParams = [];
+    let countIndex = 1;
+
+    if (category) {
+      countQueryText += ` AND (c.slug = $${countIndex} OR l.category_id::text = $${countIndex})`;
+      countParams.push(category);
+      countIndex++;
+    }
+    if (search) {
+      countQueryText += ` AND (l.title ILIKE $${countIndex} OR l.description ILIKE $${countIndex} OR l.specific_location ILIKE $${countIndex})`;
+      countParams.push(`%${search}%`);
+      countIndex++;
+    }
+    if (city) {
+      countQueryText += ` AND l.city ILIKE $${countIndex}`;
+      countParams.push(`%${city}%`);
+      countIndex++;
+    }
+    if (minPrice) {
+      countQueryText += ` AND l.rental_price >= $${countIndex}`;
+      countParams.push(Number(minPrice));
+      countIndex++;
+    }
+    if (maxPrice) {
+      countQueryText += ` AND l.rental_price <= $${countIndex}`;
+      countParams.push(Number(maxPrice));
+      countIndex++;
+    }
+    if (period) {
+      countQueryText += ` AND l.price_period = $${countIndex}`;
+      countParams.push(period);
+      countIndex++;
+    }
+
+    const countRes = await pool.query(countQueryText, countParams);
     const totalCount = parseInt(countRes.rows[0].count, 10);
+
+    const parsedLimit = limit && limit !== 'all' ? parseInt(limit, 10) : totalCount;
+    const totalPages = parsedLimit > 0 ? Math.ceil(totalCount / parsedLimit) : 1;
 
     return res.json({
       success: true,
       count: result.rows.length,
       total: totalCount,
-      page: parseInt(page, 10),
-      totalPages: Math.ceil(totalCount / parseInt(limit, 10)),
+      page: page ? parseInt(page, 10) : 1,
+      totalPages: totalPages || 1,
       listings: result.rows
     });
   } catch (error) {
@@ -133,7 +182,7 @@ export const getListingById = async (req, res) => {
               'image_url', li.image_url,
               'public_id', li.public_id,
               'is_primary', li.is_primary
-            )
+            ) ORDER BY li.is_primary DESC, li.id ASC
           ) FILTER (WHERE li.id IS NOT NULL), '[]'
         ) AS images
       FROM listings l

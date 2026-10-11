@@ -39,8 +39,8 @@ export default function ListingCard({ listing, onSelect, onOpenAuth, viewMode = 
   };
 
   const primaryImage = listing.images && listing.images.length > 0 
-    ? listing.images[0].image_url 
-    : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+    ? (listing.images.find(img => img.is_primary)?.image_url || listing.images[0].image_url) 
+    : (listing.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80');
 
   const periodLabel = listing.price_period === 'day' 
     ? t('periodDay') 
