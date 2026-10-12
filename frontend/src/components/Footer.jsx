@@ -12,7 +12,7 @@ import {
   Headphones 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { SOCIAL_LINKS, TelegramIcon, YoutubeIcon, TiktokIcon } from './TopSocialBar';
+import { SOCIAL_LINKS, TelegramIcon, FacebookIcon, YoutubeIcon, TiktokIcon } from './TopSocialBar';
 
 export default function Footer({ onCategorySelect }) {
   const { t, isAmharic } = useLanguage();
@@ -58,6 +58,18 @@ export default function Footer({ onCategorySelect }) {
                   className="w-9 h-9 rounded-xl bg-neutral-100 hover:bg-[#229ED9] text-neutral-700 hover:text-white flex items-center justify-center border border-neutral-250 hover:border-[#229ED9] transition-all shadow-xs group"
                 >
                   <TelegramIcon className="w-4 h-4 text-[#229ED9] group-hover:text-white transition-colors" />
+                </a>
+
+                {/* Facebook */}
+                <a
+                  href={SOCIAL_LINKS.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook Page"
+                  title="Facebook Page (https://www.facebook.com/profile.php?id=61595222945310&mibextid=ZbWKwL)"
+                  className="w-9 h-9 rounded-xl bg-neutral-100 hover:bg-[#1877F2] text-neutral-700 hover:text-white flex items-center justify-center border border-neutral-250 hover:border-[#1877F2] transition-all shadow-xs group"
+                >
+                  <FacebookIcon className="w-4 h-4 text-[#1877F2] group-hover:text-white transition-colors" />
                 </a>
 
                 {/* YouTube */}

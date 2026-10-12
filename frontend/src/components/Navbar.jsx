@@ -17,7 +17,7 @@ import {
 import { logout } from '../store/slices/authSlice';
 import { openChat } from '../store/slices/chatSlice';
 import { useLanguage } from '../context/LanguageContext';
-import TopSocialBar, { SOCIAL_LINKS, TelegramIcon, YoutubeIcon, TiktokIcon } from './TopSocialBar';
+import TopSocialBar, { SOCIAL_LINKS, TelegramIcon, FacebookIcon, YoutubeIcon, TiktokIcon } from './TopSocialBar';
 
 export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
   const dispatch = useDispatch();
@@ -48,13 +48,15 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
           {/* Brand Logo & Name */}
           <div 
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group h-full py-1 select-none"
           >
-            <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-250 p-1.5 flex items-center justify-center group-hover:border-amber-500/60 transition-all duration-200 shadow-xs">
-              <img src="/logo-key.svg" alt="Logo" className="w-full h-full object-contain" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-neutral-950 font-sans leading-none">
-              የኔ <span className="text-amber-500 font-extrabold">ኪራይ</span>
+            <img 
+              src="/logo-key.svg" 
+              alt="የኔ ኪራይ Logo" 
+              className="h-[54px] sm:h-[62px] w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0" 
+            />
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-neutral-950 font-sans leading-none">
+              የኔ <span className="text-amber-500 font-black">ኪራይ</span>
             </span>
           </div>
 
@@ -416,6 +418,15 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                 <span>Telegram</span>
               </a>
               <a
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-xl bg-neutral-100 hover:bg-[#1877F2]/15 text-neutral-800 font-semibold border border-neutral-200 transition-colors"
+              >
+                <FacebookIcon className="w-3.5 h-3.5 text-[#1877F2]" />
+                <span>Facebook</span>
+              </a>
+              <a
                 href={SOCIAL_LINKS.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -437,10 +448,10 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                 href={SOCIAL_LINKS.supportTelegram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold border border-amber-300 transition-colors"
+                className="col-span-2 flex items-center justify-center gap-2 p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold border border-amber-300 transition-colors"
               >
                 <TelegramIcon className="w-3.5 h-3.5 text-amber-600" />
-                <span className="truncate">Support</span>
+                <span>Customer Support (@yene_kiray_support)</span>
               </a>
             </div>
           </div>
