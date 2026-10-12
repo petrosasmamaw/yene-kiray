@@ -4,25 +4,25 @@ import { translations } from '../locales/translations';
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  // Default to Amharic ('am') as requested by user
+  // Default to English ('en') as requested by user
   const [language, setLanguageState] = useState(() => {
-    return localStorage.getItem('yene_kiray_lang') || 'am';
+    return localStorage.getItem('yene_kiray_lang') || 'en';
   });
 
   const setLanguage = (lang) => {
-    const validLang = lang === 'en' ? 'en' : 'am';
+    const validLang = lang === 'am' ? 'am' : 'en';
     setLanguageState(validLang);
     localStorage.setItem('yene_kiray_lang', validLang);
   };
 
   const toggleLanguage = () => {
-    setLanguage(language === 'am' ? 'en' : 'am');
+    setLanguage(language === 'en' ? 'am' : 'en');
   };
 
   // Translation helper function
   const t = (key, fallback = '') => {
     if (!key) return '';
-    const currentDict = translations[language] || translations.am;
+    const currentDict = translations[language] || translations.en;
     if (currentDict && currentDict[key] !== undefined) {
       return currentDict[key];
     }
@@ -60,7 +60,9 @@ export function LanguageProvider({ children }) {
     'Mekelle': 'መቀሌ',
     'Dire Dawa': 'ድሬዳዋ',
     'Gondar': 'ጎንደር',
-    'Jimma': 'ጅማ'
+    'Jimma': 'ጅማ',
+    'Other': 'ሌሎች ከተሞች',
+    'Other Cities': 'ሌሎች ከተሞች'
   };
 
   const getCityTitle = (city) => {

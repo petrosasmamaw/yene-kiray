@@ -65,9 +65,13 @@ export const getListings = async (req, res) => {
     }
 
     if (city) {
-      queryText += ` AND l.city ILIKE $${paramIndex}`;
-      params.push(`%${city}%`);
-      paramIndex++;
+      if (city === 'Other' || city === 'other' || city === 'Other Cities') {
+        queryText += ` AND (l.city ILIKE '%Other%' OR l.city NOT ILIKE ANY(ARRAY['%Addis Ababa%', '%Hawassa%', '%Adama%', '%Bahir Dar%', '%Bishoftu%', '%Mekelle%', '%Dire Dawa%', '%Gondar%', '%Jimma%']))`;
+      } else {
+        queryText += ` AND l.city ILIKE $${paramIndex}`;
+        params.push(`%${city}%`);
+        paramIndex++;
+      }
     }
 
     if (minPrice) {

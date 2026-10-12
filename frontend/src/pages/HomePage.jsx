@@ -258,6 +258,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                   <option value="Bishoftu" className="bg-white text-neutral-900 font-normal">{t('cityBishoftu')}</option>
                   <option value="Mekelle" className="bg-white text-neutral-900 font-normal">{t('cityMekelle')}</option>
                   <option value="Dire Dawa" className="bg-white text-neutral-900 font-normal">{t('cityDireDawa')}</option>
+                  <option value="Gondar" className="bg-white text-neutral-900 font-normal">{t('cityGondar')}</option>
+                  <option value="Jimma" className="bg-white text-neutral-900 font-normal">{t('cityJimma')}</option>
+                  <option value="Other" className="bg-white text-neutral-900 font-normal">{t('cityOther')}</option>
                 </select>
               </div>
 
@@ -664,6 +667,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
                 <option value="Bishoftu">{t('cityBishoftu')}</option>
                 <option value="Mekelle">{t('cityMekelle')}</option>
                 <option value="Dire Dawa">{t('cityDireDawa')}</option>
+                <option value="Gondar">{t('cityGondar')}</option>
+                <option value="Jimma">{t('cityJimma')}</option>
+                <option value="Other">{t('cityOther')}</option>
               </select>
             </div>
 
@@ -849,6 +855,9 @@ export default function HomePage({ onSelectListing, onOpenAuth }) {
               <option value="Bishoftu">{t('cityBishoftu')}</option>
               <option value="Mekelle">{t('cityMekelle')}</option>
               <option value="Dire Dawa">{t('cityDireDawa')}</option>
+              <option value="Gondar">{t('cityGondar')}</option>
+              <option value="Jimma">{t('cityJimma')}</option>
+              <option value="Other">{t('cityOther')}</option>
             </select>
           </div>
 

@@ -78,6 +78,18 @@ export const translations = {
     cityDireDawa: 'ድሬዳዋ',
     cityGondar: 'ጎንደር',
     cityJimma: 'ጅማ',
+    cityOther: 'ሌሎች ከተሞች (Other)',
+    specifyOtherCity: 'የከተማውን ስም ይግለጹ (ለምሳሌ፦ ደሴ፣ ሐረር...)',
+
+    // Social Media & Header
+    topSocialMedia: 'የእኛ ማህበራዊ ሚዲያዎች',
+    topCustomerSupport: 'የደንበኞች ድጋፍ',
+    socialTelegram: 'ቴሌግራም ቻናል',
+    socialYoutube: 'ዩቲዩብ',
+    socialTiktok: 'ቲክቶክ',
+    socialSupportAccount: 'የቴሌግራም ድጋፍ (@yene_kiray_support)',
+    footerFollowUs: 'ይከተሉን',
+    footerSocialDesc: 'አዳዲስ የኪራይ ዕድሎችን እና መረጃዎችን ለማግኘት በማህበራዊ ገጾቻችን ይከተሉን።',
 
     // Categories Section
     allCategories: 'ሁሉም ዘርፎች',
@@ -293,6 +305,18 @@ export const translations = {
     cityDireDawa: 'Dire Dawa',
     cityGondar: 'Gondar',
     cityJimma: 'Jimma',
+    cityOther: 'Other Cities',
+    specifyOtherCity: 'Specify City Name (e.g. Dessie, Harar...)',
+
+    // Social Media & Header
+    topSocialMedia: 'Our Social Media',
+    topCustomerSupport: 'Customer Support',
+    socialTelegram: 'Telegram Channel',
+    socialYoutube: 'YouTube',
+    socialTiktok: 'TikTok',
+    socialSupportAccount: 'Telegram Support (@yene_kiray_support)',
+    footerFollowUs: 'Connect With Us',
+    footerSocialDesc: 'Follow our official channels for the latest verified rentals, market updates, and community support.',
 
     // Categories Section
     allCategories: 'All Categories',

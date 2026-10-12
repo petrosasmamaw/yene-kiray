@@ -67,6 +67,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
     contact_phone: user?.phone || ''
   });
 
+  const [cityOption, setCityOption] = useState('Addis Ababa');
+  const [customCity, setCustomCity] = useState('');
+
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [images, setImages] = useState([]); // Array of { image_url, public_id }
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -430,14 +433,46 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   {t('postLabelCity')}
                 </label>
-                <input
-                  type="text"
-                  name="city"
-                  required
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="input-luxury text-sm"
-                />
+                <select
+                  value={cityOption}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCityOption(val);
+                    if (val === 'Other') {
+                      setFormData((prev) => ({ ...prev, city: customCity.trim() || 'Other' }));
+                    } else {
+                      setFormData((prev) => ({ ...prev, city: val }));
+                    }
+                  }}
+                  className="input-luxury text-sm cursor-pointer mb-2"
+                >
+                  <option value="Addis Ababa">{t('cityAddisAbaba')}</option>
+                  <option value="Hawassa">{t('cityHawassa')}</option>
+                  <option value="Adama">{t('cityAdama')}</option>
+                  <option value="Bahir Dar">{t('cityBahirDar')}</option>
+                  <option value="Bishoftu">{t('cityBishoftu')}</option>
+                  <option value="Mekelle">{t('cityMekelle')}</option>
+                  <option value="Dire Dawa">{t('cityDireDawa')}</option>
+                  <option value="Gondar">{t('cityGondar')}</option>
+                  <option value="Jimma">{t('cityJimma')}</option>
+                  <option value="Other">{t('cityOther')}</option>
+                </select>
+
+                {cityOption === 'Other' && (
+                  <input
+                    type="text"
+                    required
+                    placeholder={t('specifyOtherCity')}
+                    value={customCity}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomCity(val);
+                      setFormData((prev) => ({ ...prev, city: val.trim() || 'Other' }));
+                    }}
+                    className="input-luxury text-sm animate-in fade-in duration-200"
+                    autoFocus
+                  />
+                )}
               </div>
 
               <div>

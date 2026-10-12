@@ -17,6 +17,7 @@ import {
 import { logout } from '../store/slices/authSlice';
 import { openChat } from '../store/slices/chatSlice';
 import { useLanguage } from '../context/LanguageContext';
+import TopSocialBar, { SOCIAL_LINKS, TelegramIcon, YoutubeIcon, TiktokIcon } from './TopSocialBar';
 
 export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
   const dispatch = useDispatch();
@@ -36,8 +37,12 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-neutral-200/90 transition-all duration-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
+    <header className="sticky top-0 z-50">
+      {/* Top Social Media Announcement Strip */}
+      <TopSocialBar />
+
+      <nav className="bg-white/95 backdrop-blur-xl border-b border-neutral-200/90 transition-all duration-200 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex items-center justify-between h-[72px]">
           
           {/* Brand Logo & Name */}
@@ -394,8 +399,54 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
               </button>
             </div>
           )}
+
+          {/* Social Media Links in Mobile Drawer */}
+          <div className="pt-3 mt-3 border-t border-neutral-200">
+            <span className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2.5">
+              {t('topSocialMedia')}
+            </span>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <a
+                href={SOCIAL_LINKS.telegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-xl bg-neutral-100 hover:bg-[#229ED9]/15 text-neutral-800 font-semibold border border-neutral-200 transition-colors"
+              >
+                <TelegramIcon className="w-3.5 h-3.5 text-[#229ED9]" />
+                <span>Telegram</span>
+              </a>
+              <a
+                href={SOCIAL_LINKS.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-xl bg-neutral-100 hover:bg-[#FF0000]/15 text-neutral-800 font-semibold border border-neutral-200 transition-colors"
+              >
+                <YoutubeIcon className="w-3.5 h-3.5 text-[#FF0000]" />
+                <span>YouTube</span>
+              </a>
+              <a
+                href={SOCIAL_LINKS.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold border border-neutral-200 transition-colors"
+              >
+                <TiktokIcon className="w-3.5 h-3.5 text-neutral-900" />
+                <span>TikTok</span>
+              </a>
+              <a
+                href={SOCIAL_LINKS.supportTelegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold border border-amber-300 transition-colors"
+              >
+                <TelegramIcon className="w-3.5 h-3.5 text-amber-600" />
+                <span className="truncate">Support</span>
+              </a>
+            </div>
+          </div>
         </div>
       )}
-    </nav>
+      </nav>
+    </header>
   );
 }

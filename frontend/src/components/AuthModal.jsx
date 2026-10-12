@@ -10,7 +10,9 @@ import {
   AlertCircle, 
   ArrowRight, 
   ArrowLeft,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { loginUser, registerUser, clearAuthError } from '../store/slices/authSlice';
 import { useLanguage } from '../context/LanguageContext';
@@ -23,6 +25,7 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
   const { loading, error } = useSelector((state) => state.auth);
 
   const [mode, setMode] = useState(initialMode); // 'login' or 'register'
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -237,14 +240,27 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
             <div className="relative">
               <Lock className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input 
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 required
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="input-luxury pl-11 text-sm"
+                className="input-luxury pl-11 pr-11 text-sm"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700 focus:outline-none transition-colors cursor-pointer"
+                title={showPassword ? (isAmharic ? 'የይለፍ ቃል ደብቅ' : 'Hide password') : (isAmharic ? 'የይለፍ ቃል አሳይ' : 'Show password')}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4 text-amber-600" />
+                ) : (
+                  <Eye className="w-4 h-4 text-neutral-400 hover:text-neutral-600" />
+                )}
+              </button>
             </div>
           </div>
 
