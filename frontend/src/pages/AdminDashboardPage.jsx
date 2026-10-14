@@ -166,7 +166,8 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         phone: editingUser.phone,
         role: editingUser.role,
         is_active: editingUser.is_active,
-        bio: editingUser.bio
+        bio: editingUser.bio,
+        free_trial_posts_remaining: Number(editingUser.free_trial_posts_remaining ?? 0)
       });
       setEditingUser(null);
       dispatch(fetchAdminUsers());
@@ -1276,6 +1277,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                     <th className="py-3 px-4">User</th>
                     <th className="py-3 px-4">Role</th>
                     <th className="py-3 px-4">Listings</th>
+                    <th className="py-3 px-4">Free Posts Left</th>
                     <th className="py-3 px-4">Account Status</th>
                     <th className="py-3 px-4">Actions</th>
                   </tr>
@@ -1307,6 +1309,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
                       <td className="py-3 px-4 font-bold text-neutral-950">
                         {u.listings_count || 0}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] inline-flex items-center gap-1 ${
+                          (u.free_trial_posts_remaining || 0) > 0 
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
+                            : 'bg-neutral-100 text-neutral-500'
+                        }`}>
+                          {(u.free_trial_posts_remaining || 0) > 0 && <Sparkles className="w-3 h-3 text-emerald-600" />}
+                          <span>{u.free_trial_posts_remaining || 0} left</span>
+                        </span>
                       </td>
 
                       <td className="py-3 px-4">
@@ -1680,6 +1693,21 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   <option value="user" className="bg-white text-neutral-900">User (Standard Client)</option>
                   <option value="admin" className="bg-white text-neutral-900">Admin (Full Controls)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-neutral-700 font-semibold mb-1 flex items-center justify-between">
+                  <span>Free Trial Posts Remaining</span>
+                  <span className="text-[10px] text-amber-600 font-bold">Profile Balance</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1000"
+                  value={editingUser.free_trial_posts_remaining ?? 0}
+                  onChange={(e) => setEditingUser({ ...editingUser, free_trial_posts_remaining: parseInt(e.target.value, 10) || 0 })}
+                  className="input-luxury text-xs font-mono"
+                />
               </div>
 
               <div className="flex items-center gap-3 py-2">

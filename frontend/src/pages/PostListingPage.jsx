@@ -19,6 +19,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { createNewListing, fetchCategories } from '../store/slices/listingSlice';
+import { setFreeTrialPostsRemaining } from '../store/slices/authSlice';
 import api from '../services/api';
 import PaymentModal from '../components/PaymentModal';
 import { compressImage, fileToDataUri } from '../utils/imageCompressor';
@@ -222,6 +223,16 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
       const result = await dispatch(createNewListing(payload)).unwrap();
 
+      if (result.free_trial_posts_remaining !== undefined) {
+        dispatch(setFreeTrialPostsRemaining(result.free_trial_posts_remaining));
+        setEligibility((prev) => prev ? {
+          ...prev,
+          free_posts_remaining: result.free_trial_posts_remaining,
+          free_trial_posts_remaining: result.free_trial_posts_remaining,
+          is_free_next: result.free_trial_posts_remaining > 0
+        } : prev);
+      }
+
       toast.success(isAmharic ? 'ማስታወቂያዎ በተሳካ ሁኔታ ተመዝግቧል!' : 'Listing published successfully!');
 
       // Check if Admin requires payment
@@ -297,9 +308,43 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform text-amber-600" />
             <span>{t('back')}</span>
           </button>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider mb-2">
-            <PlusCircle className="w-3.5 h-3.5 text-amber-600" />
-            <span>{t('postPageBadge')}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider">
+              <PlusCircle className="w-3.5 h-3.5 text-amber-600" />
+              <span>{t('postPageBadge')}</span>
+            </div>
+
+            {/* Small in-page free trial pill indicator */}
+            {eligibility && (
+              <div 
+                id="free-trial-counter-pill"
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs transition-all ${
+                  eligibility.free_posts_remaining > 0
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : 'bg-amber-50 text-amber-900 border-amber-300'
+                }`}
+              >
+                {eligibility.free_posts_remaining > 0 ? (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse shrink-0" />
+                    <span>
+                      {isAmharic 
+                        ? `${eligibility.free_posts_remaining} ነጻ ፖስት ቀርቷል` 
+                        : `${eligibility.free_posts_remaining} Free Post${eligibility.free_posts_remaining === 1 ? '' : 's'} Remaining`}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      {isAmharic 
+                        ? `የሚከፈልበት ፖስት (${eligibility.posting_fee || 200} ብር)` 
+                        : `Paid Listing (${eligibility.posting_fee || 200} ETB)`}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-neutral-950 font-sans leading-tight">
             {t('postPageTitle')}
@@ -329,39 +374,39 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
 
         {/* Dynamic Business Free Trial / Payment Status Badge */}
         {eligibility && (
-          <div className={`p-4 sm:p-5 rounded-2xl border transition-all shadow-2xs ${
+          <div className={`p-3.5 sm:p-4 rounded-2xl border transition-all shadow-2xs ${
             eligibility.is_free_next 
-              ? 'bg-gradient-to-r from-emerald-50/90 via-amber-50/30 to-white border-emerald-300 text-emerald-950'
+              ? 'bg-gradient-to-r from-emerald-50/90 via-emerald-50/30 to-white border-emerald-300 text-emerald-950'
               : 'bg-gradient-to-r from-amber-50/90 via-amber-50/30 to-white border-amber-300 text-amber-950'
           }`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-start sm:items-center gap-3 min-w-0">
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border shadow-2xs ${
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs ${
                   eligibility.is_free_next 
                     ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
                     : 'bg-amber-100 text-amber-700 border-amber-300'
                 }`}>
-                  {eligibility.is_free_next ? <Sparkles className="w-5 h-5 stroke-[2.2]" /> : <CreditCard className="w-5 h-5 stroke-[2.2]" />}
+                  {eligibility.is_free_next ? <Sparkles className="w-4 h-4 stroke-[2.2]" /> : <CreditCard className="w-4 h-4 stroke-[2.2]" />}
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-xs sm:text-sm font-black font-sans tracking-tight">
                     {eligibility.is_free_next 
-                      ? (isAmharic ? `የነጻ ማስታወቂያ ሙከራ ገባሪ ነው (${eligibility.free_posts_remaining} ነጻ ፖስት ቀርቷል)` : `Free Trial Active (${eligibility.free_posts_remaining} free post(s) remaining)`)
-                      : (isAmharic ? `የማስታወቂያ ክፍያ ያስፈልጋል (${eligibility.posting_fee} ብር)` : `Paid Post Required (${eligibility.posting_fee} ETB via Telebirr or CBE)`)}
+                      ? (isAmharic ? `የነጻ ማስታወቂያ ሙከራ: ${eligibility.free_posts_remaining} ቀሪ ፖስት` : `Free Trial Balance: ${eligibility.free_posts_remaining} free post(s) remaining`)
+                      : (isAmharic ? `የነጻ ሙከራ ፖስቶች አልቀዋል (0 ቀርቷል)` : `Free Trial Balance: 0 remaining`)}
                   </h4>
                   <p className="text-[11px] text-neutral-600 mt-0.5 leading-relaxed">
                     {eligibility.is_free_next
-                      ? (isAmharic ? `አስተዳዳሪው የመደበው ነጻ የፖስቲንግ ኮታ (${eligibility.free_trial_posts_count} ፖስቶች) ውስጥ ነዎት። ይህ ፖስት በነጻ ወዲያውኑ ይለጠፋል!` : `You are within the platform's ${eligibility.free_trial_posts_count} free trial post allowance. This listing will publish live immediately for free!`)
-                      : (isAmharic ? `የነጻ ሙከራ ፖስቶችዎን አጠናቀዋል (${eligibility.user_listings_count} ተለጥፏል)። ፖስቱን ለመለጠፍ በቴሌብር ወይም በንግድ ባንክ ክፍያ ፈጽመው ደረሰኝ ያያይዙ።` : `You have used your ${eligibility.user_listings_count} free post(s). A one-time listing fee of ${eligibility.posting_fee} ETB is required for admin approval.`)}
+                      ? (isAmharic ? 'በመመዝገቢያዎ የተሰጠዎት ነጻ የፖስት እድል ነው። ይህ ማስታወቂያ ክፍያ ሳይጠይቅ ወዲያውኑ በነጻ ይለጠፋል!' : 'From your account registration grant. This listing will publish live immediately for free!')
+                      : (isAmharic ? `የመመዝገቢያ ነጻ ፖስቶችዎን አጠናቀዋል። ማስታወቂያዎን ለማስቀጠል ${eligibility.posting_fee} ብር በቴሌብር ወይም በንግድ ባንክ ክፍያ ፈጽመው ደረሰኝ ያያይዙ።` : `You have used your free trial posts. A listing fee of ${eligibility.posting_fee} ETB via Telebirr or CBE is required to publish.`)}
                   </p>
                 </div>
               </div>
-              <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border shrink-0 ${
+              <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border shrink-0 ${
                 eligibility.is_free_next 
                   ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
                   : 'bg-amber-100 text-amber-800 border-amber-300'
               }`}>
-                {eligibility.is_free_next ? (isAmharic ? 'ነጻ ፖስት' : '100% Free') : (isAmharic ? 'የሚከፈልበት' : 'Fee Required')}
+                {eligibility.is_free_next ? (isAmharic ? `${eligibility.free_posts_remaining} ነጻ ቀሪ` : `${eligibility.free_posts_remaining} Free Left`) : (isAmharic ? 'የሚከፈልበት' : 'Paid Post')}
               </span>
             </div>
           </div>
@@ -649,7 +694,31 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
           </div>
 
           {/* Submit Actions */}
-          <div className="pt-2 sm:pt-4 flex items-center justify-end">
+          <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-neutral-100 pt-5">
+            {eligibility ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-600">
+                {eligibility.free_posts_remaining > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold shadow-2xs">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>
+                      {isAmharic 
+                        ? `ይህ ፖስት በነጻ ይለጠፋል (${eligibility.free_posts_remaining} ነጻ ፖስት ይቀራል)` 
+                        : `Publishes for free (${eligibility.free_posts_remaining} free post${eligibility.free_posts_remaining === 1 ? '' : 's'} remaining)`}
+                    </span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold shadow-2xs">
+                    <CreditCard className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      {isAmharic 
+                        ? `የማስታወቂያ ክፍያ ያስፈልጋል (${eligibility.posting_fee || 200} ብር)` 
+                        : `Listing fee required (${eligibility.posting_fee || 200} ETB)`}
+                    </span>
+                  </span>
+                )}
+              </div>
+            ) : <div />}
+
             <button
               type="submit"
               disabled={submitting || uploadingImage}

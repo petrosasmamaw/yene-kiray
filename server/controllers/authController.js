@@ -31,12 +31,24 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Explicitly enforce role='user' — Admin accounts can only be created via terminal seed script!
+    // Fetch current system free trial limit configured by admin at registration time
+    const settingRes = await pool.query(
+      "SELECT setting_value FROM system_settings WHERE setting_key = 'free_trial_posts_count'"
+    );
+    let freeTrialLimit = 3;
+    if (settingRes.rows.length > 0) {
+      const parsed = parseInt(settingRes.rows[0].setting_value, 10);
+      if (!isNaN(parsed) && parsed >= 0) {
+        freeTrialLimit = parsed;
+      }
+    }
+
+    // Explicitly enforce role='user' and record the user's permanent initial free trial allowance
     const result = await pool.query(
-      `INSERT INTO users (name, email, phone, password_hash, role, is_active)
-       VALUES ($1, $2, $3, $4, 'user', true)
-       RETURNING id, name, email, phone, role, is_active, avatar_url, created_at`,
-      [name.trim(), normalizedEmail, phone || null, passwordHash]
+      `INSERT INTO users (name, email, phone, password_hash, role, is_active, free_trial_posts_remaining)
+       VALUES ($1, $2, $3, $4, 'user', true, $5)
+       RETURNING id, name, email, phone, role, is_active, avatar_url, free_trial_posts_remaining, created_at`,
+      [name.trim(), normalizedEmail, phone || null, passwordHash, freeTrialLimit]
     );
 
     const newUser = result.rows[0];
@@ -68,7 +80,7 @@ export const login = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     const userRes = await pool.query(
-      'SELECT id, name, email, phone, password_hash, role, is_active, avatar_url FROM users WHERE email = $1',
+      'SELECT id, name, email, phone, password_hash, role, is_active, avatar_url, free_trial_posts_remaining FROM users WHERE email = $1',
       [normalizedEmail]
     );
 
@@ -110,7 +122,7 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const userRes = await pool.query(
-      'SELECT id, name, email, phone, role, is_active, avatar_url, bio, created_at FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, role, is_active, avatar_url, bio, free_trial_posts_remaining, created_at FROM users WHERE id = $1',
       [req.user.id]
     );
 

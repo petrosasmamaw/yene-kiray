@@ -194,10 +194,22 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                   <div className="absolute right-0 mt-2 w-56 bg-white border border-neutral-200 rounded-xl shadow-xl py-2 z-50">
                     <div className="px-4 py-2.5 border-b border-neutral-200">
                       <p className="text-xs text-neutral-500">{t('signedInAs')}</p>
-                      <p className="text-sm font-bold text-neutral-900 truncate">{user?.email}</p>
-                      <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded bg-amber-100/80 text-amber-900 font-semibold uppercase">
-                        Role: {user?.role}
-                      </span>
+                      <p className="text-sm font-bold text-neutral-900 truncate">{user?.name || user?.email}</p>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100/80 text-amber-900 font-semibold uppercase">
+                          Role: {user?.role}
+                        </span>
+                        {user?.role !== 'admin' && (
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold inline-flex items-center gap-1 ${
+                            (user?.free_trial_posts_remaining || 0) > 0 
+                              ? 'bg-emerald-100 text-emerald-800' 
+                              : 'bg-neutral-100 text-neutral-600'
+                          }`}>
+                            <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                            <span>{user?.free_trial_posts_remaining ?? 0} {isAmharic ? 'ነጻ ቀሪ' : 'free posts'}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {user?.role !== 'admin' && (

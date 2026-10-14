@@ -53,6 +53,11 @@ const authSlice = createSlice({
     },
     clearAuthError: (state) => {
       state.error = null;
+    },
+    setFreeTrialPostsRemaining: (state, action) => {
+      if (state.user) {
+        state.user.free_trial_posts_remaining = action.payload;
+      }
     }
   },
   extraReducers: (builder) => {
@@ -107,5 +112,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const { logout, clearAuthError, setFreeTrialPostsRemaining } = authSlice.actions;
 export default authSlice.reducer;

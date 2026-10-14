@@ -191,7 +191,9 @@ export const getAllUsers = async (req, res) => {
 
     let queryText = `
       SELECT 
-        u.id, u.name, u.email, u.phone, u.role, u.is_active, u.avatar_url, u.created_at,
+        u.id, u.name, u.email, u.phone, u.role, u.is_active, u.avatar_url, 
+        COALESCE(u.free_trial_posts_remaining, 0) AS free_trial_posts_remaining,
+        u.created_at,
         COUNT(l.id) AS listings_count
       FROM users u
       LEFT JOIN listings l ON l.user_id = u.id
@@ -222,13 +224,13 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// @desc    Admin: Toggle user active/inactive & edit profile & role
+// @desc    Admin: Toggle user active/inactive & edit profile & role & free posts
 // @route   PUT /api/admin/users/:id
 // @access  Private / Admin
 export const updateUserByAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { is_active, name, phone, bio, role } = req.body;
+    const { is_active, name, phone, bio, role, free_trial_posts_remaining } = req.body;
 
     const result = await pool.query(
       `UPDATE users
@@ -237,10 +239,11 @@ export const updateUserByAdmin = async (req, res) => {
            phone = COALESCE($3, phone),
            bio = COALESCE($4, bio),
            role = COALESCE($5, role),
+           free_trial_posts_remaining = COALESCE($6, free_trial_posts_remaining),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
-       RETURNING id, name, email, phone, role, is_active, bio, created_at`,
-      [is_active, name, phone, bio, role, id]
+       WHERE id = $7
+       RETURNING id, name, email, phone, role, is_active, bio, free_trial_posts_remaining, created_at`,
+      [is_active, name, phone, bio, role, free_trial_posts_remaining !== undefined ? parseInt(free_trial_posts_remaining, 10) : null, id]
     );
 
     if (result.rows.length === 0) {

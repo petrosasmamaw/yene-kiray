@@ -228,23 +228,32 @@ export const createListing = async (req, res) => {
 
     let payToPostEnabled = settingsMap.pay_to_post_enabled === 'true';
     let postingFeeAmount = parseFloat(settingsMap.posting_fee_amount) || 200;
-    let freeTrialCount = parseInt(settingsMap.free_trial_posts_count ?? '3', 10);
-    if (isNaN(freeTrialCount)) freeTrialCount = 3;
 
-    // 2. Count existing non-rejected listings created by this user
-    const userListingsRes = await client.query(
-      "SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status != 'rejected'",
+    // 2. Fetch and lock user's individual recorded free_trial_posts_remaining
+    const userRowRes = await client.query(
+      'SELECT free_trial_posts_remaining FROM users WHERE id = $1 FOR UPDATE',
       [req.user.id]
     );
-    const userListingsCount = parseInt(userListingsRes.rows[0].count, 10) || 0;
+    let userRemaining = userRowRes.rows.length > 0 
+      ? Math.max(0, parseInt(userRowRes.rows[0].free_trial_posts_remaining ?? '0', 10))
+      : 0;
 
-    // Check if user qualifies for Free Trial
-    const isFreeTrial = freeTrialCount > 0 && userListingsCount < freeTrialCount;
+    // Free trial qualifies strictly if user has recorded free trial posts remaining (> 0)
+    const isFreeTrial = userRemaining > 0;
 
     // If Free Trial: immediate approval & paid=true; if not free trial and payToPostEnabled: pending & paid=false
     const requiresPayment = !isFreeTrial && payToPostEnabled;
     const initialStatus = requiresPayment ? 'pending' : 'approved';
     const initialPaid = !requiresPayment;
+
+    // If eligible for free trial post, consume 1 post from the user's recorded profile allowance
+    if (isFreeTrial) {
+      await client.query(
+        'UPDATE users SET free_trial_posts_remaining = GREATEST(0, free_trial_posts_remaining - 1) WHERE id = $1',
+        [req.user.id]
+      );
+      userRemaining = Math.max(0, userRemaining - 1);
+    }
 
     const listingRes = await client.query(
       `INSERT INTO listings (
@@ -311,14 +320,13 @@ export const createListing = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: isFreeTrial
-        ? `Free trial post (${userListingsCount + 1}/${freeTrialCount}) published live!`
+        ? `Free trial post published live! (${userRemaining} free trial post${userRemaining === 1 ? '' : 's'} remaining)`
         : requiresPayment
         ? 'Listing submitted! Please complete the listing payment via Telebirr or CBE to activate.'
         : 'Listing published successfully! It is now live.',
       requires_payment: requiresPayment,
       is_free_trial: isFreeTrial,
-      free_trial_used: userListingsCount + 1,
-      free_trial_limit: freeTrialCount,
+      free_trial_posts_remaining: userRemaining,
       posting_fee: postingFeeAmount,
       accounts: {
         telebirr: {
@@ -732,18 +740,26 @@ export const getPostingEligibility = async (req, res) => {
     );
     const userListingsCount = parseInt(userListingsRes.rows[0].count, 10) || 0;
 
-    const freeRemaining = Math.max(0, freeTrialCount - userListingsCount);
-    const isFreeNext = freeTrialCount > 0 && userListingsCount < freeTrialCount;
+    // Fetch user's persistent remaining free posts from their profile
+    const userRes = await pool.query(
+      'SELECT free_trial_posts_remaining FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    const freeRemaining = userRes.rows.length > 0 
+      ? Math.max(0, parseInt(userRes.rows[0].free_trial_posts_remaining ?? '0', 10))
+      : 0;
+
+    const isFreeNext = freeRemaining > 0;
     const requiresPayment = !isFreeNext && payToPostEnabled;
 
     return res.json({
       success: true,
       data: {
-        user_listings_count: userListingsCount,
-        free_trial_posts_count: freeTrialCount,
         free_posts_remaining: freeRemaining,
+        free_trial_posts_remaining: freeRemaining,
         is_free_next: isFreeNext,
         requires_payment: requiresPayment,
+        pay_to_post_enabled: payToPostEnabled,
         posting_fee: postingFeeAmount,
         accounts: {
           telebirr: {
