@@ -15,7 +15,8 @@ import {
   ShieldCheck, 
   Sparkles, 
   Info,
-  RefreshCw
+  RefreshCw,
+  CreditCard
 } from 'lucide-react';
 import { createNewListing, fetchCategories } from '../store/slices/listingSlice';
 import api from '../services/api';
@@ -79,9 +80,13 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
   // Payment Modal State
   const [paymentModalData, setPaymentModalData] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [eligibility, setEligibility] = useState(null);
 
   useEffect(() => {
     dispatch(fetchCategories());
+    api.get('/listings/user/posting-eligibility')
+      .then((res) => setEligibility(res.data?.data))
+      .catch((err) => console.warn('Could not load posting eligibility:', err.message));
   }, [dispatch]);
 
   const handleChange = (e) => {
@@ -221,7 +226,8 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
       if (result.requires_payment) {
         setPaymentModalData({
           listing: result.listing,
-          fee: result.posting_fee || 200
+          fee: result.posting_fee || 200,
+          accounts: result.accounts
         });
       } else {
         // Free posting / approved: scroll to top and navigate directly to listings list!
@@ -316,6 +322,46 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
               {submitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
               <span>{isAmharic ? 'እንደገና ሞክር' : 'Retry'}</span>
             </button>
+          </div>
+        )}
+
+        {/* Dynamic Business Free Trial / Payment Status Badge */}
+        {eligibility && (
+          <div className={`p-4 sm:p-5 rounded-2xl border transition-all shadow-2xs ${
+            eligibility.is_free_next 
+              ? 'bg-gradient-to-r from-emerald-50/90 via-amber-50/30 to-white border-emerald-300 text-emerald-950'
+              : 'bg-gradient-to-r from-amber-50/90 via-amber-50/30 to-white border-amber-300 text-amber-950'
+          }`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3 min-w-0">
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border shadow-2xs ${
+                  eligibility.is_free_next 
+                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
+                    : 'bg-amber-100 text-amber-700 border-amber-300'
+                }`}>
+                  {eligibility.is_free_next ? <Sparkles className="w-5 h-5 stroke-[2.2]" /> : <CreditCard className="w-5 h-5 stroke-[2.2]" />}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-xs sm:text-sm font-black font-sans tracking-tight">
+                    {eligibility.is_free_next 
+                      ? (isAmharic ? `የነጻ ማስታወቂያ ሙከራ ገባሪ ነው (${eligibility.free_posts_remaining} ነጻ ፖስት ቀርቷል)` : `Free Trial Active (${eligibility.free_posts_remaining} free post(s) remaining)`)
+                      : (isAmharic ? `የማስታወቂያ ክፍያ ያስፈልጋል (${eligibility.posting_fee} ብር)` : `Paid Post Required (${eligibility.posting_fee} ETB via Telebirr or CBE)`)}
+                  </h4>
+                  <p className="text-[11px] text-neutral-600 mt-0.5 leading-relaxed">
+                    {eligibility.is_free_next
+                      ? (isAmharic ? `አስተዳዳሪው የመደበው ነጻ የፖስቲንግ ኮታ (${eligibility.free_trial_posts_count} ፖስቶች) ውስጥ ነዎት። ይህ ፖስት በነጻ ወዲያውኑ ይለጠፋል!` : `You are within the platform's ${eligibility.free_trial_posts_count} free trial post allowance. This listing will publish live immediately for free!`)
+                      : (isAmharic ? `የነጻ ሙከራ ፖስቶችዎን አጠናቀዋል (${eligibility.user_listings_count} ተለጥፏል)። ፖስቱን ለመለጠፍ በቴሌብር ወይም በንግድ ባንክ ክፍያ ፈጽመው ደረሰኝ ያያይዙ።` : `You have used your ${eligibility.user_listings_count} free post(s). A one-time listing fee of ${eligibility.posting_fee} ETB is required for admin approval.`)}
+                  </p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border shrink-0 ${
+                eligibility.is_free_next 
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                  : 'bg-amber-100 text-amber-800 border-amber-300'
+              }`}>
+                {eligibility.is_free_next ? (isAmharic ? 'ነጻ ፖስት' : '100% Free') : (isAmharic ? 'የሚከፈልበት' : 'Fee Required')}
+              </span>
+            </div>
           </div>
         )}
 
@@ -627,6 +673,7 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
         <PaymentModal
           listing={paymentModalData.listing}
           feeAmount={paymentModalData.fee}
+          accounts={paymentModalData.accounts}
           onClose={() => setPaymentModalData(null)}
           onSuccess={() => {
             setPaymentModalData(null);

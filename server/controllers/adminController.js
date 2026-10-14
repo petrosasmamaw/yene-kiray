@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { clearListingsCache } from './listingController.js';
 
 // @desc    Admin: Get financial overview & platform metrics
 // @route   GET /api/admin/financial-dashboard
@@ -46,9 +47,9 @@ export const getFinancialDashboard = async (req, res) => {
        LIMIT 10`
     );
 
-    // 6. Current Monetization Settings
+    // 6. Current Monetization & Payment Settings
     const settingsRes = await pool.query(
-      "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('pay_to_post_enabled', 'posting_fee_amount', 'payment_instructions')"
+      "SELECT setting_key, setting_value FROM system_settings"
     );
 
     const settings = {};
@@ -165,6 +166,7 @@ export const updatePaymentStatus = async (req, res) => {
     }
 
     await client.query('COMMIT');
+    clearListingsCache();
 
     return res.json({
       success: true,
@@ -255,32 +257,32 @@ export const updateUserByAdmin = async (req, res) => {
   }
 };
 
-// @desc    Admin: Update system monetization settings (Pay-to-post toggle & fee amount)
+// @desc    Admin: Update system monetization settings (Pay-to-post toggle, accounts & free trial)
 // @route   PUT /api/admin/settings
 // @access  Private / Admin
 export const updateSettings = async (req, res) => {
   try {
-    const { pay_to_post_enabled, posting_fee_amount, payment_instructions } = req.body;
+    const allowedKeys = [
+      'pay_to_post_enabled',
+      'posting_fee_amount',
+      'free_trial_posts_count',
+      'telebirr_account_name',
+      'telebirr_account_number',
+      'cbe_account_name',
+      'cbe_account_number',
+      'payment_instructions'
+    ];
 
-    if (pay_to_post_enabled !== undefined) {
-      await pool.query(
-        "UPDATE system_settings SET setting_value = $1, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'pay_to_post_enabled'",
-        [String(pay_to_post_enabled)]
-      );
-    }
-
-    if (posting_fee_amount !== undefined) {
-      await pool.query(
-        "UPDATE system_settings SET setting_value = $1, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'posting_fee_amount'",
-        [String(posting_fee_amount)]
-      );
-    }
-
-    if (payment_instructions !== undefined) {
-      await pool.query(
-        "UPDATE system_settings SET setting_value = $1, updated_at = CURRENT_TIMESTAMP WHERE setting_key = 'payment_instructions'",
-        [payment_instructions]
-      );
+    for (const key of allowedKeys) {
+      if (req.body[key] !== undefined) {
+        await pool.query(
+          `INSERT INTO system_settings (setting_key, setting_value, updated_at)
+           VALUES ($1, $2, CURRENT_TIMESTAMP)
+           ON CONFLICT (setting_key) DO UPDATE
+           SET setting_value = EXCLUDED.setting_value, updated_at = CURRENT_TIMESTAMP`,
+          [key, String(req.body[key])]
+        );
+      }
     }
 
     const settingsRes = await pool.query('SELECT setting_key, setting_value FROM system_settings');
@@ -291,7 +293,7 @@ export const updateSettings = async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Settings updated successfully',
+      message: 'Business & payment settings updated successfully',
       settings
     });
   } catch (error) {
@@ -299,14 +301,12 @@ export const updateSettings = async (req, res) => {
   }
 };
 
-// @desc    Get public system settings (whether payment is currently required to post)
+// @desc    Get public system settings (payment requirements, free trial & account details)
 // @route   GET /api/admin/settings/public
 // @access  Public
 export const getPublicSettings = async (req, res) => {
   try {
-    const settingsRes = await pool.query(
-      "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('pay_to_post_enabled', 'posting_fee_amount', 'payment_instructions')"
-    );
+    const settingsRes = await pool.query('SELECT setting_key, setting_value FROM system_settings');
 
     const settings = {};
     settingsRes.rows.forEach((row) => {
@@ -318,7 +318,22 @@ export const getPublicSettings = async (req, res) => {
       settings: {
         pay_to_post_enabled: settings.pay_to_post_enabled === 'true',
         posting_fee_amount: parseFloat(settings.posting_fee_amount) || 200,
-        payment_instructions: settings.payment_instructions || ''
+        free_trial_posts_count: parseInt(settings.free_trial_posts_count ?? '3', 10),
+        payment_instructions: settings.payment_instructions || '',
+        telebirr_account_name: settings.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
+        telebirr_account_number: settings.telebirr_account_number || '0911000000',
+        cbe_account_name: settings.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
+        cbe_account_number: settings.cbe_account_number || '1000234567890',
+        accounts: {
+          telebirr: {
+            name: settings.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settings.telebirr_account_number || '0911000000'
+          },
+          cbe: {
+            name: settings.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settings.cbe_account_number || '1000234567890'
+          }
+        }
       }
     });
   } catch (error) {

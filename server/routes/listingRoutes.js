@@ -7,7 +7,8 @@ import {
   deleteListing,
   getMyListings,
   toggleSaveListing,
-  getSavedListings
+  getSavedListings,
+  getPostingEligibility
 } from '../controllers/listingController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/', getListings);
 router.get('/my-listings', protect, getMyListings);
 router.get('/saved', protect, getSavedListings);
+router.get('/user/posting-eligibility', protect, getPostingEligibility);
 router.get('/:id', getListingById);
 router.post('/', protect, createListing);
 router.put('/:id', protect, updateListing);

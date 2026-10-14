@@ -219,22 +219,32 @@ export const createListing = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Missing required listing fields' });
     }
 
-    // 1. Fetch current Admin Pay-to-Post configuration
-    const settingsRes = await client.query(
-      "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('pay_to_post_enabled', 'posting_fee_amount')"
-    );
-
-    let payToPostEnabled = false;
-    let postingFeeAmount = 200;
-
+    // 1. Fetch current Admin Pay-to-Post configuration & accounts
+    const settingsRes = await client.query('SELECT setting_key, setting_value FROM system_settings');
+    const settingsMap = {};
     settingsRes.rows.forEach((row) => {
-      if (row.setting_key === 'pay_to_post_enabled') payToPostEnabled = row.setting_value === 'true';
-      if (row.setting_key === 'posting_fee_amount') postingFeeAmount = parseFloat(row.setting_value) || 200;
+      settingsMap[row.setting_key] = row.setting_value;
     });
 
-    // 2. Decide status: if pay_to_post is ON => 'pending', if OFF => 'approved' (Free)
-    const initialStatus = payToPostEnabled ? 'pending' : 'approved';
-    const initialPaid = !payToPostEnabled;
+    let payToPostEnabled = settingsMap.pay_to_post_enabled === 'true';
+    let postingFeeAmount = parseFloat(settingsMap.posting_fee_amount) || 200;
+    let freeTrialCount = parseInt(settingsMap.free_trial_posts_count ?? '3', 10);
+    if (isNaN(freeTrialCount)) freeTrialCount = 3;
+
+    // 2. Count existing non-rejected listings created by this user
+    const userListingsRes = await client.query(
+      "SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status != 'rejected'",
+      [req.user.id]
+    );
+    const userListingsCount = parseInt(userListingsRes.rows[0].count, 10) || 0;
+
+    // Check if user qualifies for Free Trial
+    const isFreeTrial = freeTrialCount > 0 && userListingsCount < freeTrialCount;
+
+    // If Free Trial: immediate approval & paid=true; if not free trial and payToPostEnabled: pending & paid=false
+    const requiresPayment = !isFreeTrial && payToPostEnabled;
+    const initialStatus = requiresPayment ? 'pending' : 'approved';
+    const initialPaid = !requiresPayment;
 
     const listingRes = await client.query(
       `INSERT INTO listings (
@@ -274,9 +284,9 @@ export const createListing = async (req, res) => {
       }
     }
 
-    // 4. If pay_to_post is ON, create an initial pending payment record
+    // 4. If payment is required, create an initial pending payment record
     let paymentRecord = null;
-    if (payToPostEnabled) {
+    if (requiresPayment) {
       const payRes = await client.query(
         `INSERT INTO payments (
           user_id, listing_id, amount, currency, payment_method, status
@@ -293,11 +303,26 @@ export const createListing = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: payToPostEnabled
-        ? 'Listing submitted! Admin fee is enabled. Please complete payment for review.'
+      message: isFreeTrial
+        ? `Free trial post (${userListingsCount + 1}/${freeTrialCount}) published live!`
+        : requiresPayment
+        ? 'Listing submitted! Please complete the listing payment via Telebirr or CBE to activate.'
         : 'Listing published successfully! It is now live.',
-      requires_payment: payToPostEnabled,
+      requires_payment: requiresPayment,
+      is_free_trial: isFreeTrial,
+      free_trial_used: userListingsCount + 1,
+      free_trial_limit: freeTrialCount,
       posting_fee: postingFeeAmount,
+      accounts: {
+        telebirr: {
+          name: settingsMap.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
+          number: settingsMap.telebirr_account_number || '0911000000'
+        },
+        cbe: {
+          name: settingsMap.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
+          number: settingsMap.cbe_account_number || '1000234567890'
+        }
+      },
       listing: newListing,
       payment: paymentRecord
     });
@@ -675,6 +700,58 @@ export const updateListingStatusAdmin = async (req, res) => {
       listing: result.rows[0]
     });
   } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get current user's posting eligibility (free trial remaining, fee, accounts)
+// @route   GET /api/listings/user/posting-eligibility
+// @access  Private
+export const getPostingEligibility = async (req, res) => {
+  try {
+    const settingsRes = await pool.query('SELECT setting_key, setting_value FROM system_settings');
+    const settingsMap = {};
+    settingsRes.rows.forEach((row) => {
+      settingsMap[row.setting_key] = row.setting_value;
+    });
+
+    const payToPostEnabled = settingsMap.pay_to_post_enabled === 'true';
+    const postingFeeAmount = parseFloat(settingsMap.posting_fee_amount) || 200;
+    const freeTrialCount = parseInt(settingsMap.free_trial_posts_count ?? '3', 10);
+
+    const userListingsRes = await pool.query(
+      "SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status != 'rejected'",
+      [req.user.id]
+    );
+    const userListingsCount = parseInt(userListingsRes.rows[0].count, 10) || 0;
+
+    const freeRemaining = Math.max(0, freeTrialCount - userListingsCount);
+    const isFreeNext = freeTrialCount > 0 && userListingsCount < freeTrialCount;
+    const requiresPayment = !isFreeNext && payToPostEnabled;
+
+    return res.json({
+      success: true,
+      data: {
+        user_listings_count: userListingsCount,
+        free_trial_posts_count: freeTrialCount,
+        free_posts_remaining: freeRemaining,
+        is_free_next: isFreeNext,
+        requires_payment: requiresPayment,
+        posting_fee: postingFeeAmount,
+        accounts: {
+          telebirr: {
+            name: settingsMap.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settingsMap.telebirr_account_number || '0911000000'
+          },
+          cbe: {
+            name: settingsMap.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settingsMap.cbe_account_number || '1000234567890'
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('getPostingEligibility error:', error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

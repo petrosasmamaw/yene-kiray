@@ -22,7 +22,11 @@ import {
   Image as ImageIcon,
   Building2,
   MapPin,
-  X
+  X,
+  Smartphone,
+  Building,
+  Copy,
+  Sparkles
 } from 'lucide-react';
 import { 
   fetchFinancialDashboard, 
@@ -42,11 +46,20 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
 
   const [activeTab, setActiveTab] = useState('financials'); // 'financials', 'payments', 'pricing', 'users', 'categories', 'listings'
   
-  // Settings Form State
+  // Settings Form State (Monetization & Payment Accounts)
   const [payToPostEnabled, setPayToPostEnabled] = useState(false);
   const [postingFee, setPostingFee] = useState(200);
+  const [freeTrialPostsCount, setFreeTrialPostsCount] = useState(3);
+  const [telebirrAccountName, setTelebirrAccountName] = useState('የኔ ኪራይ (Yene Kiray)');
+  const [telebirrAccountNumber, setTelebirrAccountNumber] = useState('0911000000');
+  const [cbeAccountName, setCbeAccountName] = useState('የኔ ኪራይ (Yene Kiray)');
+  const [cbeAccountNumber, setCbeAccountNumber] = useState('1000234567890');
   const [paymentInstructions, setPaymentInstructions] = useState('');
   const [settingsSaved, setSettingsSaved] = useState(false);
+  
+  // Payment Filters
+  const [paymentFilterStatus, setPaymentFilterStatus] = useState('all'); // 'all', 'pending', 'approved', 'rejected'
+  const [paymentSearchQuery, setPaymentSearchQuery] = useState('');
 
   // Category Management State
   const [categories, setCategories] = useState([]);
@@ -83,6 +96,11 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
     if (dashboardData?.settings) {
       setPayToPostEnabled(dashboardData.settings.pay_to_post_enabled === 'true');
       setPostingFee(parseFloat(dashboardData.settings.posting_fee_amount) || 200);
+      setFreeTrialPostsCount(parseInt(dashboardData.settings.free_trial_posts_count ?? '3', 10));
+      setTelebirrAccountName(dashboardData.settings.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)');
+      setTelebirrAccountNumber(dashboardData.settings.telebirr_account_number || '0911000000');
+      setCbeAccountName(dashboardData.settings.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)');
+      setCbeAccountNumber(dashboardData.settings.cbe_account_number || '1000234567890');
       setPaymentInstructions(dashboardData.settings.payment_instructions || '');
     }
   }, [dashboardData]);
@@ -113,10 +131,15 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
     await dispatch(updateSettings({
       pay_to_post_enabled: payToPostEnabled ? 'true' : 'false',
       posting_fee_amount: String(postingFee),
+      free_trial_posts_count: String(freeTrialPostsCount),
+      telebirr_account_name: telebirrAccountName,
+      telebirr_account_number: telebirrAccountNumber,
+      cbe_account_name: cbeAccountName,
+      cbe_account_number: cbeAccountNumber,
       payment_instructions: paymentInstructions
     }));
     setSettingsSaved(true);
-    setTimeout(() => setSettingsSaved(false), 3000);
+    setTimeout(() => setSettingsSaved(false), 3500);
   };
 
   const handlePaymentDecision = async (id, status) => {
@@ -446,105 +469,415 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
           </div>
         )}
 
-        {/* TAB 2: PAYMENT APPROVALS QUEUE */}
+        {/* TAB 2: PAYMENT VERIFICATIONS & ACCOUNT CONTROLS */}
         {activeTab === 'payments' && (
-          <div className="card-obsidian space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-950 font-sans">
-                Pending Payment Verifications
-              </h2>
-              <p className="text-xs text-neutral-500 mt-1">
-                When you approve a payment, the associated rental listing is automatically marked <strong>Approved</strong> and published live.
-              </p>
-            </div>
-
-            {payments.filter(p => p.status === 'pending').length === 0 ? (
-              <div className="py-16 text-center bg-neutral-50 rounded-2xl border border-neutral-200">
-                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-neutral-950">Queue Cleared</h4>
-                <p className="text-xs text-neutral-500 mt-1">
-                  There are no pending user payments awaiting admin approval.
-                </p>
+          <div className="space-y-6 sm:space-y-8">
+            
+            {/* 1. Admin Business Logic & Account Settings (Telebirr, CBE, Free Trial) */}
+            <div className="card-obsidian space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-neutral-950 font-sans flex items-center gap-2">
+                    <Sliders className="w-5 h-5 text-amber-500" />
+                    <span>Business Payment & Free Trial Settings</span>
+                  </h2>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Configure official Telebirr and CBE account numbers, fee amounts, and the new user free trial post limit.
+                  </p>
+                </div>
+                {settingsSaved && (
+                  <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1.5 shrink-0 animate-fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Settings Saved!</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="space-y-4">
-                {payments.filter(p => p.status === 'pending').map((p) => (
-                  <div
-                    key={p.id}
-                    className="p-5 rounded-2xl bg-neutral-50 border border-amber-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-2xs"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-neutral-950">
-                          Pending Approval
-                        </span>
-                        <span className="text-xs font-bold text-neutral-950">{p.user_name}</span>
-                        <span className="text-xs text-neutral-500">• {p.user_phone}</span>
-                      </div>
 
-                      <h4 className="text-base font-bold text-amber-700">
-                        Listing: {p.listing_title}
-                      </h4>
-
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-600">
-                        <span>Method: <strong className="text-neutral-950">{p.payment_method}</strong></span>
-                        <span>Reference: <strong className="text-neutral-950 font-mono">{p.transaction_reference || 'N/A'}</strong></span>
-                        <span>Amount: <strong className="text-amber-600 font-bold">{Number(p.amount).toLocaleString()} ETB</strong></span>
-                      </div>
-
-                      {p.receipt_image_url && (
-                        <div className="pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
-                            className="inline-flex items-center gap-1.5 text-xs text-amber-600 font-semibold hover:underline"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>View Submitted Receipt Screenshot</span>
-                          </button>
-                        </div>
-                      )}
+              <form onSubmit={handleSaveSettings} className="space-y-5">
+                
+                {/* Free Trial Posts & Monetization Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  
+                  {/* Free Trial Posts Count */}
+                  <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200">
+                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <span>Free Trial Posts Limit</span>
+                    </label>
+                    <p className="text-[11px] text-neutral-500 mb-2">
+                      New users get this many free posts before payment is asked. Set to <strong>0</strong> to always charge.
+                    </p>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={freeTrialPostsCount}
+                        onChange={(e) => setFreeTrialPostsCount(e.target.value)}
+                        className="input-luxury text-sm font-black"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-neutral-500">
+                        Posts
+                      </span>
                     </div>
+                  </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-200">
-                      <button
-                        onClick={() => handlePaymentDecision(p.id, 'rejected')}
-                        className="px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-rose-50 text-rose-600 border border-neutral-250 hover:border-rose-300 text-xs font-bold transition-all"
-                      >
-                        Reject
-                      </button>
+                  {/* Posting Fee in ETB */}
+                  <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200">
+                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <DollarSign className="w-4 h-4 text-amber-500" />
+                      <span>Posting Fee (ETB)</span>
+                    </label>
+                    <p className="text-[11px] text-neutral-500 mb-2">
+                      Listing price charged once user free trial posts are exhausted.
+                    </p>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        value={postingFee}
+                        onChange={(e) => setPostingFee(e.target.value)}
+                        className="input-luxury text-sm font-black text-amber-600"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600">
+                        ETB
+                      </span>
+                    </div>
+                  </div>
 
+                  {/* Pay-to-Post Global Requirement Toggle */}
+                  <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex flex-col justify-between">
+                    <div>
+                      <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
+                        Pay-to-Post System
+                      </label>
+                      <p className="text-[11px] text-neutral-500">
+                        {payToPostEnabled 
+                          ? 'ENABLED: Enforces fee after free trial.' 
+                          : 'DISABLED: All posts are 100% free.'}
+                      </p>
+                    </div>
+                    <div className="pt-3">
                       <button
-                        onClick={() => handlePaymentDecision(p.id, 'approved')}
-                        className="btn-gold text-xs py-2.5 px-6 font-bold flex items-center gap-2"
+                        type="button"
+                        onClick={() => setPayToPostEnabled(!payToPostEnabled)}
+                        className={`w-14 h-8 rounded-full p-1 transition-all ${
+                          payToPostEnabled ? 'bg-amber-500 shadow-xs' : 'bg-neutral-300'
+                        }`}
                       >
-                        <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Approve & Publish Listing</span>
+                        <div className={`w-6 h-6 rounded-full bg-white shadow-xs transition-transform ${
+                          payToPostEnabled ? 'translate-x-6' : 'translate-x-0'
+                        }`} />
                       </button>
                     </div>
                   </div>
-                ))}
+
+                </div>
+
+                {/* Telebirr & CBE Payment Accounts Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  
+                  {/* Telebirr Configuration */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/40 border border-amber-300 space-y-3">
+                    <div className="flex items-center gap-2 font-black text-sm text-neutral-950">
+                      <Smartphone className="w-4 h-4 text-amber-500" />
+                      <span>Telebirr Account Configuration</span>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-600 uppercase mb-1">
+                        Telebirr Account / Merchant Name
+                      </label>
+                      <input
+                        type="text"
+                        value={telebirrAccountName}
+                        onChange={(e) => setTelebirrAccountName(e.target.value)}
+                        placeholder="e.g. የኔ ኪራይ (Yene Kiray)"
+                        className="input-luxury text-xs font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-600 uppercase mb-1">
+                        Telebirr Phone Number / Account
+                      </label>
+                      <input
+                        type="text"
+                        value={telebirrAccountNumber}
+                        onChange={(e) => setTelebirrAccountNumber(e.target.value)}
+                        placeholder="e.g. 0911000000"
+                        className="input-luxury text-xs font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  {/* CBE Configuration */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/40 border border-amber-300 space-y-3">
+                    <div className="flex items-center gap-2 font-black text-sm text-neutral-950">
+                      <Building className="w-4 h-4 text-amber-500" />
+                      <span>CBE (Commercial Bank of Ethiopia) Account</span>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-600 uppercase mb-1">
+                        CBE Account Holder Name
+                      </label>
+                      <input
+                        type="text"
+                        value={cbeAccountName}
+                        onChange={(e) => setCbeAccountName(e.target.value)}
+                        placeholder="e.g. የኔ ኪራይ (Yene Kiray)"
+                        className="input-luxury text-xs font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-600 uppercase mb-1">
+                        CBE Bank Account Number
+                      </label>
+                      <input
+                        type="text"
+                        value={cbeAccountNumber}
+                        onChange={(e) => setCbeAccountNumber(e.target.value)}
+                        placeholder="e.g. 1000234567890"
+                        className="input-luxury text-xs font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    className="btn-gold text-xs py-2.5 px-6 font-bold flex items-center gap-2"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Save Accounts & Business Settings</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* 2. Payment Verifications Queue */}
+            <div className="card-obsidian space-y-5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-950 font-sans flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-amber-500" />
+                    <span>Payment Verifications & Transaction History</span>
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Review user payments, verify Cloudinary screenshot receipts, and approve posts to make them live.
+                  </p>
+                </div>
+
+                {/* Status Filter Buttons */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[
+                    { id: 'all', label: 'All', count: payments.length },
+                    { id: 'pending', label: 'Pending', count: payments.filter(p => p.status === 'pending').length },
+                    { id: 'approved', label: 'Approved', count: payments.filter(p => p.status === 'approved').length },
+                    { id: 'rejected', label: 'Rejected', count: payments.filter(p => p.status === 'rejected').length }
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setPaymentFilterStatus(f.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                        paymentFilterStatus === f.id
+                          ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-2xs'
+                          : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
+                      }`}
+                    >
+                      <span>{f.label}</span>
+                      <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-black ${
+                        paymentFilterStatus === f.id ? 'bg-neutral-950 text-amber-400' : 'bg-neutral-100 text-neutral-700'
+                      }`}>
+                        {f.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+
+              {/* Search Bar */}
+              <div className="relative max-w-md">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search user, phone, listing, or reference..."
+                  value={paymentSearchQuery}
+                  onChange={(e) => setPaymentSearchQuery(e.target.value)}
+                  className="input-luxury pl-9 text-xs"
+                />
+              </div>
+
+              {/* Payments List */}
+              {(() => {
+                const filtered = payments.filter((p) => {
+                  if (paymentFilterStatus !== 'all' && p.status !== paymentFilterStatus) return false;
+                  if (paymentSearchQuery.trim()) {
+                    const q = paymentSearchQuery.toLowerCase();
+                    const userName = (p.user_name || '').toLowerCase();
+                    const userPhone = (p.user_phone || '').toLowerCase();
+                    const listingTitle = (p.listing_title || '').toLowerCase();
+                    const ref = (p.transaction_reference || '').toLowerCase();
+                    return userName.includes(q) || userPhone.includes(q) || listingTitle.includes(q) || ref.includes(q);
+                  }
+                  return true;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="py-14 text-center bg-neutral-50 rounded-2xl border border-neutral-200">
+                      <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
+                      <h4 className="text-sm font-bold text-neutral-950">No Payments Found</h4>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        No transactions match the selected filter or search query.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3.5">
+                    {filtered.map((p) => (
+                      <div
+                        key={p.id}
+                        className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs ${
+                          p.status === 'pending'
+                            ? 'bg-amber-50/30 border-amber-300 ring-1 ring-amber-400/20'
+                            : p.status === 'approved'
+                            ? 'bg-white border-neutral-200'
+                            : 'bg-rose-50/20 border-rose-200'
+                        }`}
+                      >
+                        <div className="space-y-2 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                              p.status === 'approved'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : p.status === 'pending'
+                                ? 'bg-amber-500 text-neutral-950 shadow-2xs'
+                                : 'bg-rose-100 text-rose-800 border border-rose-300'
+                            }`}>
+                              {p.status === 'pending' ? 'Pending Approval' : p.status}
+                            </span>
+                            
+                            <span className="text-xs font-bold text-neutral-950">{p.user_name}</span>
+                            <span className="text-xs text-neutral-500">• {p.user_phone || p.user_email}</span>
+                          </div>
+
+                          <h4 className="text-sm sm:text-base font-bold text-neutral-950 truncate max-w-lg">
+                            Listing: <span className="text-amber-700">{p.listing_title || 'Untitled Post'}</span>
+                          </h4>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-600">
+                            <span>
+                              Method: <strong className="text-neutral-950 font-bold">{p.payment_method}</strong>
+                            </span>
+                            <span>
+                              Ref: <strong className="text-neutral-950 font-mono">{p.transaction_reference || 'N/A'}</strong>
+                            </span>
+                            <span>
+                              Fee: <strong className="text-amber-600 font-bold">{Number(p.amount).toLocaleString()} ETB</strong>
+                            </span>
+                            <span className="text-neutral-400">
+                              Date: {new Date(p.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          {/* Screenshot Receipt Button with Preview Lightbox */}
+                          {p.receipt_image_url && (
+                            <div className="pt-1 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] font-bold text-amber-800 transition-colors"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-amber-600" />
+                                <span>View Payment Screenshot Receipt</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Decision Buttons */}
+                        <div className="flex items-center gap-2.5 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-200">
+                          {p.status === 'pending' ? (
+                            <>
+                              <button
+                                onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-neutral-250 hover:border-rose-300 text-xs font-bold transition-all shadow-2xs"
+                              >
+                                Reject
+                              </button>
+
+                              <button
+                                onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                className="btn-gold text-xs py-2 px-5 font-bold flex items-center gap-1.5 shadow-xs"
+                              >
+                                <Check className="w-4 h-4 stroke-[3]" />
+                                <span>Approve & Publish Live</span>
+                              </button>
+                            </>
+                          ) : p.status === 'approved' ? (
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Post is Live & Visible</span>
+                              </span>
+                              <button
+                                onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                className="text-[11px] text-neutral-500 hover:text-rose-600 underline font-semibold ml-1"
+                              >
+                                Revoke
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200">
+                                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Rejected</span>
+                              </span>
+                              <button
+                                onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                className="text-[11px] text-amber-600 hover:underline font-bold ml-1"
+                              >
+                                Re-approve
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+            </div>
+
           </div>
         )}
 
         {/* TAB 3: MONETIZATION & PRICING SETTINGS */}
         {activeTab === 'pricing' && (
-          <div className="card-obsidian max-w-2xl space-y-6">
+          <div className="card-obsidian max-w-3xl space-y-6">
             <div>
               <h2 className="text-xl font-bold text-neutral-950 font-sans">
-                Monetization & Listing Fee Control
+                Monetization, Free Trial & Payment Accounts
               </h2>
               <p className="text-xs text-neutral-500 mt-1">
-                Toggle pay-to-post requirement and specify listing fee in Ethiopian Birr.
+                Configure your platform pricing, free trial limits, and Telebirr / CBE payment accounts.
               </p>
             </div>
 
             {settingsSaved && (
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                <span>Monetization settings saved successfully!</span>
+                <span>Settings saved successfully!</span>
               </div>
             )}
 
@@ -558,8 +891,8 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   </h4>
                   <p className="text-xs text-neutral-500 mt-0.5">
                     {payToPostEnabled 
-                      ? 'ON: Users must pay fee and await admin approval before post goes live.' 
-                      : 'OFF (Free): Users post rentals immediately for free to maximize platform growth.'}
+                      ? 'ON: Users must pay fee after free trial and await admin approval before post goes live.' 
+                      : 'OFF (Free): All users post rentals immediately for free to maximize platform growth.'}
                   </p>
                 </div>
 
@@ -576,35 +909,119 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 </button>
               </div>
 
-              {/* Posting Fee Amount in ETB */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
-                  Posting Fee Amount (ETB)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    value={postingFee}
-                    onChange={(e) => setPostingFee(e.target.value)}
-                    className="input-luxury text-sm font-bold"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600">
-                    ETB
-                  </span>
+              {/* Free Trial & Fee Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Free Trial Posts Limit */}
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
+                    Free Trial Posts Count (0 = Always Paid)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      value={freeTrialPostsCount}
+                      onChange={(e) => setFreeTrialPostsCount(e.target.value)}
+                      className="input-luxury text-sm font-bold"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-neutral-500">
+                      Posts
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    Number of free posts a user is allowed before being asked to pay.
+                  </p>
                 </div>
-                <p className="text-[11px] text-neutral-500 mt-1">
-                  Charged per listing when Pay-to-Post is enabled.
-                </p>
+
+                {/* Posting Fee Amount in ETB */}
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
+                    Posting Fee Amount (ETB)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      value={postingFee}
+                      onChange={(e) => setPostingFee(e.target.value)}
+                      className="input-luxury text-sm font-bold"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600">
+                      ETB
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    Charged per listing once free trial posts are used.
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Accounts Configuration */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                
+                {/* Telebirr */}
+                <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-3">
+                  <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5 uppercase">
+                    <Smartphone className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Telebirr Account</span>
+                  </h4>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-600 mb-1">Account Name</label>
+                    <input
+                      type="text"
+                      value={telebirrAccountName}
+                      onChange={(e) => setTelebirrAccountName(e.target.value)}
+                      className="input-luxury text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-600 mb-1">Phone / Account Number</label>
+                    <input
+                      type="text"
+                      value={telebirrAccountNumber}
+                      onChange={(e) => setTelebirrAccountNumber(e.target.value)}
+                      className="input-luxury text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* CBE */}
+                <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-3">
+                  <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5 uppercase">
+                    <Building className="w-3.5 h-3.5 text-amber-500" />
+                    <span>CBE Bank Account</span>
+                  </h4>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-600 mb-1">Account Name</label>
+                    <input
+                      type="text"
+                      value={cbeAccountName}
+                      onChange={(e) => setCbeAccountName(e.target.value)}
+                      className="input-luxury text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-600 mb-1">Account Number</label>
+                    <input
+                      type="text"
+                      value={cbeAccountNumber}
+                      onChange={(e) => setCbeAccountNumber(e.target.value)}
+                      className="input-luxury text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
               </div>
 
               {/* Payment Instructions Text */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
-                  Payment Account Instructions (Displayed to Users)
+                  Payment Instructions (Displayed to Users)
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={paymentInstructions}
                   onChange={(e) => setPaymentInstructions(e.target.value)}
                   className="input-luxury text-xs"
