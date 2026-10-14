@@ -50,11 +50,13 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group h-full py-1 select-none"
           >
-            <img 
-              src="/logo-key.svg" 
-              alt="የኔ ኪራይ Logo" 
-              className="h-[54px] sm:h-[62px] w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0" 
-            />
+            <div className="relative flex items-center justify-center shrink-0">
+              <img 
+                src="/logo-badge.png" 
+                alt="የኔ ኪራይ Logo" 
+                className="h-[46px] sm:h-[50px] w-[46px] sm:w-[50px] rounded-2xl object-cover shadow-sm transition-transform duration-200 group-hover:scale-105 shrink-0" 
+              />
+            </div>
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-neutral-950 font-sans leading-none">
               የኔ <span className="text-amber-500 font-black">ኪራይ</span>
             </span>

@@ -118,8 +118,8 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
 
         {/* Modal Brand Logo & Title */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 p-2 flex items-center justify-center shadow-xs mb-3">
-            <img src="/logo-key.svg" alt="የኔ ኪራይ" className="w-full h-full object-contain" />
+          <div className="w-16 h-16 rounded-2xl bg-neutral-950 border border-amber-500/30 p-0.5 flex items-center justify-center shadow-md mb-3 overflow-hidden">
+            <img src="/logo-badge.png" alt="የኔ ኪራይ" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-2xl font-black text-neutral-950 font-sans">
             {mode === 'login' ? (isAmharic ? 'እንኳን ደህና መጡ' : 'Welcome Back') : (isAmharic ? 'የኔ ኪራይ ይቀላቀሉ' : 'Join የኔ ኪራይ')}

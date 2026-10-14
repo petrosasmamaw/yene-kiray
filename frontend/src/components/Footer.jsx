@@ -25,8 +25,8 @@ export default function Footer({ onCategorySelect }) {
           {/* Brand Info & Social Media Links */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-250 p-1.5 flex items-center justify-center shadow-xs">
-                <img src="/logo-key.svg" alt="Logo" className="w-full h-full object-contain" />
+              <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-amber-500/30 p-0.5 flex items-center justify-center shadow-xs overflow-hidden">
+                <img src="/logo-badge.png" alt="የኔ ኪራይ Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-xl font-bold text-neutral-950 font-sans">
                 የኔ <span className="text-amber-500 font-extrabold">ኪራይ</span>

@@ -51,7 +51,9 @@ yene-kiray/
 │
 ├── frontend/
 │   ├── public/
-│   │   └── logo-key.svg          # 3D Gold roof & white key brand mark
+│   │   ├── logo-badge.png        # Official 3D Amharic "የኔ" brand emblem badge
+│   │   ├── logo.png              # High-res 3D brand logo
+│   │   └── favicon.png           # App icon & favicon
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Navbar.jsx        # Gold/black brand bar with role badges
