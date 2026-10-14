@@ -272,15 +272,22 @@ export const createListing = async (req, res) => {
 
     const newListing = listingRes.rows[0];
 
-    // 3. Insert images if provided
+    // 3. Insert images if provided (support both strings and objects { image_url, public_id })
     if (Array.isArray(images) && images.length > 0) {
+      let isFirstImage = true;
       for (let i = 0; i < images.length; i++) {
         const img = images[i];
-        await client.query(
-          `INSERT INTO listing_images (listing_id, image_url, public_id, is_primary)
-           VALUES ($1, $2, $3, $4)`,
-          [newListing.id, img.image_url, img.public_id || null, i === 0]
-        );
+        const imgUrl = typeof img === 'string' ? img : (img?.image_url || img?.url || null);
+        const pubId = typeof img === 'object' && img !== null ? (img.public_id || null) : null;
+
+        if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim().length > 0) {
+          await client.query(
+            `INSERT INTO listing_images (listing_id, image_url, public_id, is_primary)
+             VALUES ($1, $2, $3, $4)`,
+            [newListing.id, imgUrl.trim(), pubId, isFirstImage]
+          );
+          isFirstImage = false;
+        }
       }
     }
 

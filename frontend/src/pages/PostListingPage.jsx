@@ -215,7 +215,9 @@ export default function PostListingPage({ onListingSuccess, onGoBack, onGoHome }
         ...formData,
         rental_price: Number(formData.rental_price),
         features: selectedFeatures,
-        images: images.map((img) => img.image_url)
+        images: images
+          .filter((img) => img && (img.image_url || typeof img === 'string'))
+          .map((img) => (typeof img === 'string' ? { image_url: img } : { image_url: img.image_url, public_id: img.public_id || null }))
       };
 
       const result = await dispatch(createNewListing(payload)).unwrap();
