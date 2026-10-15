@@ -78,7 +78,7 @@ export const translations = {
     cityDireDawa: 'ድሬዳዋ',
     cityGondar: 'ጎንደር',
     cityJimma: 'ጅማ',
-    cityOther: 'ሌሎች ከተሞች (Other)',
+    cityOther: 'ሌሎች ከተሞች',
     specifyOtherCity: 'የከተማውን ስም ይግለጹ (ለምሳሌ፦ ደሴ፣ ሐረር...)',
 
     // Social Media & Header

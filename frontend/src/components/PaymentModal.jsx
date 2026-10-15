@@ -20,7 +20,14 @@ import api from '../services/api';
 import { compressImage, fileToDataUri } from '../utils/imageCompressor';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function PaymentModal({ listing, feeAmount = 200, accounts: initialAccounts, onClose, onSuccess }) {
+export default function PaymentModal({ 
+  listing = null, 
+  isMembership = false, 
+  feeAmount = 200, 
+  accounts: initialAccounts, 
+  onClose, 
+  onSuccess 
+}) {
   const { t, isAmharic } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState('Telebirr');
   const [transactionRef, setTransactionRef] = useState('');
@@ -57,7 +64,7 @@ export default function PaymentModal({ listing, feeAmount = 200, accounts: initi
     return () => { isMounted = false; };
   }, []);
 
-  if (!listing) return null;
+  if (!listing && !isMembership) return null;
 
   const copyToClipboard = (text, key) => {
     if (!text) return;
@@ -130,7 +137,8 @@ export default function PaymentModal({ listing, feeAmount = 200, accounts: initi
 
     try {
       await api.post('/payments/submit', {
-        listing_id: listing.id,
+        listing_id: isMembership ? null : (listing?.id || null),
+        payment_type: isMembership ? 'unlimited_access' : 'listing_fee',
         payment_method: paymentMethod,
         transaction_reference: transactionRef.trim() || 'RECEIPT_ATTACHED',
         receipt_image_url: receiptUrl || null,
@@ -185,10 +193,14 @@ export default function PaymentModal({ listing, feeAmount = 200, accounts: initi
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-black text-neutral-950 font-sans tracking-tight">
-              {isAmharic ? 'የማስታወቂያ ክፍያ ያረጋግጡ' : 'Complete Listing Payment'}
+              {isMembership 
+                ? (isAmharic ? 'ያልተገደበ ማስታወቂያ የመለጠፍ ፈቃድ ይክፈቱ' : 'Unlock Unlimited Posting Access')
+                : (isAmharic ? 'የማስታወቂያ ክፍያ ያረጋግጡ' : 'Complete Listing Payment')}
             </h2>
             <p className="text-xs text-neutral-500 mt-0.5">
-              {isAmharic ? 'የነጻ ሙከራ ገደብ አልቋል፤ ክፍያ ፈጽመው ደረሰኝ ይላኩ' : 'Free trial limit reached. Pay fee & submit screenshot to activate post.'}
+              {isMembership
+                ? (isAmharic ? 'አንድ ጊዜ ብቻ በመክፈል ለወደፊቱ ያልተገደቡ የኪራይ ማስታወቂያዎችን በነጻ ይለጥፉ!' : 'Pay once and unlock lifetime unlimited rental postings without paying per post!')
+                : (isAmharic ? 'የነጻ ሙከራ ገደብ አልቋል፤ ክፍያ ፈጽመው ደረሰኝ ይላኩ' : 'Free trial limit reached. Pay fee & submit screenshot to activate post.')}
             </p>
           </div>
         </div>
@@ -198,18 +210,26 @@ export default function PaymentModal({ listing, feeAmount = 200, accounts: initi
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                {isAmharic ? 'የሚለጠፈው ንብረት' : 'Target Rental Listing'}
+                {isMembership 
+                  ? (isAmharic ? 'የአባልነት አይነት' : 'Membership Access')
+                  : (isAmharic ? 'የሚለጠፈው ንብረት' : 'Target Rental Listing')}
               </span>
               <p className="text-sm font-black text-neutral-950 truncate mt-0.5">
-                {listing.title}
+                {isMembership 
+                  ? (isAmharic ? 'የአንድ ጊዜ ያልተገደበ አባልነት' : 'Lifetime Unlimited Membership')
+                  : listing?.title}
               </p>
               <p className="text-xs text-neutral-600 mt-0.5">
-                {listing.city} {listing.subcity ? `• ${listing.subcity}` : ''}
+                {isMembership 
+                  ? (isAmharic ? 'ያልተገደበ ማስታወቂያ በነጻ የመለጠፍ ፈቃድ' : 'Post unlimited rentals anytime for free')
+                  : `${listing?.city || ''} ${listing?.subcity ? `• ${listing.subcity}` : ''}`}
               </p>
             </div>
             <div className="text-right shrink-0">
               <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                {isAmharic ? 'የማስታወቂያ ክፍያ' : 'Posting Fee'}
+                {isMembership 
+                  ? (isAmharic ? 'የአንድ ጊዜ ክፍያ' : 'One-Time Fee')
+                  : (isAmharic ? 'የማስታወቂያ ክፍያ' : 'Posting Fee')}
               </span>
               <p className="text-xl font-black text-amber-600 font-sans">
                 {Number(currentFee).toLocaleString()} <span className="text-xs font-bold">ETB</span>

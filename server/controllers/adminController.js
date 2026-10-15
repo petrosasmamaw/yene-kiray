@@ -95,6 +95,7 @@ export const getAllPayments = async (req, res) => {
         u.name AS user_name,
         u.email AS user_email,
         u.phone AS user_phone,
+        COALESCE(u.has_unlimited_access, false) AS user_has_unlimited_access,
         l.title AS listing_title,
         l.rental_price AS listing_price
       FROM payments p
@@ -117,7 +118,7 @@ export const getAllPayments = async (req, res) => {
   }
 };
 
-// @desc    Admin: Approve or Reject a payment (Controls listing publication)
+// @desc    Admin: Approve or Reject a payment (Controls unlimited access & listing publication)
 // @route   PUT /api/admin/payments/:id/status
 // @access  Private / Admin
 export const updatePaymentStatus = async (req, res) => {
@@ -152,12 +153,20 @@ export const updatePaymentStatus = async (req, res) => {
       [status, admin_notes, req.user.id, id]
     );
 
-    // If status is 'approved', update the associated listing to 'approved' and 'is_paid = true'
-    if (status === 'approved' && payment.listing_id) {
+    // If status is 'approved', grant user lifetime unlimited posting access!
+    if (status === 'approved') {
       await client.query(
-        "UPDATE listings SET status = 'approved', is_paid = true, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-        [payment.listing_id]
+        "UPDATE users SET has_unlimited_access = true, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        [payment.user_id]
       );
+
+      // If associated with a listing, approve and activate the listing too
+      if (payment.listing_id) {
+        await client.query(
+          "UPDATE listings SET status = 'approved', is_paid = true, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+          [payment.listing_id]
+        );
+      }
     } else if (status === 'rejected' && payment.listing_id) {
       await client.query(
         "UPDATE listings SET status = 'rejected', is_paid = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
@@ -170,7 +179,7 @@ export const updatePaymentStatus = async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Payment marked as ${status}. Listing status updated accordingly.`,
+      message: `Payment marked as ${status}. Unlimited access granted and listings updated.`,
       payment: updatedPayRes.rows[0]
     });
   } catch (error) {
@@ -193,6 +202,7 @@ export const getAllUsers = async (req, res) => {
       SELECT 
         u.id, u.name, u.email, u.phone, u.role, u.is_active, u.avatar_url, 
         COALESCE(u.free_trial_posts_remaining, 0) AS free_trial_posts_remaining,
+        COALESCE(u.has_unlimited_access, false) AS has_unlimited_access,
         u.created_at,
         COUNT(l.id) AS listings_count
       FROM users u
@@ -224,13 +234,13 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// @desc    Admin: Toggle user active/inactive & edit profile & role & free posts
+// @desc    Admin: Toggle user active/inactive & edit profile & role & free posts & unlimited access
 // @route   PUT /api/admin/users/:id
 // @access  Private / Admin
 export const updateUserByAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { is_active, name, phone, bio, role, free_trial_posts_remaining } = req.body;
+    const { is_active, name, phone, bio, role, free_trial_posts_remaining, has_unlimited_access } = req.body;
 
     const result = await pool.query(
       `UPDATE users
@@ -240,10 +250,20 @@ export const updateUserByAdmin = async (req, res) => {
            bio = COALESCE($4, bio),
            role = COALESCE($5, role),
            free_trial_posts_remaining = COALESCE($6, free_trial_posts_remaining),
+           has_unlimited_access = COALESCE($7, has_unlimited_access),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7
-       RETURNING id, name, email, phone, role, is_active, bio, free_trial_posts_remaining, created_at`,
-      [is_active, name, phone, bio, role, free_trial_posts_remaining !== undefined ? parseInt(free_trial_posts_remaining, 10) : null, id]
+       WHERE id = $8
+       RETURNING id, name, email, phone, role, is_active, bio, free_trial_posts_remaining, has_unlimited_access, created_at`,
+      [
+        is_active, 
+        name, 
+        phone, 
+        bio, 
+        role, 
+        free_trial_posts_remaining !== undefined ? parseInt(free_trial_posts_remaining, 10) : null,
+        has_unlimited_access !== undefined ? Boolean(has_unlimited_access) : null,
+        id
+      ]
     );
 
     if (result.rows.length === 0) {

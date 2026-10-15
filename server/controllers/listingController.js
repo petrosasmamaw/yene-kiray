@@ -229,31 +229,51 @@ export const createListing = async (req, res) => {
     let payToPostEnabled = settingsMap.pay_to_post_enabled === 'true';
     let postingFeeAmount = parseFloat(settingsMap.posting_fee_amount) || 200;
 
-    // 2. Fetch and lock user's individual recorded free_trial_posts_remaining
+    // 2. Fetch and lock user's individual recorded free_trial_posts_remaining and unlimited access
     const userRowRes = await client.query(
-      'SELECT free_trial_posts_remaining FROM users WHERE id = $1 FOR UPDATE',
+      'SELECT role, free_trial_posts_remaining, has_unlimited_access FROM users WHERE id = $1 FOR UPDATE',
       [req.user.id]
     );
-    let userRemaining = userRowRes.rows.length > 0 
-      ? Math.max(0, parseInt(userRowRes.rows[0].free_trial_posts_remaining ?? '0', 10))
-      : 0;
+    const userRow = userRowRes.rows[0] || {};
+    const hasUnlimited = userRow.has_unlimited_access === true || userRow.role === 'admin';
+    let userRemaining = Math.max(0, parseInt(userRow.free_trial_posts_remaining ?? '0', 10));
 
-    // Free trial qualifies strictly if user has recorded free trial posts remaining (> 0)
-    const isFreeTrial = userRemaining > 0;
-
-    // If Free Trial: immediate approval & paid=true; if not free trial and payToPostEnabled: pending & paid=false
-    const requiresPayment = !isFreeTrial && payToPostEnabled;
-    const initialStatus = requiresPayment ? 'pending' : 'approved';
-    const initialPaid = !requiresPayment;
+    // If user does not have unlimited access AND has 0 free trial posts AND payToPostEnabled is active:
+    // User must unlock unlimited access first! No pending post is created.
+    if (!hasUnlimited && userRemaining <= 0 && payToPostEnabled) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({
+        success: false,
+        requires_membership_payment: true,
+        message: 'Your free trial posts have ended. Please unlock unlimited access to post rentals.',
+        posting_fee: postingFeeAmount,
+        accounts: {
+          telebirr: {
+            name: settingsMap.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settingsMap.telebirr_account_number || '0911000000'
+          },
+          cbe: {
+            name: settingsMap.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
+            number: settingsMap.cbe_account_number || '1000234567890'
+          }
+        }
+      });
+    }
 
     // If eligible for free trial post, consume 1 post from the user's recorded profile allowance
-    if (isFreeTrial) {
+    let isFreeTrial = false;
+    if (!hasUnlimited && userRemaining > 0) {
+      isFreeTrial = true;
       await client.query(
         'UPDATE users SET free_trial_posts_remaining = GREATEST(0, free_trial_posts_remaining - 1) WHERE id = $1',
         [req.user.id]
       );
       userRemaining = Math.max(0, userRemaining - 1);
     }
+
+    // With unlimited access or free trial, listings are published live immediately
+    const initialStatus = 'approved';
+    const initialPaid = true;
 
     const listingRes = await client.query(
       `INSERT INTO listings (
@@ -300,46 +320,20 @@ export const createListing = async (req, res) => {
       }
     }
 
-    // 4. If payment is required, create an initial pending payment record
-    let paymentRecord = null;
-    if (requiresPayment) {
-      const payRes = await client.query(
-        `INSERT INTO payments (
-          user_id, listing_id, amount, currency, payment_method, status
-        )
-        VALUES ($1, $2, $3, 'ETB', 'Telebirr', 'pending')
-        RETURNING *`,
-        [req.user.id, newListing.id, postingFeeAmount]
-      );
-      paymentRecord = payRes.rows[0];
-    }
-
     await client.query('COMMIT');
     clearListingsCache();
 
     return res.status(201).json({
       success: true,
-      message: isFreeTrial
+      message: hasUnlimited
+        ? 'Listing published live! You have unlimited posting privileges.'
+        : isFreeTrial
         ? `Free trial post published live! (${userRemaining} free trial post${userRemaining === 1 ? '' : 's'} remaining)`
-        : requiresPayment
-        ? 'Listing submitted! Please complete the listing payment via Telebirr or CBE to activate.'
         : 'Listing published successfully! It is now live.',
-      requires_payment: requiresPayment,
+      has_unlimited_access: hasUnlimited,
       is_free_trial: isFreeTrial,
       free_trial_posts_remaining: userRemaining,
-      posting_fee: postingFeeAmount,
-      accounts: {
-        telebirr: {
-          name: settingsMap.telebirr_account_name || 'የኔ ኪራይ (Yene Kiray)',
-          number: settingsMap.telebirr_account_number || '0911000000'
-        },
-        cbe: {
-          name: settingsMap.cbe_account_name || 'የኔ ኪራይ (Yene Kiray)',
-          number: settingsMap.cbe_account_number || '1000234567890'
-        }
-      },
-      listing: newListing,
-      payment: paymentRecord
+      listing: newListing
     });
   } catch (error) {
     await client.query('ROLLBACK');
@@ -732,33 +726,36 @@ export const getPostingEligibility = async (req, res) => {
 
     const payToPostEnabled = settingsMap.pay_to_post_enabled === 'true';
     const postingFeeAmount = parseFloat(settingsMap.posting_fee_amount) || 200;
-    const freeTrialCount = parseInt(settingsMap.free_trial_posts_count ?? '3', 10);
 
-    const userListingsRes = await pool.query(
-      "SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status != 'rejected'",
-      [req.user.id]
-    );
-    const userListingsCount = parseInt(userListingsRes.rows[0].count, 10) || 0;
-
-    // Fetch user's persistent remaining free posts from their profile
+    // Fetch user's persistent remaining free posts and unlimited access status
     const userRes = await pool.query(
-      'SELECT free_trial_posts_remaining FROM users WHERE id = $1',
+      'SELECT free_trial_posts_remaining, has_unlimited_access, role FROM users WHERE id = $1',
       [req.user.id]
     );
-    const freeRemaining = userRes.rows.length > 0 
-      ? Math.max(0, parseInt(userRes.rows[0].free_trial_posts_remaining ?? '0', 10))
-      : 0;
+    const user = userRes.rows[0] || {};
+    const hasUnlimited = user.has_unlimited_access === true || user.role === 'admin';
+    const freeRemaining = Math.max(0, parseInt(user.free_trial_posts_remaining ?? '0', 10));
 
-    const isFreeNext = freeRemaining > 0;
-    const requiresPayment = !isFreeNext && payToPostEnabled;
+    // Check for any pending membership payment
+    const pendingPayRes = await pool.query(
+      "SELECT id, amount, payment_method, transaction_reference, receipt_image_url, status, created_at FROM payments WHERE user_id = $1 AND (payment_type = 'unlimited_access' OR listing_id IS NULL) AND status = 'pending' ORDER BY created_at DESC LIMIT 1",
+      [req.user.id]
+    );
+    const pendingPayment = pendingPayRes.rows[0] || null;
+
+    const canPost = hasUnlimited || freeRemaining > 0 || !payToPostEnabled;
+    const requiresPayment = !hasUnlimited && freeRemaining <= 0 && payToPostEnabled;
 
     return res.json({
       success: true,
       data: {
+        has_unlimited_access: hasUnlimited,
         free_posts_remaining: freeRemaining,
         free_trial_posts_remaining: freeRemaining,
-        is_free_next: isFreeNext,
+        is_free_next: canPost,
+        can_post: canPost,
         requires_payment: requiresPayment,
+        pending_payment: pendingPayment,
         pay_to_post_enabled: payToPostEnabled,
         posting_fee: postingFeeAmount,
         accounts: {

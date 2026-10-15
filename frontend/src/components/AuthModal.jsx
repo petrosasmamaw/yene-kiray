@@ -163,16 +163,6 @@ export default function AuthModal({ initialMode = 'login', onClose }) {
           </button>
         </div>
 
-        {/* Informational Security Notice */}
-        {mode === 'register' && (
-          <div className="mb-5 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-[11px] text-amber-800">
-            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <p>
-              {isAmharic ? 'አዲስ የተመዘገቡ ተጠቃሚዎች መደበኛ የተጠቃሚ ፍቃድ ያገኛሉ። የአስተዳዳሪ ሚናዎች በውስጣዊ ቁጥጥር ብቻ ይሰጣሉ።' : 'Public registrations are assigned Client (User) privileges. Administrative roles are provisioned exclusively through internal terminal CLI seeds.'}
-            </p>
-          </div>
-        )}
-
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="space-y-4">
           

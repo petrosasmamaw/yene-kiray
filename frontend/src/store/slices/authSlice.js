@@ -58,6 +58,16 @@ const authSlice = createSlice({
       if (state.user) {
         state.user.free_trial_posts_remaining = action.payload;
       }
+    },
+    setHasUnlimitedAccess: (state, action) => {
+      if (state.user) {
+        state.user.has_unlimited_access = action.payload;
+      }
+    },
+    updateUserData: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     }
   },
   extraReducers: (builder) => {
@@ -112,5 +122,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { logout, clearAuthError, setFreeTrialPostsRemaining } = authSlice.actions;
+export const { logout, clearAuthError, setFreeTrialPostsRemaining, setHasUnlimitedAccess, updateUserData } = authSlice.actions;
 export default authSlice.reducer;

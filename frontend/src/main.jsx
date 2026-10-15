@@ -13,13 +13,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <Provider store={store}>
-        <NetworkStatusProvider>
-          <ToastProvider>
-            <LanguageProvider>
+        <LanguageProvider>
+          <NetworkStatusProvider>
+            <ToastProvider>
               <App />
-            </LanguageProvider>
-          </ToastProvider>
-        </NetworkStatusProvider>
+            </ToastProvider>
+          </NetworkStatusProvider>
+        </LanguageProvider>
       </Provider>
     </ErrorBoundary>
   </React.StrictMode>

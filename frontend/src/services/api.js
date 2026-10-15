@@ -3,19 +3,24 @@ import axios from 'axios';
 // Create Axios client with sensible timeout
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  timeout: 15000, // 15-second timeout for mobile & slow cellular networks
+  timeout: 25000, // 25-second timeout to handle slow/cellular internet connections seamlessly
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Helper: Normalize error into user-friendly message
+// Helper: Normalize error into user-friendly message based strictly on active language
 export const normalizeApiError = (error) => {
+  const currentLang = (typeof localStorage !== 'undefined' && localStorage.getItem('yene_kiray_lang')) || 'am';
+  const isAm = currentLang === 'am';
+
   // 1. Client offline / no connection
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     return {
       type: 'OFFLINE',
-      message: 'ከኢንተርኔት ውጪ ኖት፣ እባክዎ የኔትወርክ ግንኙነትዎን ያረጋግጡ (You are offline. Please check your connection.)'
+      message: isAm 
+        ? 'ከኢንተርኔት ውጪ ኖት፣ እባክዎ የኔትወርክ ግንኙነትዎን ያረጋግጡ' 
+        : 'You are offline. Please check your internet connection.'
     };
   }
 
@@ -23,7 +28,9 @@ export const normalizeApiError = (error) => {
   if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
     return {
       type: 'TIMEOUT',
-      message: 'የኢንተርኔት ግንኙነትዎ ዝቅተኛ በመሆኑ ምላሽ አልሰጠም፣ እባክዎ እንደገና ይሞክሩ (Request timed out due to slow network. Please retry.)'
+      message: isAm 
+        ? 'የኢንተርኔት ግንኙነትዎ ዝቅተኛ በመሆኑ ምላሽ አልሰጠም፣ እባክዎ እንደገና ይሞክሩ' 
+        : 'Request timed out due to slow network. Please try again.'
     };
   }
 
@@ -31,7 +38,9 @@ export const normalizeApiError = (error) => {
   if (error.code === 'ERR_NETWORK' || !error.response) {
     return {
       type: 'NETWORK_ERROR',
-      message: 'የሰርቨር ግንኙነት ተቋርጧል ወይም ኢንተርኔት የለም (Server is temporarily unreachable. Please check your connection.)'
+      message: isAm 
+        ? 'የሰርቨር ግንኙነት ተቋርጧል ወይም ኢንተርኔት የለም' 
+        : 'Server is temporarily unreachable. Please check your connection.'
     };
   }
 
@@ -42,7 +51,9 @@ export const normalizeApiError = (error) => {
   if (status >= 500) {
     return {
       type: 'SERVER_ERROR',
-      message: serverMsg || 'የሰርቨር ወይም የዳታቤዝ ችግር አጋጥሟል፣ እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ (Server or database temporarily unavailable.)'
+      message: serverMsg || (isAm 
+        ? 'የሰርቨር ችግር አጋጥሟል፣ እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ' 
+        : 'Server or database is temporarily unavailable. Please try again shortly.')
     };
   }
 
@@ -50,13 +61,17 @@ export const normalizeApiError = (error) => {
   if (status === 401) {
     return {
       type: 'AUTH_EXPIRED',
-      message: serverMsg || 'የመግቢያ ክፍለ ጊዜዎ አልቋል፣ እባክዎ እንደገና ይግቡ (Session expired. Please sign in again.)'
+      message: serverMsg || (isAm 
+        ? 'የመግቢያ ክፍለ ጊዜዎ አልቋል፣ እባክዎ እንደገና ይግቡ' 
+        : 'Your session has expired. Please sign in again.')
     };
   }
   if (status === 403) {
     return {
       type: 'FORBIDDEN',
-      message: serverMsg || 'ይህን ለማድረግ በቂ ፈቃድ የለዎትም (Access forbidden.)'
+      message: serverMsg || (isAm 
+        ? 'ይህን ለማድረግ በቂ ፈቃድ የለዎትም' 
+        : 'You do not have permission to perform this action.')
     };
   }
 
@@ -64,7 +79,9 @@ export const normalizeApiError = (error) => {
   if (status === 404) {
     return {
       type: 'NOT_FOUND',
-      message: serverMsg || 'የተፈለገው መረጃ አልተገኘም (Requested resource not found.)'
+      message: serverMsg || (isAm 
+        ? 'የተፈለገው መረጃ አልተገኘም' 
+        : 'The requested resource was not found.')
     };
   }
 
@@ -72,14 +89,18 @@ export const normalizeApiError = (error) => {
   if (status === 413) {
     return {
       type: 'PAYLOAD_TOO_LARGE',
-      message: serverMsg || 'የተመረጠው ሰነድ/ምስል መጠን በጣም ትልቅ ነው (File is too large.)'
+      message: serverMsg || (isAm 
+        ? 'የተመረጠው ምስል/ፋይል መጠን በጣም ትልቅ ነው' 
+        : 'Uploaded file is too large. Please select a smaller file.')
     };
   }
 
   // 8. Validation / Conflict (400, 409, 422)
   return {
     type: 'CLIENT_ERROR',
-    message: serverMsg || 'የተሳሳተ መረጃ ተልኳል፣ እባክዎ ያረጋግጡ (Invalid request data.)'
+    message: serverMsg || (isAm 
+      ? 'የተሳሳተ መረጃ ተልኳል፣ እባክዎ ያረጋግጡ' 
+      : 'Invalid request data. Please verify your input.')
   };
 };
 

@@ -45,9 +45,9 @@ export const register = async (req, res) => {
 
     // Explicitly enforce role='user' and record the user's permanent initial free trial allowance
     const result = await pool.query(
-      `INSERT INTO users (name, email, phone, password_hash, role, is_active, free_trial_posts_remaining)
-       VALUES ($1, $2, $3, $4, 'user', true, $5)
-       RETURNING id, name, email, phone, role, is_active, avatar_url, free_trial_posts_remaining, created_at`,
+      `INSERT INTO users (name, email, phone, password_hash, role, is_active, free_trial_posts_remaining, has_unlimited_access)
+       VALUES ($1, $2, $3, $4, 'user', true, $5, false)
+       RETURNING id, name, email, phone, role, is_active, avatar_url, free_trial_posts_remaining, has_unlimited_access, created_at`,
       [name.trim(), normalizedEmail, phone || null, passwordHash, freeTrialLimit]
     );
 
@@ -80,7 +80,7 @@ export const login = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     const userRes = await pool.query(
-      'SELECT id, name, email, phone, password_hash, role, is_active, avatar_url, free_trial_posts_remaining FROM users WHERE email = $1',
+      'SELECT id, name, email, phone, password_hash, role, is_active, avatar_url, free_trial_posts_remaining, has_unlimited_access FROM users WHERE email = $1',
       [normalizedEmail]
     );
 
@@ -122,7 +122,7 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const userRes = await pool.query(
-      'SELECT id, name, email, phone, role, is_active, avatar_url, bio, free_trial_posts_remaining, created_at FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, role, is_active, avatar_url, bio, free_trial_posts_remaining, has_unlimited_access, created_at FROM users WHERE id = $1',
       [req.user.id]
     );
 

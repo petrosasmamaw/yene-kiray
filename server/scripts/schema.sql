@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url TEXT,
     bio TEXT,
     free_trial_posts_remaining INTEGER DEFAULT 0,
+    has_unlimited_access BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -71,6 +72,7 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_method VARCHAR(50) NOT NULL, -- 'Telebirr', 'CBE Birr', 'Awash Bank', 'BOA'
     transaction_reference VARCHAR(120),
     receipt_image_url TEXT,
+    payment_type VARCHAR(50) DEFAULT 'unlimited_access',
     status VARCHAR(20) NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
     admin_notes TEXT,
     reviewed_by UUID REFERENCES users(id),

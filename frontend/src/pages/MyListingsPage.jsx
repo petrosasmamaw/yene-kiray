@@ -80,7 +80,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
       await api.delete(`/listings/${id}`);
       dispatch(fetchMyListings());
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete listing');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ማስታወቂያውን መሰረዝ አልተቻለም' : 'Failed to delete listing'));
     }
   };
 
@@ -102,7 +102,7 @@ export default function MyListingsPage({ onNavigatePost, onSelectListing, onGoBa
       setEditingListing(null);
       dispatch(fetchMyListings());
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update listing');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ማስታወቂያውን ማስተካከል አልተቻለም' : 'Failed to update listing'));
     }
   };
 

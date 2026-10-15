@@ -167,12 +167,13 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
         role: editingUser.role,
         is_active: editingUser.is_active,
         bio: editingUser.bio,
-        free_trial_posts_remaining: Number(editingUser.free_trial_posts_remaining ?? 0)
+        free_trial_posts_remaining: Number(editingUser.free_trial_posts_remaining ?? 0),
+        has_unlimited_access: Boolean(editingUser.has_unlimited_access)
       });
       setEditingUser(null);
       dispatch(fetchAdminUsers());
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update user');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ተጠቃሚውን ማስተካከል አልተቻለም' : 'Failed to update user'));
     }
   };
 
@@ -194,7 +195,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
       setNewCatImage('');
       loadCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create category');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ዘርፉን መፍጠር አልተቻለም' : 'Failed to create category'));
     }
   };
 
@@ -214,17 +215,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
       setEditingCategory(null);
       loadCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update category');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ዘርፉን ማስተካከል አልተቻለም' : 'Failed to update category'));
     }
   };
 
   const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    if (!window.confirm(isAmharic ? 'እርግጠኛ ነዎት ይህን ዘርፍ መሰረዝ ይፈልጋሉ?' : 'Are you sure you want to delete this category?')) return;
     try {
       await api.delete(`/categories/${id}`);
       loadCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete category');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ዘርፉን መሰረዝ አልተቻለም' : 'Failed to delete category'));
     }
   };
 
@@ -233,7 +234,7 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
       await api.put(`/categories/${cat.id}`, { is_active: !cat.is_active });
       loadCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error updating category');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'የዘርፉን ሁኔታ መቀየር አልተቻለም' : 'Error updating category'));
     }
   };
 
@@ -242,17 +243,17 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
       await api.put(`/admin/listings/${id}/status`, { status });
       loadAdminListings();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update status');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'የማስታወቂያውን ሁኔታ መቀየር አልተቻለም' : 'Failed to update status'));
     }
   };
 
   const handleDeleteListing = async (id) => {
-    if (!window.confirm('Are you sure you want to permanently delete this listing?')) return;
+    if (!window.confirm(isAmharic ? 'እርግጠኛ ነዎት ይህን ማስታወቂያ እስከመጨረሻው መሰረዝ ይፈልጋሉ?' : 'Are you sure you want to permanently delete this listing?')) return;
     try {
       await api.delete(`/admin/listings/${id}`);
       loadAdminListings();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete listing');
+      alert(err.userMessage || err.response?.data?.message || (isAmharic ? 'ማስታወቂያውን መሰረዝ አልተቻለም' : 'Failed to delete listing'));
     }
   };
 
@@ -771,7 +772,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                           </div>
 
                           <h4 className="text-sm sm:text-base font-bold text-neutral-950 truncate max-w-lg">
-                            Listing: <span className="text-amber-700">{p.listing_title || 'Untitled Post'}</span>
+                            {p.payment_type === 'unlimited_access' || !p.listing_id ? (
+                              <span className="inline-flex items-center gap-1.5 text-amber-900 bg-amber-100/90 px-3 py-1 rounded-xl border border-amber-300 font-bold">
+                                <Sparkles className="w-4 h-4 text-amber-600" />
+                                <span>One-Time Unlimited Membership Access</span>
+                              </span>
+                            ) : (
+                              <>Listing: <span className="text-amber-700">{p.listing_title || 'Untitled Post'}</span></>
+                            )}
                           </h4>
 
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-600">
@@ -820,14 +828,22 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                                 className="btn-gold text-xs py-2 px-5 font-bold flex items-center gap-1.5 shadow-xs"
                               >
                                 <Check className="w-4 h-4 stroke-[3]" />
-                                <span>Approve & Publish Live</span>
+                                <span>
+                                  {p.payment_type === 'unlimited_access' || !p.listing_id 
+                                    ? 'Approve & Grant Unlimited Access' 
+                                    : 'Approve & Publish Live'}
+                                </span>
                               </button>
                             </>
                           ) : p.status === 'approved' ? (
                             <div className="flex items-center gap-2">
                               <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Post is Live & Visible</span>
+                                <span>
+                                  {p.payment_type === 'unlimited_access' || !p.listing_id 
+                                    ? 'Unlimited Access Active' 
+                                    : 'Post is Live & Visible'}
+                                </span>
                               </span>
                               <button
                                 onClick={() => handlePaymentDecision(p.id, 'rejected')}
@@ -1312,14 +1328,21 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] inline-flex items-center gap-1 ${
-                          (u.free_trial_posts_remaining || 0) > 0 
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
-                            : 'bg-neutral-100 text-neutral-500'
-                        }`}>
-                          {(u.free_trial_posts_remaining || 0) > 0 && <Sparkles className="w-3 h-3 text-emerald-600" />}
-                          <span>{u.free_trial_posts_remaining || 0} left</span>
-                        </span>
+                        {u.has_unlimited_access ? (
+                          <span className="px-2.5 py-0.5 rounded-full font-bold text-[11px] inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300">
+                            <Sparkles className="w-3 h-3 text-amber-600" />
+                            <span>Unlimited Access</span>
+                          </span>
+                        ) : (
+                          <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] inline-flex items-center gap-1 ${
+                            (u.free_trial_posts_remaining || 0) > 0 
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
+                          }`}>
+                            {(u.free_trial_posts_remaining || 0) > 0 && <Sparkles className="w-3 h-3 text-emerald-600" />}
+                            <span>{u.free_trial_posts_remaining || 0} free left</span>
+                          </span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4">
@@ -1708,6 +1731,24 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   onChange={(e) => setEditingUser({ ...editingUser, free_trial_posts_remaining: parseInt(e.target.value, 10) || 0 })}
                   className="input-luxury text-xs font-mono"
                 />
+              </div>
+
+              <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-amber-50/60 border border-amber-200">
+                <div>
+                  <label className="text-neutral-900 font-bold block text-xs">Unlimited Posting Access:</label>
+                  <span className="text-[10px] text-neutral-500">Allow client to post freely without trial or fee</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser({ ...editingUser, has_unlimited_access: !editingUser.has_unlimited_access })}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    editingUser.has_unlimited_access 
+                      ? 'bg-amber-500 text-neutral-950 shadow-xs' 
+                      : 'bg-neutral-100 text-neutral-600 border border-neutral-300'
+                  }`}
+                >
+                  {editingUser.has_unlimited_access ? 'UNLIMITED ON' : 'OFF'}
+                </button>
               </div>
 
               <div className="flex items-center gap-3 py-2">

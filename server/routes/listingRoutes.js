@@ -17,6 +17,7 @@ const router = express.Router();
 router.get('/', getListings);
 router.get('/my-listings', protect, getMyListings);
 router.get('/saved', protect, getSavedListings);
+router.get('/eligibility', protect, getPostingEligibility);
 router.get('/user/posting-eligibility', protect, getPostingEligibility);
 router.get('/:id', getListingById);
 router.post('/', protect, createListing);

@@ -200,14 +200,25 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
                           Role: {user?.role}
                         </span>
                         {user?.role !== 'admin' && (
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold inline-flex items-center gap-1 ${
-                            (user?.free_trial_posts_remaining || 0) > 0 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : 'bg-neutral-100 text-neutral-600'
-                          }`}>
-                            <Sparkles className="w-2.5 h-2.5 text-amber-600" />
-                            <span>{user?.free_trial_posts_remaining ?? 0} {isAmharic ? 'ነጻ ቀሪ' : 'free posts'}</span>
-                          </span>
+                          user?.has_unlimited_access ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded font-bold inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                              <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                              <span>{isAmharic ? 'ያልተገደበ ፖስት' : 'Unlimited Posts'}</span>
+                            </span>
+                          ) : (
+                            <span className={`text-[10px] px-2 py-0.5 rounded font-bold inline-flex items-center gap-1 ${
+                              (user?.free_trial_posts_remaining || 0) > 0 
+                                ? 'bg-emerald-100 text-emerald-800' 
+                                : 'bg-rose-100 text-rose-700'
+                            }`}>
+                              <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                              <span>
+                                {(user?.free_trial_posts_remaining || 0) > 0 
+                                  ? `${user?.free_trial_posts_remaining} ${isAmharic ? 'ነጻ ቀሪ' : 'free posts'}`
+                                  : (isAmharic ? 'ክፍያ ያስፈልጋል' : 'Payment Required')}
+                              </span>
+                            </span>
+                          )
                         )}
                       </div>
                     </div>
@@ -335,6 +346,38 @@ export default function Navbar({ currentView, setCurrentView, onOpenAuth }) {
 
           {isAuthenticated ? (
             <>
+              <div className="py-2.5 px-3 mb-2 rounded-xl bg-neutral-100/80 border border-neutral-200">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-neutral-900 truncate">{user?.name || user?.email}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-semibold uppercase shrink-0">
+                    {user?.role}
+                  </span>
+                </div>
+                {user?.role !== 'admin' && (
+                  <div className="mt-1.5 flex items-center">
+                    {user?.has_unlimited_access ? (
+                      <span className="text-[11px] px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300">
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <span>{isAmharic ? 'ያልተገደበ ፖስት (ክፍያ ተፈጽሟል)' : 'Unlimited Posts (Paid)'}</span>
+                      </span>
+                    ) : (
+                      <span className={`text-[11px] px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1.5 ${
+                        (user?.free_trial_posts_remaining || 0) > 0 
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                          : 'bg-rose-100 text-rose-700 border border-rose-200'
+                      }`}>
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <span>
+                          {(user?.free_trial_posts_remaining || 0) > 0 
+                            ? `${user?.free_trial_posts_remaining} ${isAmharic ? 'ነጻ ቀሪ ፖስቶች' : 'free posts remaining'}`
+                            : (isAmharic ? 'ማስታወቂያ ለመለጠፍ ክፍያ ያስፈልጋል' : 'Payment Required to Post')}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {user?.role !== 'admin' && (
                 <>
                   <button
