@@ -674,8 +674,8 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                   </p>
                 </div>
 
-                {/* Status Filter Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5">
+                {/* Status Filter Tabs */}
+                <div className="inline-flex p-1 bg-neutral-100 rounded-xl border border-neutral-200 text-xs">
                   {[
                     { id: 'all', label: 'All', count: payments.length },
                     { id: 'pending', label: 'Pending', count: payments.filter(p => p.status === 'pending').length },
@@ -686,15 +686,15 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                       key={f.id}
                       type="button"
                       onClick={() => setPaymentFilterStatus(f.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                         paymentFilterStatus === f.id
-                          ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-2xs'
-                          : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
+                          ? 'bg-white text-neutral-950 shadow-xs font-bold'
+                          : 'text-neutral-600 hover:text-neutral-950'
                       }`}
                     >
                       <span>{f.label}</span>
-                      <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-black ${
-                        paymentFilterStatus === f.id ? 'bg-neutral-950 text-amber-400' : 'bg-neutral-100 text-neutral-700'
+                      <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-bold ${
+                        paymentFilterStatus === f.id ? 'bg-amber-100 text-amber-900' : 'bg-neutral-200/80 text-neutral-600'
                       }`}>
                         {f.count}
                       </span>
@@ -704,14 +704,14 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
               </div>
 
               {/* Search Bar */}
-              <div className="relative max-w-md">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <div className="relative max-w-sm">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
                   type="text"
-                  placeholder="Search user, phone, listing, or reference..."
+                  placeholder="Search user, phone, reference..."
                   value={paymentSearchQuery}
                   onChange={(e) => setPaymentSearchQuery(e.target.value)}
-                  className="input-luxury pl-9 text-xs"
+                  className="input-luxury pl-9 py-2 text-xs"
                 />
               </div>
 
@@ -743,133 +743,252 @@ export default function AdminDashboardPage({ onGoBack, onGoHome, onSelectListing
                 }
 
                 return (
-                  <div className="space-y-3.5">
-                    {filtered.map((p) => (
-                      <div
-                        key={p.id}
-                        className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs ${
-                          p.status === 'pending'
-                            ? 'bg-amber-50/30 border-amber-300 ring-1 ring-amber-400/20'
-                            : p.status === 'approved'
-                            ? 'bg-white border-neutral-200'
-                            : 'bg-rose-50/20 border-rose-200'
-                        }`}
-                      >
-                        <div className="space-y-2 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                              p.status === 'approved'
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                                : p.status === 'pending'
-                                ? 'bg-amber-500 text-neutral-950 shadow-2xs'
-                                : 'bg-rose-100 text-rose-800 border border-rose-300'
-                            }`}>
-                              {p.status === 'pending' ? 'Pending Approval' : p.status}
-                            </span>
-                            
-                            <span className="text-xs font-bold text-neutral-950">{p.user_name}</span>
-                            <span className="text-xs text-neutral-500">• {p.user_phone || p.user_email}</span>
+                  <div className="space-y-4">
+                    {/* Desktop View: Clean Financial Ledger Table */}
+                    <div className="hidden md:block overflow-x-auto rounded-xl border border-neutral-200">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-neutral-50 text-neutral-600 uppercase tracking-wider text-[11px] font-bold border-b border-neutral-200">
+                          <tr>
+                            <th className="py-3 px-4">Client</th>
+                            <th className="py-3 px-4">Access / Target</th>
+                            <th className="py-3 px-4">Method & Ref</th>
+                            <th className="py-3 px-4">Amount</th>
+                            <th className="py-3 px-4">Date</th>
+                            <th className="py-3 px-4">Receipt</th>
+                            <th className="py-3 px-4">Status</th>
+                            <th className="py-3 px-4 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-200 bg-white">
+                          {filtered.map((p) => (
+                            <tr key={p.id} className="hover:bg-neutral-50/70 transition-colors">
+                              {/* Client */}
+                              <td className="py-3.5 px-4">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-xs shrink-0">
+                                    {(p.user_name || 'U').charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-bold text-neutral-950 truncate max-w-[140px]">{p.user_name}</div>
+                                    <div className="text-[11px] text-neutral-500 font-mono">{p.user_phone || p.user_email}</div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Access / Target */}
+                              <td className="py-3.5 px-4">
+                                {p.payment_type === 'unlimited_access' || !p.listing_id ? (
+                                  <span className="inline-flex items-center gap-1.5 text-amber-900 font-bold text-xs bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <span>Unlimited Membership</span>
+                                  </span>
+                                ) : (
+                                  <div className="truncate max-w-[170px] text-neutral-800 font-medium" title={p.listing_title}>
+                                    {p.listing_title || 'Rental Listing'}
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Method & Ref */}
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-neutral-950 capitalize">{p.payment_method}</div>
+                                <div className="text-[11px] font-mono text-neutral-500 truncate max-w-[130px]" title={p.transaction_reference}>
+                                  {p.transaction_reference || '—'}
+                                </div>
+                              </td>
+
+                              {/* Amount */}
+                              <td className="py-3.5 px-4 font-bold text-neutral-950 whitespace-nowrap">
+                                {Number(p.amount).toLocaleString()} ETB
+                              </td>
+
+                              {/* Date */}
+                              <td className="py-3.5 px-4 text-neutral-500 text-[11px] whitespace-nowrap">
+                                {new Date(p.created_at).toLocaleDateString()}
+                              </td>
+
+                              {/* Receipt */}
+                              <td className="py-3.5 px-4">
+                                {p.receipt_image_url ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
+                                    className="group inline-flex items-center gap-1.5 text-xs text-amber-700 hover:text-amber-900 font-semibold cursor-pointer"
+                                    title="Click to view screenshot receipt"
+                                  >
+                                    <div className="w-7 h-7 rounded-md border border-neutral-200 overflow-hidden bg-neutral-100 flex items-center justify-center shrink-0 group-hover:border-amber-500 transition-colors">
+                                      <img src={p.receipt_image_url} alt="receipt" className="w-full h-full object-cover" />
+                                    </div>
+                                    <span className="underline underline-offset-2 text-[11px]">View</span>
+                                  </button>
+                                ) : (
+                                  <span className="text-neutral-400 text-xs">—</span>
+                                )}
+                              </td>
+
+                              {/* Status */}
+                              <td className="py-3.5 px-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                                  p.status === 'approved'
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                    : p.status === 'pending'
+                                    ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${
+                                    p.status === 'approved' ? 'bg-emerald-600' : p.status === 'pending' ? 'bg-amber-600' : 'bg-rose-600'
+                                  }`} />
+                                  <span className="capitalize">{p.status}</span>
+                                </span>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                {p.status === 'pending' ? (
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                      className="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 border border-neutral-200 text-xs font-semibold transition-colors"
+                                    >
+                                      Reject
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                      className="btn-gold text-xs py-1 px-3 font-bold flex items-center gap-1 shadow-xs"
+                                    >
+                                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                      <span>Approve</span>
+                                    </button>
+                                  </div>
+                                ) : p.status === 'approved' ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                    className="text-xs text-neutral-400 hover:text-rose-600 font-medium transition-colors"
+                                  >
+                                    Revoke
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                    className="text-xs text-amber-600 hover:text-amber-800 font-bold transition-colors"
+                                  >
+                                    Re-approve
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile View: Clean, Modern Flat Cards (No Boxes-in-Boxes) */}
+                    <div className="md:hidden divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white overflow-hidden">
+                      {filtered.map((p) => (
+                        <div key={p.id} className="p-3.5 space-y-2.5 hover:bg-neutral-50/50 transition-colors">
+                          {/* Row 1: Client & Status & Amount */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-xs shrink-0">
+                                {(p.user_name || 'U').charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-bold text-neutral-950 text-xs truncate block">{p.user_name}</span>
+                                <span className="text-[11px] text-neutral-500 font-mono block">{p.user_phone || p.user_email}</span>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <div className="font-bold text-neutral-950 text-xs">{Number(p.amount).toLocaleString()} ETB</div>
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-bold ${
+                                p.status === 'approved' ? 'text-emerald-700' : p.status === 'pending' ? 'text-amber-700' : 'text-rose-700'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  p.status === 'approved' ? 'bg-emerald-500' : p.status === 'pending' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'
+                                }`} />
+                                <span className="capitalize">{p.status}</span>
+                              </span>
+                            </div>
                           </div>
 
-                          <h4 className="text-sm sm:text-base font-bold text-neutral-950 truncate max-w-lg">
-                            {p.payment_type === 'unlimited_access' || !p.listing_id ? (
-                              <span className="inline-flex items-center gap-1.5 text-amber-900 bg-amber-100/90 px-3 py-1 rounded-xl border border-amber-300 font-bold">
-                                <Sparkles className="w-4 h-4 text-amber-600" />
-                                <span>One-Time Unlimited Membership Access</span>
-                              </span>
-                            ) : (
-                              <>Listing: <span className="text-amber-700">{p.listing_title || 'Untitled Post'}</span></>
-                            )}
-                          </h4>
-
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-600">
-                            <span>
-                              Method: <strong className="text-neutral-950 font-bold">{p.payment_method}</strong>
-                            </span>
-                            <span>
-                              Ref: <strong className="text-neutral-950 font-mono">{p.transaction_reference || 'N/A'}</strong>
-                            </span>
-                            <span>
-                              Fee: <strong className="text-amber-600 font-bold">{Number(p.amount).toLocaleString()} ETB</strong>
-                            </span>
-                            <span className="text-neutral-400">
-                              Date: {new Date(p.created_at).toLocaleDateString()}
-                            </span>
+                          {/* Row 2: Target & Method / Ref */}
+                          <div className="flex items-center justify-between text-xs text-neutral-600 pt-0.5">
+                            <div className="flex items-center gap-1 min-w-0 text-neutral-900 font-medium">
+                              {p.payment_type === 'unlimited_access' || !p.listing_id ? (
+                                <span className="inline-flex items-center gap-1 text-amber-800 font-bold text-[11px]">
+                                  <Sparkles className="w-3 h-3 text-amber-600" />
+                                  <span>Unlimited Membership</span>
+                                </span>
+                              ) : (
+                                <span className="truncate text-xs">{p.listing_title || 'Rental Post'}</span>
+                              )}
+                            </div>
+                            <div className="text-neutral-500 font-mono text-[11px] shrink-0 pl-2">
+                              {p.payment_method} • {p.transaction_reference || 'N/A'}
+                            </div>
                           </div>
 
-                          {/* Screenshot Receipt Button with Preview Lightbox */}
-                          {p.receipt_image_url && (
-                            <div className="pt-1 flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] font-bold text-amber-800 transition-colors"
-                              >
-                                <Eye className="w-3.5 h-3.5 text-amber-600" />
-                                <span>View Payment Screenshot Receipt</span>
-                              </button>
+                          {/* Row 3: Date, Receipt & Action */}
+                          <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-[10px] text-neutral-400">{new Date(p.created_at).toLocaleDateString()}</span>
+                              {p.receipt_image_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewReceiptUrl(p.receipt_image_url)}
+                                  className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-bold hover:underline"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-amber-600" />
+                                  <span>View Receipt</span>
+                                </button>
+                              )}
                             </div>
-                          )}
+
+                            <div className="flex items-center gap-1.5">
+                              {p.status === 'pending' ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                    className="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 border border-neutral-200 text-xs font-semibold"
+                                  >
+                                    Reject
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                    className="btn-gold text-xs py-1 px-3 font-bold flex items-center gap-1"
+                                  >
+                                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    <span>Approve</span>
+                                  </button>
+                                </>
+                              ) : p.status === 'approved' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handlePaymentDecision(p.id, 'rejected')}
+                                  className="text-xs text-neutral-400 hover:text-rose-600 font-medium"
+                                >
+                                  Revoke
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handlePaymentDecision(p.id, 'approved')}
+                                  className="text-xs text-amber-600 hover:text-amber-800 font-bold"
+                                >
+                                  Re-approve
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-
-                        {/* Action Decision Buttons */}
-                        <div className="flex items-center gap-2.5 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-neutral-200">
-                          {p.status === 'pending' ? (
-                            <>
-                              <button
-                                onClick={() => handlePaymentDecision(p.id, 'rejected')}
-                                className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-neutral-250 hover:border-rose-300 text-xs font-bold transition-all shadow-2xs"
-                              >
-                                Reject
-                              </button>
-
-                              <button
-                                onClick={() => handlePaymentDecision(p.id, 'approved')}
-                                className="btn-gold text-xs py-2 px-5 font-bold flex items-center gap-1.5 shadow-xs"
-                              >
-                                <Check className="w-4 h-4 stroke-[3]" />
-                                <span>
-                                  {p.payment_type === 'unlimited_access' || !p.listing_id 
-                                    ? 'Approve & Grant Unlimited Access' 
-                                    : 'Approve & Publish Live'}
-                                </span>
-                              </button>
-                            </>
-                          ) : p.status === 'approved' ? (
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>
-                                  {p.payment_type === 'unlimited_access' || !p.listing_id 
-                                    ? 'Unlimited Access Active' 
-                                    : 'Post is Live & Visible'}
-                                </span>
-                              </span>
-                              <button
-                                onClick={() => handlePaymentDecision(p.id, 'rejected')}
-                                className="text-[11px] text-neutral-500 hover:text-rose-600 underline font-semibold ml-1"
-                              >
-                                Revoke
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200">
-                                <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                                <span>Rejected</span>
-                              </span>
-                              <button
-                                onClick={() => handlePaymentDecision(p.id, 'approved')}
-                                className="text-[11px] text-amber-600 hover:underline font-bold ml-1"
-                              >
-                                Re-approve
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 );
               })()}
